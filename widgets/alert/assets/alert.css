@@ -1,0 +1,55 @@
+.alertBox
+{
+	position: relative;
+	margin: 10px 0 10px 0;
+	padding: 10px 30px 10px 10px;
+}
+
+.alertBox a.close
+{
+	color: #000;
+	position: absolute;
+	right: 4px;
+	top: 0;
+	font-size: 18px;
+	opacity: 0.2;
+	padding: 4px;
+}
+
+.alertBox a.close:hover,
+.alertBox a.close:focus
+{
+	opacity: 0.4;
+}
+
+.alertBox ul {
+	margin: 0;
+	padding: 0 0 0 20px;
+}
+
+.alertBox ul li {
+	list-style: square;
+	font-weight: normal;
+}
+
+.alertSuccessMessage
+{
+
+	border: 1px solid #E4EBD8;
+	background: #F5FCE8;
+	color: #008000;
+	font-weight: bold;
+}
+
+.alertErrorMessage
+{
+	border: 1px solid #C00;
+	background: #FFE4E1;
+	color: #C00;
+	font-weight: bold;
+}
+
+.alertWarningMessage {
+	border: 1px solid #FAE8BC;
+	background: #FFFFE0;
+}

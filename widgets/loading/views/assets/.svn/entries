@@ -1,0 +1,42 @@
+10
+
+dir
+0
+svn://svn.printatet.com/trunk/printatet/protected/extensions/widgets/loading/views/assets
+svn://svn.printatet.com
+add
+
+
+
+
+
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+99180eef-0a84-4557-8f7a-e57e0b1a485c
+
+Loading.css
+file
+
+
+
+add
+
+Loading.js
+file
+
+
+
+add
+

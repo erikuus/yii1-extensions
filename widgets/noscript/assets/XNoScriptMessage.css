@@ -1,0 +1,29 @@
+/*
+    Document   : jgui-noscript
+    Created on : 07.09.2010, 10:34:42
+    Author     : bk016474
+    Description:
+        styling for noscript tag.
+*/
+
+.noscript {
+    display: none;
+}
+
+noscript {
+    display:block;
+    overflow:hidden;
+    width:auto;
+}
+
+div#js-info {
+    display:block;
+    padding: 10px 20px;
+    background: #fee;
+    color: #800;
+    margin: 0 0 10px 0;
+    border-top:3px solid #c30;
+    border-bottom:3px solid #c30;
+    font-weight:bold;
+}
+

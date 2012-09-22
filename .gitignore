@@ -1,0 +1,12 @@
+# Ecplipse generated files #
+######################
+.project
+.cache/
+.settings/
+# Specific modules #
+######################
+modules/au/
+modules/rbam/
+# OS generated files #
+######################
+Thumbs.db

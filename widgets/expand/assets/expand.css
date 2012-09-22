@@ -1,0 +1,22 @@
+.expand {
+	margin: 15px 0 10px 0;
+}
+
+.expandTrigger {
+	margin: 0px 0 10px 0;
+	padding: 0 0 0 14px;
+	color: #0066a7;
+	cursor: pointer;
+}
+
+.expandTrigger-expanded {
+	background-image: url(minus.gif);
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+
+.expandTrigger-collapsed {
+	background-image: url(plus.gif);
+	background-repeat: no-repeat;
+	background-position: center left;
+}

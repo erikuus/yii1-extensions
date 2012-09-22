@@ -1,0 +1,73 @@
+/* Height hack for float wrappers */
+.services {
+	overflow:auto;
+}
+
+.auth-icon {
+	display: block;
+	width: 32px;
+	height: 32px;
+	background: url("../images/auth.png") no-repeat;
+}
+
+.auth-icon.google,
+.auth-icon.google_oauth {
+	background-position: 0 -35px;
+}
+.auth-icon.twitter {
+	background-position: 0 -69px;
+}
+.auth-icon.facebook {
+	background-position: 0 -103px;
+}
+.auth-icon.linkedin {
+	background-position: 0 -137px;
+}
+.auth-icon.github {
+	background-position: 0 -170px;
+}
+.auth-icon.eesti_id_kaart {
+	background-position: 0 -205px;
+	width: 90px;
+}
+.auth-icon.eesti_mobiil_id {
+	background-position: 0 -238px;
+	width: 90px;
+}
+
+.auth-link:hover .auth-icon i,
+.auth-link:focus .auth-icon i {
+	display: block;
+	width: 32px;
+	height: 32px;
+	background: url("../images/auth.png") 0 0 no-repeat;
+}
+
+.auth-services {
+	padding: 0;
+	margin: 0 0 1em;
+	list-style: none;
+	/* Height hack for float wrappers */
+	overflow:auto;
+}
+
+.auth-service {
+	float: left;
+	margin: 0 1em 0 0;
+}
+
+.auth-services .auth-service .auth-link {
+	display: block;
+	width: 58px;
+	/*padding: 0 0.4em;*/
+}
+
+.auth-service .auth-link .auth-icon {
+	margin: 0 auto;
+}
+
+.auth-service .auth-link .auth-title {
+	display: block;
+	margin-top: 0.4em;
+	text-align: center;
+}

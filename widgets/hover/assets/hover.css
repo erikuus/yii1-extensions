@@ -1,0 +1,35 @@
+.hoverArea
+{
+	position: relative
+}
+
+.hoverAreaContent
+{
+	display:none;
+	position:absolute;
+	top: -5px;
+	padding: 10px;
+	background-color: #FFF;
+	border: 1px solid #CCC;
+	-moz-box-shadow: 1px 1px 1px #A8B296;
+	-webkit-box-shadow: 1px 1px 1px #A8B296;
+	box-shadow: 1px 1px 1px #A8B296;
+	z-index: 100;
+	white-space: nowrap;
+	text-align: left;
+}
+
+.hoverAreaContent hr
+{
+	display: block;
+	position: relative;
+	padding: 0;
+	margin: 8px auto;
+	height: 0;
+	max-height: 0;
+	clear: both;
+	border: none;
+	border-top: 1px solid #DDD;
+	font-size: 1px;
+	line-height: 0;
+}
