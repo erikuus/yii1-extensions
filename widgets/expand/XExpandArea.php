@@ -81,6 +81,7 @@ class XExpandArea extends CWidget
 	protected function registerClientScript()
 	{
 		$cs=Yii::app()->clientScript;
+		$cs->registerCoreScript('jquery');
 
 		// publish and register css files
 		if($this->cssFile===null)
