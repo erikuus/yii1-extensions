@@ -68,25 +68,25 @@ class XMultiSelect extends CJuiInputWidget
 	 *
 	 * header:
 	 * Either a boolean value denoting whether or not to display the header, or a string value.
-	 * If you pass a string, the default “check all”, “uncheck all”, and “close” links will be
+	 * If you pass a string, the default "check all", "uncheck all", and "close" links will be
 	 * replaced with the specified text.
 	 * Defaults to true.
 	 *
 	 * height:
-	 * Height of the checkbox container (scroll area) in pixels. If set to “auto”,
+	 * Height of the checkbox container (scroll area) in pixels. If set to "auto",
 	 * the height will calculate based on the number of checkboxes in the menu.
 	 * Defaults to 175
 	 *
 	 * minWidth:
-	 * Minimum width of the entire widget in pixels. Setting to “auto” will disable.
+	 * Minimum width of the entire widget in pixels. Setting to "auto" will disable.
 	 * Defaults to 225
 	 *
 	 * checkAllText:
-	 * The text of the “check all” link.
+	 * The text of the "check all" link.
 	 * Defaults to Check all
 	 *
 	 * uncheckAllText:
-	 * The text of the “uncheck all” link.
+	 * The text of the "uncheck all" link.
 	 * Defaults to Uncheck All
 	 *
 	 * noneSelectedText:
@@ -125,12 +125,12 @@ class XMultiSelect extends CJuiInputWidget
 	 *
 	 * classes:
 	 * New in 1.5! Additional class(es) to apply to BOTH the button and menu for further customization. Separate multiple classes
-	 * with a space. You’ll need to scope your CSS to differentiate between the button/menu
+	 * with a space. You'll need to scope your CSS to differentiate between the button/menu
 	 * .ui-multiselect.myClass {} .ui-multiselect-menu.myClass {}
 	 * Defaults to empty string
 	 *
 	 * position:
-	 * New in 1.5! Requires jQuery 1.4.3+, jQuery UI position utility. This option allows you to position the menu anywhere you’d
+	 * New in 1.5! Requires jQuery 1.4.3+, jQuery UI position utility. This option allows you to position the menu anywhere you'd
 	 * like relative to the button; centered, above, below (default), etc. Also provides collision detection to flip the menu above
 	 * the button when near the bottom of the window. If you do not set this option or if the position utility has not been included,
 	 * the menu will open below the button.
