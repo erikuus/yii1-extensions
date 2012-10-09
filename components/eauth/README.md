@@ -23,7 +23,7 @@ The implementation of the authorization on your own server has several advantage
 * Extend the standard authorization classes to obtain additional data about the user.
 * Work with the API of social networks by extending the authorization classes.
 * Set up a list of supported services, customize the appearance of the widget, use the popup window without closing your application.
-	
+
 
 ### Extension includes:
 
@@ -35,9 +35,9 @@ The implementation of the authorization on your own server has several advantage
 
 ### Supported providers "out of box":
 
-* OpenID: Google, Yandex(ru)
+* OpenID: Google, ID-kaart
 * OAuth: Twitter, LinkedIn
-* OAuth 2.0: Google, Facebook, GitHub, VKontake(ru), Mail.ru(ru), Moi Krug(ru), Odnoklassniki(ru)
+* OAuth 2.0: Google, Facebook, GitHub
 
 
 ### Resources
@@ -87,9 +87,6 @@ The implementation of the authorization on your own server has several advantage
 				'google' => array(
 					'class' => 'GoogleOpenIDService',
 				),
-				'yandex' => array(
-					'class' => 'YandexOpenIDService',
-				),
 				'twitter' => array(
 					// register your app here: https://dev.twitter.com/apps/new
 					'class' => 'TwitterOAuthService',
@@ -121,32 +118,6 @@ The implementation of the authorization on your own server has several advantage
 					'client_id' => '...',
 					'client_secret' => '...',
 				),
-				'vkontakte' => array(
-					// register your app here: http://vkontakte.ru/editapp?act=create&site=1
-					'class' => 'VKontakteOAuthService',
-					'client_id' => '...',
-					'client_secret' => '...',
-				),
-				'mailru' => array(
-					// register your app here: http://api.mail.ru/sites/my/add
-					'class' => 'MailruOAuthService',
-					'client_id' => '...',
-					'client_secret' => '...',
-				),
-				'moikrug' => array(
-					// register your app here: https://oauth.yandex.ru/client/my
-					'class' => 'MoikrugOAuthService',
-					'client_id' => '...',
-					'client_secret' => '...',
-				),
-				'odnoklassniki' => array(
-					// register your app here: http://www.odnoklassniki.ru/dk?st.cmd=appsInfoMyDevList&st._aid=Apps_Info_MyDev
-					'class' => 'OdnoklassnikiOAuthService',
-					'client_id' => '...',
-					'client_public' => '...',
-					'client_secret' => '...',
-					'title' => 'Odnokl.',
-				),
 			),
 		),
 		...
@@ -168,14 +139,14 @@ The implementation of the authorization on your own server has several advantage
 			$authIdentity = Yii::app()->eauth->getIdentity($service);
 			$authIdentity->redirectUrl = Yii::app()->user->returnUrl;
 			$authIdentity->cancelUrl = $this->createAbsoluteUrl('site/login');
-			
+
 			if ($authIdentity->authenticate()) {
 				$identity = new EAuthUserIdentity($authIdentity);
-				
+
 				// successful authentication
 				if ($identity->authenticate()) {
 					Yii::app()->user->login($identity);
-					
+
 					// special redirect with closing popup window
 					$authIdentity->redirect();
 				}
@@ -184,11 +155,11 @@ The implementation of the authorization on your own server has several advantage
 					$authIdentity->cancel();
 				}
 			}
-			
+
 			// Something went wrong, redirect to login page
 			$this->redirect(array('site/login'));
 		}
-		
+
 		// default authorization code through login/password ..
 	}
 ```
@@ -197,7 +168,7 @@ The implementation of the authorization on your own server has several advantage
 
 ```php
 <h2>Do you already have an account on one of these sites? Click the logo to log in with it here:</h2>
-<?php 
+<?php
 	$this->widget('ext.eauth.EAuthWidget', array('action' => 'site/login'));
 ?>
 ```
@@ -217,7 +188,5 @@ Also you may need to override the `EAuthUserIdentity` class to store additional 
 * To add a new language, you can use the blank file `/protected/extensions/eauth/messages/blank/eauth.php`.
 
 ## License
-
-Some time ago I developed this extension for [LiStick.ru](http://listick.ru) and I still support the extension.
 
 The extension was released under the [New BSD License](http://www.opensource.org/licenses/bsd-license.php), so you'll find the latest version on [GitHub](https://github.com/Nodge/yii-eauth).
