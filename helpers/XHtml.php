@@ -166,7 +166,7 @@ class XHtml extends CHtml
 	 * @param array html options for ul tag
 	 * @return string html list
 	 */
-	public function listContent($contents, $liHtmlOptions=array(), $ulHtmlOptions=array())
+	public static function listContent($contents, $liHtmlOptions=array(), $ulHtmlOptions=array())
 	{
 		$list='';
 		foreach ($contents as $content)

@@ -8,6 +8,7 @@
  * <pre>
  *     Cookie::set('name', $value);
  *     $value=Cookie::get('name');
+ *     Cookie::delete('name');
  * </pre>
  */
 class Cookie
@@ -38,5 +39,15 @@ class Cookie
 		$cookie=new CHttpCookie($name,$value);
 		$cookie->expire = $expiration;
 		Yii::app()->request->cookies[$name]=$cookie;
+	}
+
+	/**
+	 * Delete
+	 * Set the expiration date to one hour ago
+	 * @param string $name the name of cookie
+	 */
+	public static function delete($name)
+	{
+		self::set($name, '', time() - 3600);
 	}
 }

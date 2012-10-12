@@ -293,6 +293,7 @@ abstract class EAuthServiceBase extends CComponent implements IAuthService {
 		curl_setopt($ch, CURLOPT_HEADER, 0);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
 		curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+		curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4); // makes curl much faster (Erik Uus)
 
 		if (isset($options['referer']))
 			curl_setopt($ch, CURLOPT_REFERER, $options['referer']);

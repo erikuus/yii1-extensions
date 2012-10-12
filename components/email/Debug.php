@@ -14,7 +14,8 @@ class Debug extends CWidget {
 			Yii::app()->getClientScript()->registerCssFile($cssFile);
 			// dump debug info
 			foreach($flashMessages as $key=>$message) {
-				echo $message;
+				if(strstr($key,'debug.email'))
+					echo $message.strpos($key, 'debug.email');
 			}
 		}
 	}

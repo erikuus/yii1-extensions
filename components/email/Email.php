@@ -204,7 +204,7 @@ class Email extends CApplicationComponent {
 				$debug = Yii::app()->controller->renderPartial('email.debug',
 						array_merge(compact('to', 'subject', 'message'), array('headers'=>$this->createHeaders(),'type'=>$this->type)),
 						true);
-				Yii::app()->user->setFlash(uniqid(), $debug);
+				Yii::app()->user->setFlash('debug.email'.uniqid(), $debug);
 				return true;
 				break;
 		}
