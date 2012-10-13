@@ -2,7 +2,10 @@
 /**
  * XLogFilter class
  *
- * This log filter ignores 404 (Page Not Found) errors
+ * This log filter ignores 404 (Page Not Found) errors.
+ * It is meant to be used together with XEmailLogRoute
+ *
+ * Configuration example:
  *
  * 'log' => array(
  *     'class' => 'CLogRouter',
@@ -11,14 +14,14 @@
  *             'class' => 'ext.components.log.XEmailLogRoute',
  *             'filter' => array(
  *                 'class'=>'ext.components.log.XLogFilter',
- *                     'ignoreCategories' => array(
- *                         'exception.CHttpException.404',
- *                     ),
- *                 ),
  *                 'levels' => 'error',
  *                 'emails' => 'myemail@mydomain.com',
- *              ),
- *          ),
+ *                 'ignoreCategories' => array(
+ *                     'exception.CHttpException.404',
+ *                 ),
+ *             ),
+ *         ),
+ *     ),
  * )
  */
 class XLogFilter extends CLogFilter
