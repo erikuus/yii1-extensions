@@ -162,10 +162,13 @@ class XReorderBehavior extends CActiveRecordBehavior
 		{
 			$condition=array();
 			foreach ($this->groupId as $groupId)
-				$condition[]=$groupId."='".$owner->{$groupId}."'";
+			{
+				if($owner->{$groupId})
+					$condition[]=$groupId."='".$owner->{$groupId}."'";
+			}
 			return implode(' AND ', $condition);
 		}
-		elseif($this->groupId)
+		elseif($this->groupId && $owner->{$this->groupId})
 			return $this->groupId."='".$owner->{$this->groupId}."'";
 		else
 			return '1=1'; //dummy condition
