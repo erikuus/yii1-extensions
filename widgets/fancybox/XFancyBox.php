@@ -47,6 +47,9 @@ class XFancyBox extends CWidget
 
 	public function run()
 	{
+		if(!$this->target)
+			return false;
+
 		$config = CJavaScript::encode($this->config);
 		Yii::app()->clientScript->registerScript($this->name, "
 			$('$this->target').fancybox($config);
