@@ -15,6 +15,10 @@
 	height: 0
 }
 
+.hover-area-trigger {
+	cursor: pointer;
+}
+
 .hover-area-content {
 	display: none;
 	position: absolute;

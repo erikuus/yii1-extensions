@@ -32,8 +32,8 @@
  * URL length as much as possible you should make sure that your parameter
  * size can never exceed this limit.
  *
- * @copyright 2009 by Michael Härtl
- * @author Michael Härtl <haertl.mike@googlemail.com>
+ * @copyright 2009 by Michael Haertl
+ * @author Michael Haertl <haertl.mike@googlemail.com>
  * @license See http://www.yiiframework/extension/xreturnable
  * @version 1.0.2
  */
@@ -50,6 +50,8 @@
  *  $this->createReturnableUrl('specify',array('id'=>$data->id),array('#'=>'order'.$data->id)),
  * Updated Methods {@link  urlUncompress()} and {@link  loadStackFromUrl()}
  *  to Fix PHP Warning gzuncompress()
+ * Updated Method {@link  getCurrentPageParams()}
+ *  by adding module support
  *
  * @author Erik Uus <erik.uus@gmail.com>
  */
@@ -86,7 +88,7 @@ class XReturnableBehavior extends CBehavior
 	 * @param string $amp the separator as used by {@link CController::createUrl}
 	 * @return string the constructed URL with appended return parameters
 	 */
-	public function createReturnableUrl($route, $params=array(),$stackParams=array(),$amp='&')
+	public function createReturnableUrl($route, $params=array(), $stackParams=array(), $amp='&')
 	{
 		$stack=$this->getReturnStack();
 		$stack[]=$this->getCurrentPageParams() + $stackParams;
@@ -115,7 +117,7 @@ class XReturnableBehavior extends CBehavior
 	}
 
 	/**
-	 * @param string param prefix (added by Erik Uus)
+	 * @param string param prefix
 	 * @return string the URL to the last page on the return stack or null if none present.
 	 */
 	public function getReturnUrl($prefix='')
@@ -231,7 +233,8 @@ class XReturnableBehavior extends CBehavior
 			//$this->_currentPageParams=$_GET;
 			$r=Yii::app()->urlManager->routeVar;
 			$c=$this->getOwner();
-			$route=isset($_GET[$r]) ? $_GET[$r] : $c->getId().'/'.$c->getAction()->getId();
+			$m=$c->module ? '/'.$c->module->id.'/' : null;
+			$route=isset($_GET[$r]) ? $_GET[$r] : $m.$c->getId().'/'.$c->getAction()->getId();
 			unset($this->_currentPageParams[$r]);
 			array_unshift($this->_currentPageParams,$route);
 		}

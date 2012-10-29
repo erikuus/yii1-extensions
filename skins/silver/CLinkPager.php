@@ -9,6 +9,6 @@ return array(
 		'prevPageLabel'=>'&lt;',
 		'nextPageLabel'=>'&gt;',
 		'lastPageLabel'=>'&gt;&gt;',
-		'cssFile'=>'/yiithemes/skins/silver/pager/pager.css',
+		'cssFile'=>Yii::app()->baseUrl.'/css/yiithemes/skins/silver/pager/pager.css',
 	)
 );

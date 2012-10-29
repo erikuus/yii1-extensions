@@ -4,6 +4,6 @@
  */
 return array(
 	'default'=>array(
-		'cssFile'=>'/yiithemes/skins/silver/yiitab/yiitab.css',
+		'cssFile'=>Yii::app()->baseUrl.'/css/yiithemes/skins/silver/yiitab/yiitab.css',
 	)
 );
