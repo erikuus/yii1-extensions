@@ -5,17 +5,20 @@
  * @author Jonah Turnquist <poppitypop@gmail.com>
  * @link http://php-thoughts.cubedwater.com/
  * @version 1.0
+ */
+
+/**
+ * CHANGELOG:
  *
- * Change Log:
- *
- * Property "type" is also sent to debug view.
- * In view, if type is 'text/plain', nl2br function is applied to message
- * Function mail returns true in debug mode
- * Replased Yii::app()->user->setFlash('email', $debug) with Yii::app()->user->setFlash(uniqid(), $debug)
+ * - Added property viewPath
+ * - Added property layoutPath
+ * - Property "type" is also sent to debug view.
+ * - In view, if type is 'text/plain', nl2br function is applied to message
+ * - Function mail returns true in debug mode
+ * - Replaced Yii::app()->user->setFlash('email', $debug) with Yii::app()->user->setFlash(uniqid(), $debug)
  * to support dumping info for multiple e-mails in debug mode
  *
  * @author Erik Uus <erik.uus@gmail.com>
- * @version 1.1
  *
  * You can configure the extension as follows:
  *
@@ -60,7 +63,6 @@
  * Var1:<?php echo $var1 ?>
  * <br>
  * Var2:<?php echo $var2 ?>
- *
  */
 class Email extends CApplicationComponent {
 	/**
@@ -122,18 +124,22 @@ class Email extends CApplicationComponent {
 	/**
 	 * @var string language to encode the message in (eg "Japanese", "ja", "English", "en" and "uni" (UTF-8))
 	 */
-	public $language= 'uni';
+	public $language = 'uni';
 
 	/**
 	 * @var string the content-type of the email
 	 */
-	public $contentType= 'utf-8';
+	public $contentType = 'utf-8';
+
+	/**
+	 * @var string path to the email view directory. Defaults to 'application.views.email'.
+	 */
+	public $viewPath = 'application.views.email';
 
 	/**
 	 * @var string The view to use as the content of the email, as an alternative to setting $this->message.
-	 * Must be located in application.views.email directory.  This email object is availiable within the view
-	 * through $email, thus letting you define things such as the subject within the view (helps maintain
-	 * seperation of logic and output).
+	 * This email object is availiable within the view through $email, thus letting you define things such
+	 * as the subject within the view (helps maintain seperation of logic and output).
 	 */
 	public $view = null;
 
@@ -141,6 +147,11 @@ class Email extends CApplicationComponent {
 	 * @var array Variable to be sent to the view.
 	 */
 	public $viewVars = null;
+
+	/**
+	 * @var string path to the email layout directory. Defaults to 'application.views.email.layouts'.
+	 */
+	public $layoutPath = 'application.views.email.layouts';
 
 	/**
 	 * @var string The layout for the view to be imbedded in. Must be located in
@@ -172,12 +183,12 @@ class Email extends CApplicationComponent {
 			else
 				$vars = $arg1;
 
-			$view = Yii::app()->controller->renderPartial('application.views.email.'.$this->view, array_merge($vars, array('email'=>$this)), true);
+			$view = Yii::app()->controller->renderPartial($this->viewPath.'.'.$this->view, array_merge($vars, array('email'=>$this)), true);
 
 			if ($this->layout === null)
 				$message = $view;
 			else
-				$message = Yii::app()->controller->renderPartial('application.views.email.layouts.'.$this->layout, array('content'=>$view), true);
+				$message = Yii::app()->controller->renderPartial($this->layoutPath.'.'.$this->layout, array('content'=>$view), true);
 		}
 		else
 		{

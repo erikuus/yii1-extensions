@@ -20,3 +20,17 @@ div.emailDebug .emailMessage {
 	margin: 10px 0 10px 0;
 	padding: 10px;
 }
+div.emailDebug table {
+	width: 800px;
+	border-collapse:collapse;
+}
+div.emailDebug table th {
+	border: 1px solid #666666;
+	padding: 3px;
+	text-align: left;
+}
+div.emailDebug table td {
+	border: 1px solid #666666;
+	padding: 3px;
+	text-align: left;
+}
