@@ -28,12 +28,12 @@ class LikeButton extends SPluginBase
 	 * @var string The URL of the Facebook page for this Like button.
 	 */
 	public $href;
-  /**
+	/**
 	 * @var boolean Specifies whether to include a Send button with the Like
 	 * button.
 	 */
 	public $send;
-  /**
+	/**
 	 * @var string Three options : 'standard', 'button_count', 'box_count'
 	 */
 	public $layout;
@@ -62,8 +62,8 @@ class LikeButton extends SPluginBase
 	 * @var string A label for tracking referrals; must be less than 50
 	 * characters and can contain alphanumeric characters and some punctuation
 	 * (currently +/=-.:_). The ref attribute causes two parameters to be added to the
-   * referrer URL when a user clicks a link from a stream story about a Like action:
-   * fb_ref and fb_source
+	 * referrer URL when a user clicks a link from a stream story about a Like action:
+	 * fb_ref and fb_source
 	 */
 	public $ref;
 

@@ -203,6 +203,26 @@ class XHtml extends CHtml
 	}
 
 	/**
+	 * Find any URLs in the block of text and turn them into hyperlinks
+	 * @param string $text
+	 * @return string
+	 */
+	public static function formatUrlsInText($text)
+	{
+		$reg_exUrl = "/(http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?/";
+		preg_match_all($reg_exUrl, $text, $matches);
+		$usedPatterns = array();
+		foreach($matches[0] as $pattern)
+		{
+			if(!array_key_exists($pattern, $usedPatterns)){
+				$usedPatterns[$pattern]=true;
+				$text =str_replace ($pattern, "<a href=\"{$pattern}\" rel=\"nofollow\">{$pattern}</a>", $text);
+			}
+		}
+		return $text;
+	}
+
+	/**
 	 * Explodes radioButtonList into array
 	 * enabling to render buttons separately ($radio[0], $radio[1]...)
 	 * @param CActiveForm $form the form widgets

@@ -36,8 +36,6 @@
  *     'afterAjaxUpdate'=>'function(id,data){initTipsy();}',
  *  ...
  */
-
-
 class XTipsy extends CWidget
 {
 	public $items=array();
