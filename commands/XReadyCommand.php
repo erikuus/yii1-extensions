@@ -66,8 +66,7 @@ class XReadyCommand extends CConsoleCommand
 			foreach ($columns as $column)
 			{
 				$sql="UPDATE {$table} SET {$column}=REPLACE({$column}, '/labs/', '/');";
-				echo $sql."\n";
-				//Yii::app()->db->createCommand($sql)->execute();
+				Yii::app()->db->createCommand($sql)->execute();
 			}
 		}
 	}
