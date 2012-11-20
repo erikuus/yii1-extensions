@@ -3,7 +3,7 @@
 /**
  * XGenerateUidBehavior
  *
- * This behavior generates unique id as combination of timedata and authenticated user id
+ * This behavior generates unique id as combination of timedata and random number
  *
  * It can be  be attached to a model on its behaviors() method:
  * <pre>
@@ -39,10 +39,10 @@ class XGenerateUidBehavior extends CActiveRecordBehavior
 	/**
 	 * This is invoked before the record is saved.
 	 */
-	public function beforeSave($event)
+	public function beforeValidate($event)
 	{
 		$owner=$this->getOwner();
 		if($owner->isNewRecord)
-			$owner->setAttribute($this->attributeName,$this->prefix.date($this->timeFormat).Yii::app()->user->id);
+			$owner->setAttribute($this->attributeName,$this->prefix.date($this->timeFormat).mt_rand(1000,9999));
 	}
 }
