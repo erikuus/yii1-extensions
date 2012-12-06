@@ -45,6 +45,12 @@ class XExpandArea extends CWidget
 	 * @var string the CSS class for the widget content. Defaults to 'hoverContent'.
 	 */
 	public $contentCssClass='expandContent';
+	/**
+	 * @var boolean whether to hide the portlet when the body content is empty. Defaults to true.
+	 */
+	public $hideOnEmpty=true;
+
+	private $_openTag;
 
 	/**
 	 * Initializes the widget.
@@ -54,10 +60,16 @@ class XExpandArea extends CWidget
 	{
 		if($this->visible)
 		{
+			ob_start();
+			ob_implicit_flush(false);
+
 			$this->registerClientScript();
 			echo "<div class=\"{$this->cssClass}\">\n";
 			echo "<div class=\"{$this->triggerCssClass} expandTrigger-collapsed\">".$this->trigger."</div>\n";
 			echo "<div class=\"{$this->contentCssClass}\" style=\"display: none\">\n";
+
+			$this->_openTag=ob_get_contents();
+			ob_clean();
 		}
 	}
 
@@ -70,6 +82,13 @@ class XExpandArea extends CWidget
 		if($this->visible)
 		{
 			$this->renderContent();
+
+			$content=ob_get_clean();
+			if($this->hideOnEmpty&&trim($content)==='')
+				return;
+			echo $this->_openTag;
+
+			echo $content;
 			echo "</div><!-- {$this->contentCssClass} -->\n";
 			echo "</div><!-- {$this->cssClass} -->";
 		}

@@ -2,9 +2,7 @@
 /**
  * XFlagColumn
  *
- * Allows to display Y/N links in CGridView column.
- * @author Alexander Makarov
- * @version 1.1
+ * XFlagColumn allows to display Y/N links (based on boolean value) in CGridView column.
  *
  * The following shows how to use XFlagColumn.
  *
@@ -14,8 +12,6 @@
  *    'dataProvider'=>$model->search(),
  *    'filter'=>$model,
  *    'columns'=>array(
- *        'first_name',
- *        'last_name',
  *        array(
  *            'class' => 'ext.widgets.grid.flagcolumn.XFlagColumn',
  *            'name' => 'active',
@@ -31,14 +27,17 @@
  *    if(!Yii::app()->request->isAjaxRequest)
  *        $this->redirect('admin');
  * }
-*/
+ *
+ * @author Alexander Makarov
+ * @version 1.1
+ */
 
 class XFlagColumn extends CGridColumn
 {
 	public $name;
 	public $sortable=true;
 	public $callbackUrl = array('flag');
-	private $_flagClass = "flag_link";
+	private $_flagClass = "flag-link";
 
 	public function init()
 	{

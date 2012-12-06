@@ -42,9 +42,8 @@
  * IMPORTANT WHEN UPGRADING!!!
  * New Method {@link  getReturnUrlRoute()}
  * Updated Method {@link  getReturnUrl()}
- *  by adding param prefix
- *  so that you can now call $this->getReturnUrl('/')
- *  to get return url from module to app
+ *  by adding '/' to $this->_returnUrl=$this->Owner->createUrl('/'.$route,$params);
+ *  so that you can get return url from module to app
  * Updated Method {@link  createReturnableUrl()}
  *  by adding param $stackParams so that you can define return target
  *  $this->createReturnableUrl('specify',array('id'=>$data->id),array('#'=>'order'.$data->id)),
@@ -117,10 +116,9 @@ class XReturnableBehavior extends CBehavior
 	}
 
 	/**
-	 * @param string param prefix
 	 * @return string the URL to the last page on the return stack or null if none present.
 	 */
-	public function getReturnUrl($prefix='')
+	public function getReturnUrl()
 	{
 		if ($this->_returnUrl===null) {
 			if (!($stack=$this->getReturnStack()))
@@ -130,7 +128,7 @@ class XReturnableBehavior extends CBehavior
 			$route=array_shift($params);
 			if (count($stack))
 				$params[$this->paramName]=self::urlCompress($stack);
-			$this->_returnUrl=$this->Owner->createUrl($prefix.$route,$params);
+			$this->_returnUrl=$this->Owner->createUrl('/'.$route,$params);
 		}
 		return $this->_returnUrl;
 	}

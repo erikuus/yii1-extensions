@@ -3,7 +3,7 @@
  * ETaggableBehavior class file.
  *
  * @author Alexander Makarov
- * @link http://code.google.com/p/yiiext/
+ * @link https://github.com/yiiext/
  */
 /**
  * Provides tagging ability for a model.
@@ -11,11 +11,41 @@
  * @version 1.5
  * @package yiiext.behaviors.model.taggable
  */
+/**
+ * IMPORTANT WHEN UPGRADING!!!
+ *
+ * Removed ´ that throws error when using postgre database
+ *
+ * Removed $criteria->mergeWith($this->getScopeCriteria());
+ * from getFindByTagsCriteria($tags)
+ * because of inevitable table alias conflict
+ *
+ * Added new property "tagTableSeq" and changed in afterSave method
+ * from $this->getConnection()->getLastInsertID()
+ * to $this->getConnection()->getLastInsertID($this->tagTableSeq)
+ * so that this behavior can be used with postgre database
+ *
+ * Added new method deleteTagsWithNoBindings()
+ * Added new property deleteTagsWithNoBindings
+ * If set true, tags with no bindings will be
+ * deleted in afterSave and afterDelete method
+ *
+ * Added bugfix to removeTags()	method
+ * so that also last single tag can be removed
+ * if($this->tags===array())
+ *     $this->tags[]='';
+ *
+ * @author Erik Uus <erik.uus@gmail.com>
+ */
 class ETaggableBehavior extends CActiveRecordBehavior {
 	/**
 	 * @var string tags table name.
 	 */
 	public $tagTable = 'Tag';
+	/**
+	 * @var string tags table sequence name (postgre only)
+	 */
+	public $tagTableSeq;
 	/**
 	 * @var string tag table field that contains tag name.
 	 */
@@ -26,9 +56,13 @@ class ETaggableBehavior extends CActiveRecordBehavior {
 	public $tagTablePk = 'id';
 	/**
 	 * @var string tag to Model binding table name.
-	 * Defaults to `{model table name}Tag`.
+	 * Defaults to {model table name}Tag.
 	 */
 	public $tagBindingTable;
+	/**
+	 * @var CDbExpression Custom expression for finding the tag if we are using magic fields
+	 */
+	public $tagTableCondition;
 	/**
 	 * @var string binding table tagId name.
 	 */
@@ -38,12 +72,12 @@ class ETaggableBehavior extends CActiveRecordBehavior {
 	 */
 	public $tagTableCount;
 	/**
-	 * @var string binding table model FK name.
-	 * Defaults to `{model table name with first lowercased letter}Id`.
+	 * @var string binding table model FK field name.
+	 * Defaults to {model table name with first lowercased letter}Id.
 	 */
 	public $modelTableFk;
 	/**
-	 * @var boolean which create tags automatically or throw exception if tag does not exist.
+	 * @var boolean whether create tags automatically or throw exception if tag does not exist.
 	 */
 	public $createTagsAutomatically = true;
 	/**
@@ -51,6 +85,10 @@ class ETaggableBehavior extends CActiveRecordBehavior {
 	 * Defaults to false.
 	 */
 	public $cacheID = false;
+	/**
+	 * @var boolean whether delete tags that have no bindings
+	 */
+	public $deleteTagsWithNoBindings = false;
 
 	private $tags = array();
 	private $originalTags = array();
@@ -176,6 +214,9 @@ class ETaggableBehavior extends CActiveRecordBehavior {
 		$tags = $this->toTagsArray($tags);
 		$this->tags = array_diff($this->tags, $tags);
 
+		if($this->tags===array())
+			$this->tags[]='';
+
 		return $this->getOwner();
 	}
 	/**
@@ -234,7 +275,7 @@ class ETaggableBehavior extends CActiveRecordBehavior {
 
 			if($this->tagTableCount !== null){
 				$findCriteria = new CDbCriteria(array(
-					'select' => "t.{$this->tagTableName} as `name`, t.{$this->tagTableCount} as `count` ",
+					'select' => "t.{$this->tagTableName} as name, t.{$this->tagTableCount} as count ",
 					'join' => "INNER JOIN {$this->getTagBindingTableName()} et on t.{$this->tagTablePk} = et.{$this->tagBindingTableTagId} ",
 					'condition' => "et.{$this->getModelTableFkName()} = :ownerid ",
 					'params' => array(
@@ -243,10 +284,10 @@ class ETaggableBehavior extends CActiveRecordBehavior {
 				));
 			} else{
 				$findCriteria = new CDbCriteria(array(
-					'select' => "t.{$this->tagTableName} as `name`, count(*) as `count` ",
+					'select' => "t.{$this->tagTableName} as name, count(*) as count ",
 					'join' => "INNER JOIN {$this->getTagBindingTableName()} et on t.{$this->tagTablePk} = et.{$this->tagBindingTableTagId} ",
 					'condition' => "et.{$this->getModelTableFkName()} = :ownerid ",
-					'group' => 't.'.$this->tagTablePk,
+					'group' => 'name',
 					'params' => array(
 						':ownerid' => $this->getOwner()->primaryKey,
 					)
@@ -310,6 +351,7 @@ class ETaggableBehavior extends CActiveRecordBehavior {
 	 * @throw Exception
 	 */
 	public function afterSave($event) {
+
 		if($this->needToSave()){
 
 			$builder = $this->getConnection()->getCommandBuilder();
@@ -320,9 +362,14 @@ class ETaggableBehavior extends CActiveRecordBehavior {
 
 					$findCriteria = new CDbCriteria(array(
 						'select' => "t.".$this->tagTablePk,
-						'condition' => "t.{$this->tagTableName} = :tag ",
 						'params' => array(':tag' => $tag),
 					));
+
+					if (! $this->tagTableCondition instanceof CDbExpression)
+						$findCriteria->addCondition("t.{$this->tagTableName} = :tag ");
+					else
+						$findCriteria->addCondition($this->tagTableCondition->__toString());
+
 					if($this->getScopeCriteria()){
 						$findCriteria->mergeWith($this->getScopeCriteria());
 					}
@@ -346,47 +393,53 @@ class ETaggableBehavior extends CActiveRecordBehavior {
 			// add new tag bindings and tags if there are any
 			if(!empty($this->tags)){
 				foreach($this->tags as $tag){
-					if(empty($tag)) return;
+					if(!empty($tag)){
+						// try to get existing tag
+						$findCriteria = new CDbCriteria(array(
+							'select' => "t.".$this->tagTablePk,
+							'params' => array(':tag' => $tag),
+						));
 
-					// try to get existing tag
-					$findCriteria = new CDbCriteria(array(
-						'select' => "t.".$this->tagTablePk,
-						'condition' => "t.{$this->tagTableName} = :tag ",
-						'params' => array(':tag' => $tag),
-					));
-					if($this->getScopeCriteria()){
-						$findCriteria->mergeWith($this->getScopeCriteria());
+						if (! $this->tagTableCondition instanceof CDbExpression)
+							$findCriteria->addCondition("t.{$this->tagTableName} = :tag ");
+						else
+							$findCriteria->addCondition($this->tagTableCondition->__toString());
+
+						if($this->getScopeCriteria()){
+							$findCriteria->mergeWith($this->getScopeCriteria());
+						}
+						$tagId = $builder->createFindCommand(
+							$this->tagTable,
+							$findCriteria
+						)->queryScalar();
+
+						// if there is no existing tag, create one
+						if(!$tagId){
+							$this->createTag($tag);
+
+							// reset all tags cache
+							$this->resetAllTagsCache();
+							$this->resetAllTagsWithModelsCountCache();
+
+							$tagId = $this->getConnection()->getLastInsertID($this->tagTableSeq);
+						}
+
+						// bind tag to it's model
+						$builder->createInsertCommand(
+							$this->getTagBindingTableName(),
+							array(
+								$this->getModelTableFkName() => $this->getOwner()->primaryKey,
+								$this->tagBindingTableTagId => $tagId
+							)
+						)->execute();
 					}
-					$tagId = $builder->createFindCommand(
-						$this->tagTable,
-						$findCriteria
-					)->queryScalar();
-
-					// if there is no existing tag, create one
-					if(!$tagId){
-						$this->createTag($tag);
-
-						// reset all tags cache
-						$this->resetAllTagsCache();
-						$this->resetAllTagsWithModelsCountCache();
-
-						$tagId = $this->getConnection()->getLastInsertID();
-					}
-
-					// bind tag to it's model
-					$builder->createInsertCommand(
-						$this->getTagBindingTableName(),
-						array(
-							$this->getModelTableFkName() => $this->getOwner()->primaryKey,
-							$this->tagBindingTableTagId => $tagId
-						)
-					)->execute();
 				}
 				$this->updateCount(+1);
 			}
 
-
 			$this->cache->set($this->getCacheKey(), $this->tags);
+
+			$this->deleteTagsWithNoBindings();
 		}
 
 		parent::afterSave($event);
@@ -414,6 +467,9 @@ class ETaggableBehavior extends CActiveRecordBehavior {
 		// delete all present tag bindings
 		$this->deleteTags();
 
+		// delete tag with no bindings
+		$this->deleteTagsWithNoBindings();
+
 		$this->cache->delete($this->getCacheKey());
 		$this->resetAllTagsWithModelsCountCache();
 
@@ -432,7 +488,7 @@ class ETaggableBehavior extends CActiveRecordBehavior {
 		if(!($tags = $this->cache->get($this->getCacheKey()))){
 
 			$findCriteria = new CDbCriteria(array(
-				'select' => "t.{$this->tagTableName} as `name`",
+				'select' => "t.{$this->tagTableName} as name",
 				'join' => "INNER JOIN {$this->getTagBindingTableName()} et ON t.{$this->tagTablePk} = et.{$this->tagBindingTableTagId} ",
 				'condition' => "et.{$this->getModelTableFkName()} = :ownerid ",
 				'params' => array(
@@ -494,13 +550,14 @@ class ETaggableBehavior extends CActiveRecordBehavior {
 				$tag = $conn->quoteValue($tags[$i]);
 				$criteria->join .=
 					"JOIN {$this->getTagBindingTableName()} bt$i ON t.{$pk} = bt$i.{$this->getModelTableFkName()}
-					JOIN {$this->tagTable} tag$i ON tag$i.{$this->tagTablePk} = bt$i.{$this->tagBindingTableTagId} AND tag$i.`{$this->tagTableName}` = $tag";
+					JOIN {$this->tagTable} tag$i ON tag$i.{$this->tagTablePk} = bt$i.{$this->tagBindingTableTagId} AND tag$i.{$this->tagTableName} = $tag";
 			}
 		}
 
-		if($this->getScopeCriteria()){
-			$criteria->mergeWith($this->getScopeCriteria());
-		}
+// Does not work! Inevitable table alias conflict!
+//		if($this->getScopeCriteria()){
+//			$criteria->mergeWith($this->getScopeCriteria());
+//		}
 
 		return $criteria;
 	}
@@ -542,22 +599,22 @@ class ETaggableBehavior extends CActiveRecordBehavior {
 
 			if($this->tagTableCount !== null){
 				$tagsCriteria->select = sprintf(
-					"t.%s as `name`, %s as `count`",
+					"t.%s as name, %s as count",
 					$this->tagTableName,
 					$this->tagTableCount
 				);
 			}
 			else{
 				$tagsCriteria->select = sprintf(
-					"t.%s as `name`, count(*) as `count`",
+					"t.%s as name, count(*) as count",
 					$this->tagTableName
 				);
 				$tagsCriteria->join = sprintf(
-					"JOIN `%s` et ON t.{$this->tagTablePk} = et.%s",
+					"JOIN %s et ON t.{$this->tagTablePk} = et.%s",
 					$this->getTagBindingTableName(),
 					$this->tagBindingTableTagId
 				);
-				$tagsCriteria->group = 't.'.$this->tagTablePk;
+				$tagsCriteria->group = 'name';
 			}
 
 			if($criteria!==null)
@@ -630,8 +687,8 @@ class ETaggableBehavior extends CActiveRecordBehavior {
 		$conn->createCommand(
 			sprintf(
 				"DELETE
-                 FROM `%s`
-                 WHERE %s = '%s'",
+				 FROM %s
+				 WHERE %s = %d",
 				$this->getTagBindingTableName(),
 				$this->getModelTableFkName(),
 				$this->getOwner()->primaryKey
@@ -671,7 +728,7 @@ class ETaggableBehavior extends CActiveRecordBehavior {
 				sprintf(
 					"UPDATE %s
 					SET %s = %s + %s
-					WHERE %s in (SELECT %s FROM %s WHERE %s = '%s')",
+					WHERE %s in (SELECT %s FROM %s WHERE %s = %d)",
 					$this->tagTable,
 					$this->tagTableCount,
 					$this->tagTableCount,
@@ -681,6 +738,27 @@ class ETaggableBehavior extends CActiveRecordBehavior {
 					$this->getTagBindingTableName(),
 					$this->getModelTableFkName(),
 					$this->getOwner()->primaryKey
+				)
+			)->execute();
+		}
+	}
+
+	/**
+	 * Deletes tags with no bindings
+	 * Used if {@link deleteTagsWithNoBindings} is true.
+	 * @return void
+	 */
+	protected function deleteTagsWithNoBindings() {
+		if($this->deleteTagsWithNoBindings===true) {
+			$this->getConnection()->createCommand(
+				sprintf(
+					"DELETE
+					FROM %s
+					WHERE %s not in (SELECT %s FROM %s)",
+					$this->tagTable,
+					$this->tagTablePk,
+					$this->tagBindingTableTagId,
+					$this->getTagBindingTableName()
 				)
 			)->execute();
 		}

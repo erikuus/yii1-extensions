@@ -108,10 +108,11 @@ class DefaultController extends Controller
 			$model->attributes=$_POST['Help'];
 			if($model->save())
 			{
-				if(!$this->getReturnUrl('/'))
+				// using xreturnable extension to go back
+				if(!$this->goBack())
 					$this->redirect(array('admin'));
 				else
-					$this->redirect($this->getReturnUrl('/'));
+					$this->goBack();
 			}
 		}
 

@@ -53,7 +53,7 @@
 		'name'=>'btnCancel',
 		'value'=>'Cancel',
 		'caption'=>Yii::t('HelpModule.ui', 'Cancel'),
-		'url'=>!$this->getReturnUrl('/')  ? array('admin') : $this->getReturnUrl('/'),
+		'url'=>!$this->getReturnUrl()  ? array('admin') : $this->getReturnUrl(),
 	)); ?>
 
 <?php $this->endWidget(); ?>
