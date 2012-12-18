@@ -18,7 +18,7 @@
  */
 class Pdf
 {
-	public function render($html,$filename,$paper='a4',$orientation='portrait')
+	public function render($html,$filename,$attachment=1,$paper='a4',$orientation='portrait')
 	{
 		Yii::import('ext.vendors.pdf.dompdf.*');
 		require_once ('dompdf_config.inc.php');
@@ -28,6 +28,6 @@ class Pdf
 		$dompdf->load_html($html);
 		$dompdf->set_paper($paper,$orientation);
 		$dompdf->render();
-		$dompdf->stream($filename.".pdf");
+		$dompdf->stream($filename.".pdf", array("Attachment"=>$attachment));
 	}
 }
