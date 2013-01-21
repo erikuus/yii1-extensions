@@ -64,7 +64,7 @@ class XVauHelpdesk extends CWidget
 			'host'=>Yii::app()->request->hostInfo
 		);
 
-		$url='http://www.ra.ee/vau/redirect.php?'.http_build_query($params);
+		$url='http://www.ra.ee/vaux/redirect.php?'.http_build_query($params);
 
 		echo CHtml::link($text,$url,array('class'=>$this->cssClass,'title'=>$this->title));
 	}
