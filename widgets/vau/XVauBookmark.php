@@ -19,7 +19,8 @@
  */
 class XVauBookmark extends CWidget
 {
-	private $cssClass='vauBookmark';
+	private $_cssClass='vauBookmark';
+	private $_vauUrl='http://www.ra.ee/vau/index.php';
 
 	/**
 	 * @var boolean whether the portlet is visible. Defaults to true.
@@ -82,12 +83,12 @@ class XVauBookmark extends CWidget
 		if($this->addTag)
 		{
 			$text=$this->getText($this->addLabel,$baseUrl.'/bookmark.gif',$this->addTitle);
-			echo CHtml::link($text,$this->getOpenAddBookmarkUrl(),array('class'=>$this->cssClass,'title'=>$this->addTitle));
+			echo CHtml::link($text,$this->getOpenAddBookmarkUrl(),array('class'=>$this->_cssClass,'title'=>$this->addTitle));
 		}
 		if($this->listTag)
 		{
 			$text=$this->getText($this->listLabel,$baseUrl.'/bookmarkList.gif',$this->listTitle);
-			echo CHtml::link($text,$this->getOpenListBookmarkUrl(),array('class'=>$this->cssClass,'title'=>$this->listTitle));
+			echo CHtml::link($text,$this->getOpenListBookmarkUrl(),array('class'=>$this->_cssClass,'title'=>$this->listTitle));
 		}
 	}
 
@@ -107,11 +108,7 @@ class XVauBookmark extends CWidget
 	 */
 	protected function getOpenListBookmarkUrl()
 	{
-		$params=array(
-			'dialog'=>'BookmarksList',
-			'_lang'=>$this->lang
-		);
-		return $this->getOpenUrl($params);
+		return "{$this->_vauUrl}/{$this->lang}/bookmark/linkDialog/";
 	}
 
 	/**
@@ -120,21 +117,10 @@ class XVauBookmark extends CWidget
 	protected function getOpenAddBookmarkUrl()
 	{
 		$params=array(
-			'dialog'=>'Bookmarks',
-			'_lang'=>$this->lang,
-			'purl'=>$this->getBookmarkUrl(),
-			'host'=>Yii::app()->request->hostInfo
+			'url'=>$this->getBookmarkUrl(),
+			'app'=>Yii::app()->name
 		);
-		return $this->getOpenUrl($params);
-	}
-
-	/**
-	 * @param array url params
-	 * @return string url to open page to add or list bookmarks
-	 */
-	protected function getOpenUrl($params)
-	{
-		return 'http://www.ra.ee/vau/redirect.php?'.http_build_query($params);
+		return "{$this->_vauUrl}/{$this->lang}/bookmark/linkDialog/create?".http_build_query($params);
 	}
 
 	/**
@@ -162,9 +148,9 @@ class XVauBookmark extends CWidget
 	{
 		$script =
 <<<SCRIPT
-	jQuery(".{$this->cssClass}").live("click", function(e){
+	jQuery(".{$this->_cssClass}").live("click", function(e){
 		e.preventDefault();
-		window.open(this.href,"","top=100,left=100,width=600,height=480,resizable=yes,location=no,menubar=no,scrollbars=yes,status=no,toolbar=no,fullscreen=no,dependent=no");
+		window.open(this.href,"","top=0,left=0,width=1024,height=600,resizable=yes,location=no,menubar=no,scrollbars=yes,status=no,toolbar=no,fullscreen=no,dependent=no");
 	});
 SCRIPT;
 

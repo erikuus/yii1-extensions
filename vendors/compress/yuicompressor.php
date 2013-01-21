@@ -10,8 +10,8 @@
 class YUICompressor
 {
 	// absolute path to YUI jar file.
-	private static $JAR_PATH;
-	private static $TEMP_FILES_DIR;
+	private $JAR_PATH;
+	private $TEMP_FILES_DIR;
 	private $options=array(
 		'type'=>'css',
 		'linebreak'=>false,
