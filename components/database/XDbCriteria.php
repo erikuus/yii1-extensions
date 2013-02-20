@@ -127,7 +127,8 @@ class XDbCriteria extends CDbCriteria
 	 * When the value is empty or is not date, no comparison expression will be added to the search condition.
 	 *
 	 * @param string $column the name of the column to be searched
-	 * @param string value to be compared with.
+	 * @param string $value to be compared with.
+	 * @param boolean $convertToTime whether to convert date to unix timestamp for comparison.
 	 * @param array $dateFormat expected format for date value.
 	 * Defaults to array('d','m','y').
 	 * @param string $dateSeparator character that separates date parts.
@@ -136,7 +137,7 @@ class XDbCriteria extends CDbCriteria
 	 * Defaults to 'AND'.
 	 * @return CDbCriteria the criteria object itself
 	 */
-	public function dcompare($column, $value, $dateFormat=array('d','m','y'), $dateSeparator='.', $operator='AND')
+	public function dcompare($column, $value, $convertToTime=false, $dateFormat=array('d','m','y'), $dateSeparator='.', $operator='AND')
 	{
 		if(preg_match('/^(?:\s*(<>|<=|>=|<|>|=))?(.*)$/',$value,$matches))
 		{
@@ -155,6 +156,9 @@ class XDbCriteria extends CDbCriteria
 		if($op==='')
 			$op='=';
 
+		if($convertToTime)
+			$value=strtotime($value);
+
 		$this->addCondition($column.$op.self::PARAM_PREFIX.self::$paramCount,$operator);
 		$this->params[self::PARAM_PREFIX.self::$paramCount++]=$value;
 
@@ -171,6 +175,13 @@ class XDbCriteria extends CDbCriteria
 	public function isValidDate($value,$format,$sep)
 	{
 		$valid=false;
+
+		// strip time data
+		// get from left until there is a space
+		$arr=explode(' ',$value,2);
+		$value= array_shift($arr);
+
+		// check format
 		if(is_array($format) && count($format)==3 && count(explode($sep,$value))==3)
 		{
 			$date=array_combine($format,explode($sep,$value));

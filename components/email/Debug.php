@@ -15,7 +15,7 @@ class Debug extends CWidget {
 			// dump debug info
 			foreach($flashMessages as $key=>$message) {
 				if(strstr($key,'debug.email'))
-					echo $message.strpos($key, 'debug.email');
+					echo $message;
 			}
 		}
 	}

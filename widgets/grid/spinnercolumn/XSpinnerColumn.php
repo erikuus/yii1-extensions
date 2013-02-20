@@ -2,6 +2,8 @@
 /**
  * XSpinnerColumn
  *
+ * XSpinnerColumn allows to display +/- links (that enable to increase and decrease cell value) in CGridView column.
+ *
  * The following shows how to use XSpinnerColumn.
  *
  * In view:

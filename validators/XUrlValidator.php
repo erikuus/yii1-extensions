@@ -1,9 +1,7 @@
 <?php
 /**
  * XUrlValidator class file.
- *
  * XUrlValidator validates that the attribute value is a valid http or https URL.
- *
  * This validator is more relaxed then CUrlValidator, accepting URLs with no protocol.
  */
 class XUrlValidator extends CValidator

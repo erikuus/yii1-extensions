@@ -33,7 +33,7 @@ class LinkedinOAuthService extends EOAuthService {
 	);
 
 	protected function fetchAttributes() {
-		$info = $this->makeSignedRequest('http://api.linkedin.com/v1/people/~:(id,first-name,last-name,public-profile-url)', array(), false); // json format not working :(
+		$info = $this->makeSignedRequest('https://api.linkedin.com/v1/people/~:(id,first-name,last-name,public-profile-url)', array(), false); // json format not working :(
 		$info = $this->parseInfo($info);
 
 		$this->attributes['id'] = $info['id'];
