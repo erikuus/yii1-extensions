@@ -210,7 +210,7 @@ class Email extends CApplicationComponent {
 			case 'php':
 				$message = wordwrap($message, $this->lineLength);
 				mb_language($this->language);
-				return mb_send_mail($to, $subject, $message, implode("\r\n", $this->createHeaders()));
+				return mb_send_mail($to, $subject, $message, implode("\r\n", $this->createHeaders()),'-fadmin.vau@ra.ee');
 			case 'debug':
 				$debug = Yii::app()->controller->renderPartial('email.debug',
 						array_merge(compact('to', 'subject', 'message'), array('headers'=>$this->createHeaders(),'type'=>$this->type)),
@@ -239,6 +239,7 @@ class Email extends CApplicationComponent {
 		}
 		$headers[] = "Content-Type: {$this->type}; charset=".$this->contentType;
 		$headers[] = "MIME-Version: 1.0";
+		$headers[] = "X-Mailer: PHP/" . phpversion();
 
 		return $headers;
 	}

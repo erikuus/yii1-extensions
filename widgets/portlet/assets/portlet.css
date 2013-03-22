@@ -70,3 +70,17 @@
 	padding: 0;
 	color: #999;
 }
+
+.portlet hr {
+	display: block;
+	position: relative;
+	padding: 0;
+	margin: 5px 5px 3px 0;
+	height: 0;
+	max-height: 0;
+	clear: both;
+	border: none;
+	border-top: 1px solid #e3e3e3;
+	font-size: 1px;
+	line-height: 0;
+}
