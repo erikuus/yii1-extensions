@@ -33,6 +33,8 @@
 							'height'=>'500px',
 							'upImgUrl'=>Yii::app()->controller->module->editorUploadRoute ? Yii::app()->controller->createUrl(Yii::app()->controller->module->editorUploadRoute) : null,
 							'upImgExt'=>'jpg,jpeg,gif,png',
+							'upLinkUrl'=>Yii::app()->controller->module->editorUploadRoute ? Yii::app()->controller->createUrl(Yii::app()->controller->module->editorUploadRoute) : null,
+							'upLinkExt'=>'zip,rar,txt,pdf',
 						)
 					));?>
 					<?php echo $form->error($model,$model->localizeAttribute('content')); ?>
