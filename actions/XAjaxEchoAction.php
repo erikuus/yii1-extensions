@@ -1,6 +1,6 @@
 <?php
 /**
- * XAjaxEchoAction
+ * XAjaxEchoAction class
  *
  * This action echos attribute value
  *

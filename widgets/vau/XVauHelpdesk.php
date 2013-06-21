@@ -18,7 +18,7 @@
  */
 class XVauHelpdesk extends CWidget
 {
-	private $cssClass='vauHelpdesk';
+	private $cssClass='vauHelpdesk2';
 
 	/**
 	 * @var boolean whether the portlet is visible. Defaults to true.
@@ -40,11 +40,6 @@ class XVauHelpdesk extends CWidget
 	 */
 	public $lang;
 
-	/**
-	 * @var integer the id of the VAU FAQ subject. If not set, helpdesk link will open Send Message page.
-	 */
-	public $id;
-
 	public function run()
 	{
 		if(!$this->visible)
@@ -57,14 +52,12 @@ class XVauHelpdesk extends CWidget
 			CHtml::image($baseUrl.'/helpdesk.gif',$this->title,array('title'=>$this->title,'style'=>'margin-left: 3px'));
 
 		$params=array(
-			'page'=>'HelpFAQPage',
-			'SendMessage'=>1,
-			'_lang'=>$this->lang,
-			'Url'=>$this->controller->createAbsoluteUrl('',$_GET),
-			'host'=>Yii::app()->request->hostInfo
+			'language'=>$this->lang,
+			'url'=>$this->controller->createAbsoluteUrl('',$_GET),
+			'dialog'=>1
 		);
 
-		$url='http://www.ra.ee/vaux/redirect.php?'.http_build_query($params);
+		$url='http://www.ra.ee/vau/index.php/helpdesk/message/feedback?'.http_build_query($params);
 
 		echo CHtml::link($text,$url,array('class'=>$this->cssClass,'title'=>$this->title));
 	}
