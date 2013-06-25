@@ -5,11 +5,10 @@
  * This widget creates infinite ajax scroll pager for CListView
  * This extension uses Infinite Ajax Scroll, a jQuery plugin
  *
- * USAGE SAMPLE
+ * Example:
  *
  * Widget:
- *
- * ~~~
+ * <pre>
  * $this->widget('zii.widgets.CListView', array(
  *     'id'=>'contest-list',
  *     'dataProvider'=>$dataProvider,
@@ -30,16 +29,13 @@
  *     'template'=>'{items}{pager}',
  *     'itemsCssClass'=>'contest-list',
  * ));
- * ~~~
+ * </pre>
  *
  * Partial view _contest:
- *
- * ~~~
- * <div class="contest-row">
- *     <h3 class="contest-title"><?php echo CHtml::encode($data->Name); ?></h3>
- *     <p><?php echo CHtml::encode($data->Description); ?></p>
- * </div>
- * ~~~
+ * <pre>
+ * echo CHtml::encode($data->Name);
+ * echo CHtml::encode($data->Description);
+ * </pre>
  *
  * @link http://www.yiiframework.com/extension/inifinite-scroll-pager/
  * @author Tpoxa

@@ -7,7 +7,7 @@
  * The following shows how to use XSelect2InitAction action.
  *
  * First set up the action on RequestController actions() method:
- * ~~~
+ * <pre>
  * return array(
  *     'initPerson'=>array(
  *         'class'=>'ext.actions.XSelect2InitAction',
@@ -15,11 +15,11 @@
  *         'textField'=>'fullname',
  *     ),
  * );
- * ~~~
+ * </pre>
  *
  * And then Select2 widget can be initalized as follows:
- * ~~~
- *  $this->widget('ext.widgets.select2.XSelect2', array(
+ * <pre>
+ * $this->widget('ext.widgets.select2.XSelect2', array(
  *     'model'=>$model,
  *     'attribute'=>'id',
  *     'options'=>array(
@@ -37,7 +37,7 @@
  *         }",
  *     ),
  * ));
- * ~~~
+ * </pre>
  *
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 1.0.0

@@ -4,9 +4,9 @@
  *
  * XJuiDateTimePicker encapsulates the {@link http://trentrichardson.com/examples/timepicker/} addon.
  *
- * To use this widget, you may insert the following code in a view:
+ * Example:
  *
- * ~~~
+ * <pre>
  * $this->widget('ext.widgets.timepicker.XJuiDateTimePicker', array(
  *     'model'     => $model,
  *     'attribute' => 'attribute',
@@ -19,7 +19,7 @@
  *         'style'=>'height:20px;'
  *     ),
  * ));
- * ~~~
+ * </pre>
  *
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 1.0

@@ -16,14 +16,14 @@
  * }
  * </pre>
  *
- * USAGE:
+ * Example:
+ *
  * $emails=User::model()->findColumn('email', 'active = 1');
  * foreach ($emails as $email) {
  *     echo $email;
  * }
  *
- * NOTE!
- * beforeFind and afterFind functions will be ignored.
+ * NOTE! beforeFind and afterFind functions will be ignored.
  *
  * @author Rajat Singhal <rajat.developer.singhal@gmail.com>
  * @link http://www.yiiframework.com/

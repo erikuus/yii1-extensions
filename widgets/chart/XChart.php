@@ -7,11 +7,9 @@
  * xCharts is a JavaScript library for building beautiful and custom data-driven chart visualizations for the web using D3.js.
  * Using HTML, CSS, and SVG, xCharts are designed to be dynamic, fluid, and open to integrations and customization.
  *
- * The following examples show how to use XChart widget.
+ * Basic example:
  *
- * BASIC EXAMPLE
- *
- * ~~~
+ * <pre>
  * $this->widget('ext.widgets.chart.XChart', array(
  *     'id'=>'activityChart',
  *     'type'=>'line-dotted',
@@ -70,13 +68,13 @@
  *         'style'=>'width:100%; height:500px;'
  *     )
  * ));
- * ~~~
+ * </pre>
  *
- * COMPLEX EXAMPLE. DATA FROM MODEL. AJAX UPDATE CHART DATA.
+ * Complex example (data from model, ajax update chart data):
  *
  * Widget:
  *
- * ~~~
+ * <pre>
  * $this->widget('ext.widgets.chart.XChart', array(
  *     'id'=>'contestActivityChart',
  *     'cssFile'=>false,
@@ -95,11 +93,11 @@
  *         'style'=>'width:100%; height:500px;'
  *     )
  * ));
- * ~~~
+ * </pre>
  *
  * Links to change graph:
  *
- * ~~~
+ * <pre>
  * <ul class="contest-stats">
  *     <li class="active" data-graph="contestViews">
  *         <a href="#">
@@ -112,11 +110,11 @@
  *         </a>
  *     </li>
  * </ul>
- * ~~~
+ * </pre>
  *
  * Client script to get and set data:
  *
- * ~~~
+ * <pre>
  * Yii::app()->clientScript->registerScript('xChart', "
  *     $('.contest-stats li a').on('click', function(e){
  *         e.preventDefault();
@@ -134,11 +132,11 @@
  *         });
  *     });
  * ", CClientScript::POS_READY);
- * ~~~
+ * </pre>
  *
  * Request controller:
  *
- * ~~~
+ * <pre>
  * public function actionGetGraph($graphName,$contestId=0)
  * {
  *    switch ($graphName) {
@@ -161,11 +159,11 @@
  *        )
  *    ));
  * }
- * ~~~
+ * </pre>
  *
  * Model:
  *
- * ~~~
+ * <pre>
  * public function getContestPhotoViewsGraph($contestId)
  * {
  *     $rows=Yii::app()->db->createCommand("
@@ -185,7 +183,7 @@
  *     }
  *     return $data;
  * }
- * ~~~
+ * </pre>
  *
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 1.0.0

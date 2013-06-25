@@ -8,7 +8,7 @@
  *
  * First set up suggestCountry action on RequestController actions() method:
  *
- * ~~~
+ * <pre>
  * public function actions()
  * {
  *     return array(
@@ -19,11 +19,11 @@
  *         ),
  *     );
  * }
- * ~~~
+ * </pre>
  *
  * And then set up widget:
  *
- * ~~~
+ * </pre>
  * $this->widget('ext.widgets.select2.XSelect2', array(
  *     'model'=>$model,
  *     'attribute'=>'id',
@@ -42,11 +42,11 @@
  *         ...
  *     ),
  * ));
- * ~~~
+ * </pre>
  *
  * Note, you also have to write model method that makes suggest query. For example:
  *
- * ~~~
+ * <pre>
  * public function suggest($keyword, $limit=20)
  * {
  *     $models=$this->findAll(array(
@@ -65,7 +65,7 @@
  *     }
  *     return $suggest;
  * }
- * ~~~
+ * </pre>
  *
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 1.0.0

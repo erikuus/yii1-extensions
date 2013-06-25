@@ -5,19 +5,10 @@
  * Based on the Smarty function {html_select_date}
  * http://www.smarty.net/manual/en/language.function.html.select.date.php
  *
- * @author Vladimir Papaev <kosenka@gmail.com>
- * @version 0.2
- */
-
-/**
- * Updated underscore to camel.
- * Added day, month and year template properties
- *
- * USAGE SAMPLE
+ * Example:
  *
  * Widget:
- *
- * ~~~
+ * <pre>
  * $this->widget('ext.widgets.dateselect.XDateSelect', array(
  *     'model'=>$model,
  *     'attribute'=>'DateOfBirth',
@@ -29,11 +20,10 @@
  *     'monthTemplate'=>'<div>{select}</div>',
  *     'yearTemplate'=>'<div style="float: left;">{select}</div>',
  * ));
- * ~~~
+ * </pre>
  *
  * Controller:
- *
- * ~~~
+ * <pre>
  * public function actionCreate()
  * {
  *     $model=new Account('createAccount');
@@ -52,8 +42,9 @@
  *         'model'=>$model,
  *     ));
  * }
- * ~~~
+ * </pre>
  *
+ * @author Vladimir Papaev <kosenka@gmail.com>
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 0.3
  */

@@ -4,29 +4,25 @@
  * XAjaxUpload class file.
  *
  * This widget enables file uploads via ajax
- *
  * This extension is a wrapper of http://valums.com/ajax-upload/
  *
- * @author Vladimir Papaev <kosenka@gmail.com>
- * @version 0.1
- * @license http://www.opensource.org/licenses/bsd-license.php
- */
-
-/**
- * Renamed XAjaxUpload class and property names
- * Restructured code
- * Added htmlOptions property
- * Added better comments
- * Added buttonLabel and buttonClass options for fileuploader.js
- * Added saveAsFilename property for class qqFileUploader (qqFileUploader.php)
+ * Original version by Vladimir Papaev <kosenka@gmail.com>
  *
- * EXAMPLE OF USAGE:
+ * Changes to original version:
+ * renamed XAjaxUpload class and property names,
+ * restructured code,
+ * added htmlOptions property,
+ * added better comments,
+ * added buttonLabel and buttonClass options for fileuploader.js,
+ * added saveAsFilename property for class qqFileUploader (qqFileUploader.php).
+ *
+ * Example:
  *
  * Inside CActiveForm:
  *
- * ~~~
- * <?php echo $form->labelEx($model,'Photo'); ?>
- * <?php $this->widget('ext.widgets.ajaxupload.XAjaxUpload', array(
+ * <pre>
+ * echo $form->labelEx($model,'Photo');
+ * $this->widget('ext.widgets.ajaxupload.XAjaxUpload', array(
  *     'id'=>'image',
  *     'options'=>array(
  *         'action'=>Yii::app()->createUrl('/controller/upload'),
@@ -47,15 +43,15 @@
  *             'onLeave'=>Yii::t('vd','The files are being uploaded, if you leave now the upload will be cancelled.')
  *         ),
  *     )
- * )); ?>
- * <?php echo CHtml::image('image.jpg', 'alternative text', array('id'=>'photo'))?>
- * <?php echo $form->hiddenField($model,'Photo'); ?>
- * <?php echo $form->error($model,'Photo'); ?>
- * ~~~
+ * ));
+ * echo CHtml::image('image.jpg', 'alternative text', array('id'=>'photo'));
+ * echo $form->hiddenField($model,'Photo');
+ * echo $form->error($model,'Photo');
+ * </pre>
  *
  * In controller:
  *
- * ~~~
+ * <pre>
  * public function actionUpload()
  * {
  *     Yii::import("ext.widgets.ajaxupload.qqFileUploader");
@@ -68,12 +64,13 @@
  *     $result = htmlspecialchars(json_encode($result), ENT_NOQUOTES);
  *     echo $result;
  * }
- * ~~~
+ * </pre>
  *
  * Above method will return
  * - on success: array('success'=>true,'filename'=>$filename.'.'.$ext);
  * - on failure: array('error'=>'Could not save uploaded file.'.'The upload was cancelled, or server error encountered');
  *
+ * @author Vladimir Papaev <kosenka@gmail.com>
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 2.0
  */
