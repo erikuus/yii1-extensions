@@ -524,6 +524,7 @@ var emptyData = [[]],
 
     // Axis tick formatting
     tickHintX: 10,
+    tickWidthX: 80,
     tickFormatX: function (x) { return x; },
     tickHintY: 10,
     tickFormatY: function (y) { return y; },
@@ -874,6 +875,7 @@ _.defaults(xChart.prototype, {
       o = self._options,
       t = self._gScale.transition().duration(o.timing),
       xTicks = o.tickHintX,
+      xWidth = o.tickWidthX,
       yTicks = o.tickHintY,
       bottom = self._height + o.axisPaddingTop + o.axisPaddingBottom,
       zeroLine = d3.svg.line().x(function (d) { return d; }),
@@ -902,7 +904,7 @@ _.defaults(xChart.prototype, {
     xAxis.call(xRules);
 
     labels = self._gScale.selectAll('.axisX g')[0];
-    if (labels.length > (self._width / 80)) {
+    if (labels.length > (self._width / xWidth)) {
       labels.sort(function (a, b) {
         var r = /translate\(([^,)]+)/;
         a = a.getAttribute('transform').match(r);

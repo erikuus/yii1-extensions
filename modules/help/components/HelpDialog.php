@@ -57,8 +57,8 @@ SCRIPT;
 			'options'=>array_merge(
 				array(
 					'title'=>null,
-					'width'=>700,
-					'height'=>400,
+					'width'=>750,
+					'height'=>450,
 					'autoOpen'=>false,
 					'modal'=>true,
 				),

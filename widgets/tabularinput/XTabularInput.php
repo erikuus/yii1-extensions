@@ -2,7 +2,7 @@
 /**
  * XTabularInput
  *
- * Widget to handle variable number of inputs
+ * Widget to handle variable number of form inputs.
  *
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 1.0.0
@@ -19,7 +19,9 @@ class XTabularInput extends CWidget
 	public $inputView;
 	/**
 	 * @var string the url to action that (partial)renders tabular input.
-	 * Example of action:
+	 *
+	 * Example:
+	 *
 	 * public function actionField($index)
 	 * {
 	 *     $model=new Task;

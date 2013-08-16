@@ -232,6 +232,7 @@ class XChart extends CWidget
 	 * paddingBottom - Allows space for the x-axis scale. Controls the amount of space from the bottom edge of the svg element to the beginning of the axisPaddingBottom.
 	 * paddingLeft - Allows space for the y-axis scale. Amount of space from the left edge of the svg element to the beginning of the axisPaddingLeft.
 	 * tickHintX - The amount of ticks that you would like to have displayed on the x-axis. Note: this is merely a guide and your results will likely vary.
+	 * tickWidthX - The estimated width of tick labels displayed on the x-axis (This option is not in the original code. It was added by Erik Uus)
 	 * tickFormatX - Provide alternate formatting for the x-axis tick labels.
 	 * tickHintY - The amount of ticks that you would like to have displayed on the y-axis. Note: this is merely a guide and your results will likely vary.
 	 * tickFormatY - Provide alternate formatting for the y-axis tick labels.
