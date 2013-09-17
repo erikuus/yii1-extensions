@@ -12,7 +12,7 @@
  *     'addFields'=>array(
  *         'class'=>'ext.actions.XTabularInputAction',
  *         'modelName'=>'Person',
- *         'viewName'=>'_inputFields',
+ *         'viewName'=>'/person/_inputFields',
  *     ),
  * );
  * </pre>
@@ -31,7 +31,6 @@
  * echo CHtml::activeLabel($model,"[$index]firstname");
  * echo CHtml::activeTextField($model,"[$index]firstname");
  * echo CHtml::error($model,"[$index]firstname");
- * <a href="#" class="tabular-input-remove">Remove</a>
  * </pre>
  *
  * @author Erik Uus <erik.uus@gmail.com>
