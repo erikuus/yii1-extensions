@@ -4,6 +4,108 @@
  *
  * Widget to handle variable number of form inputs.
  *
+ * XTabularInput can be used together with {@link XTabularInputAction}
+ *
+ * BASIC EXAMPLE
+ * minimal configuration, no style
+ *
+ * Widget:
+ *
+ * <pre>
+ * $this->widget('ext.widgets.tabularinput.XTabularInput',array(
+ *     'models'=>$persons,
+ *     'inputView'=>'_tabularInput',
+ *     'inputUrl'=>$this->createUrl('request/addTabularInputs'),
+ *     'removeTemplate'=>'<div class="action">{link}</div>',
+ *     'addTemplate'=>'<div class="action">{link}</div>',
+ * ));
+ * </pre>
+ *
+ * Partial view _tabularInput:
+ *
+ * <div class="simple">
+ *    <?php echo CHtml::activeLabelEx($model,"[$index]firstname"); ?>
+ *    <?php echo CHtml::activeTextField($model,"[$index]firstname"); ?>
+ *    <?php echo CHtml::error($model,"[$index]firstname"); ?>
+ * </div>
+ * <div class="simple">
+ *    <?php echo CHtml::activeLabelEx($model,"[$index]lastname"); ?>
+ *    <?php echo CHtml::activeTextField($model,"[$index]lastname"); ?>
+ *    <?php echo CHtml::error($model,"[$index]lastname"); ?>
+ * </div>
+ *
+ * Action defined in controller {@see XTabularInputAction}:
+ *
+ * <pre>
+ * public function actions()
+ * {
+ *     return array(
+ *         'addTabularInputs'=>array(
+ *             'class'=>'ext.actions.XTabularInputAction',
+ *             'modelName'=>'Person',
+ *             'viewName'=>'/person/_tabularInput',
+ *         ),
+ *     );
+ * }
+ * </pre>
+ *
+ * ADVANCED EXAMPLE
+ * tabular inputs configured into table layout, buttons styled
+ *
+ * Widget:
+ *
+ * <pre>
+ * $this->widget('ext.widgets.tabularinput.XTabularInput',array(
+ *     'models'=>$persons2,
+ *     'containerTagName'=>'table',
+ *     'headerTagName'=>'thead',
+ *     'header'=>'
+ *         <tr>
+ *             <td>'.CHtml::activeLabelEX(Person::model(),'firstname').'</td>
+ *             <td>'.CHtml::activeLabelEX(Person::model(),'lastname').'</td>
+ *             <td>'.CHtml::activeLabelEX(Person::model(),'eyecolor_code').'</td>
+ *             <td></td>
+ *         </tr>
+ *     ',
+ *     'inputContainerTagName'=>'tbody',
+ *     'inputTagName'=>'tr',
+ *     'inputView'=>'extensions/_tabularInputAsTable',
+ *     'inputUrl'=>$this->createUrl('request/addTabularInputsAsTable'),
+ *     'addTemplate'=>'<tbody><tr><td colspan="3">{link}</td></tr></tbody>',
+ *     'addLabel'=>Yii::t('ui','Add new row'),
+ *     'addHtmlOptions'=>array('class'=>'blue pill full-width'),
+ *     'removeTemplate'=>'<td>{link}</td>',
+ *     'removeLabel'=>Yii::t('ui','Delete'),
+ *     'removeHtmlOptions'=>array('class'=>'red pill'),
+ * ));
+ * </pre>
+ *
+ * Partial view _tabularInputAsTable:
+ *
+ * <td>
+ *    <?php echo CHtml::activeTextField($model,"[$index]firstname"); ?>
+ *    <?php echo CHtml::error($model,"[$index]firstname"); ?>
+ * </td>
+ * <td>
+ *    <?php echo CHtml::activeTextField($model,"[$index]lastname"); ?>
+ *    <?php echo CHtml::error($model,"[$index]lastname"); ?>
+ * </td>
+ *
+ * Action defined in controller {@see XTabularInputAction}:
+ *
+ * <pre>
+ * public function actions()
+ * {
+ *     return array(
+ *         'addTabularInputsAsTable'=>array(
+ *             'class'=>'ext.actions.XTabularInputAction',
+ *             'modelName'=>'Person',
+ *             'viewName'=>'/site/extensions/_tabularInputAsTable',
+ *         ),
+ *     );
+ * }
+ * </pre>
+ *
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 1.0.0
  */
@@ -252,7 +354,7 @@ SCRIPT;
 
 	/**
 	 * Get the the link that removes tabular input and hidden index input field
-	 * @param mixed tabular input index. 
+	 * @param mixed tabular input index.
 	 */
 	protected function getRemoveLinkAndIndexInput($index)
 	{
