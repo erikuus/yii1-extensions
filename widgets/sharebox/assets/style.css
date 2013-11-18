@@ -1,0 +1,72 @@
+/* Based on Beautiful Social Bookmarking Widget By Harish @ www.way2blogging.org */
+ul.way2blogging-social {
+	list-style: none;
+	margin: 5px 0;
+	display: inline-block;
+}
+ul.way2blogging-social li {
+	display:inline;
+	float:left;
+	background-repeat:no-repeat;
+}
+ul.way2blogging-social li a {
+	display:block;
+	padding-right:5px;
+	position:relative;
+	text-decoration:none;
+}
+ul.way2blogging-social li a strong {
+	font-weight:normal;
+	position:absolute;
+	left:20px;
+    top:-10px;
+	color:#fff;
+	padding:3px;
+	z-index:9999;
+	text-shadow:1px 1px 0 rgba(0, 0, 0, 0.75);
+	background-color:rgba(0, 0, 0, 0.7);
+	-moz-border-radius:3px;
+	-moz-box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+	-webkit-border-radius:3px;
+	-webkit-box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+	border-radius:3px;
+	box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+	opacity:0;    
+}
+
+ul.way2blogging-cssanime:hover li { opacity:0.4; }
+ul.way2blogging-cssanime li {
+	-webkit-transition-property: opacity;
+	-webkit-transition-duration: 500ms;
+	-moz-transition-property: opacity;
+	-moz-transition-duration: 500ms;
+}
+ul.way2blogging-cssanime li a strong {
+	-webkit-transition-property: opacity, top;
+	-webkit-transition-duration: 300ms;
+	-moz-transition-property: opacity, top;
+	-moz-transition-duration: 300ms;
+}
+ul.way2blogging-cssanime li:hover {
+	opacity:1;
+}
+ul.way2blogging-cssanime li:hover a strong {
+	opacity:1;
+}
+
+ul.way2blogging-size16 li a {
+    width: 16px;
+    height: 16px;
+}
+ul.way2blogging-size24 li a {
+    width: 24px;
+    height: 24px;
+}
+ul.way2blogging-size32 li a {
+    width: 32px;
+    height: 32px;
+}
+ul.way2blogging-size48 li a {
+    width: 48px;
+    height: 48px;
+}

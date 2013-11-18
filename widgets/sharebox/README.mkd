@@ -1,0 +1,99 @@
+Yii Social Share Box
+================
+
+ShareBox allows you to easily share a URL on your Yii powered site with social networking sites.
+
+##Requirements
+Developed and tested on Yii 1.1.7, should work on all 1.1.x branch.
+
+
+##Install
+Extract to your extensions folder.
+
+Alternatively, you can check out from GitHub right in your Git enabled project:
+~~~
+$ git submodule add git@github.com:digitick/yii-sharebox.git extensions/sharebox
+$ git submodule init
+$ git submodule update
+~~~
+
+##Usage
+Include the widget in a view file as follows:
+~~~
+[php]
+$this->widget('ext.sharebox.EShareBox', array(
+    // url to share, required.
+    'url' => $this->createAbsoluteUrl('/'),
+    
+    // A title to describe your link, required.
+    // Some services will ignore this value.
+    'title'=> 'My Awesome web site !!',
+
+    // Size of the icons to display, in pixels.
+    // Default is 24px, available sizes : 16, 24, 32, 48.
+    //'iconSize' => 32,
+
+    // Whether to animate the links.
+    // Default is true
+    //'animate' => false,
+
+   // Social networks to include, excluding all others.
+   // The exclude filter is still run.
+   //'include' => array('technorati', 'digg'),
+
+   // Social networks to exclude from display.
+   // By default none are excluded.
+   //'exclude' => array('technorati', 'digg'),
+
+   // Use your own icons! Note that you will need to have
+   // a subfolder of the appropriate icons sizes.
+   // ie: /myimages/social/16px /myimages/social/24px ...
+   //'iconPath' => '/myimages/social',
+
+   // HTML options for the UL element.
+   //'ulHtmlOptions' => array('class' => 'myCustomUlClass'),
+
+   // HTML options for all the LI elements.
+   //'liHtmlOptions' => array('class' => 'myCustomLiClass'),
+));
+~~~
+
+##Acknowledgements
+ShareBox uses the following resources internally :
+
+Original idea and CSS from [Beautiful Social Bookmarking Widget](http://www.way2blogging.org/2011/03/add-beautiful-social-bookmarking-widget.html) by Harish. 
+The extension uses the CSS only version, no jQuery involved.
+
+16, 24, 32 and 48 px icons from [IconDock](http://icondock.com/free/vector-social-media-icons)
+
+Note: the company logos in the icons are copyright of their respective owners.
+
+
+##Resources
+* Please use [this forum topic](http://www.yiiframework.com/forum/index.php?/topic/19767-extension-sharebox/ "Sharebox forum topic") to discuss all aspects of the extension, including adding other services.
+* [GitHub Repo](https://github.com/digitick/yii-sharebox)
+* [Extension Page](http://www.yiiframework.com/extension/sharebox)
+
+##Change Log
+
+* v 1.3 — 2012-09-27 :
+  * Add the animate option.
+  * CSS fixes and cleanup.
+
+* v 1.2.2 — 2011-09-27 :
+  * Fix XHTML validation errors : url formating and CSS (thanks to Leffe for the CSS improvements).
+
+* v 1.2.1 — 2011-07-13 :
+  * Fix Twitter spelling (thanks to scoob.junior).
+
+* v 1.2 — 2011-06-09 :
+  * Change 'htmlOptions' to 'ulHtmlOptions'. **WARNING :** _this will cause an exception on upgrade_. You will need to update your code if you are using this feature !!
+  * Use same icons for all sizes.
+  * Add 'include' option.
+  * Add 'liHtmlOptions'.
+
+* v 1.1 — 2011-05-24 :
+  * Merge improvements contributed by tydeas_dr, many thanks.
+  * Allow HTML options for the UL element of the widget, including id and class.
+
+* v 1.0 — 2011-05-23 : initial release.
