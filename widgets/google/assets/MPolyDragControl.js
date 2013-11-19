@@ -26,10 +26,10 @@ MPolyDragControl.prototype.initialize = function() {
 	this.dragMarker0;
 	this.dragMarker1;
 	this.polyEditIcon = {
-    	url: this.style.markerImage,
-    	size: new google.maps.Size(11,11),
-    	anchor: new google.maps.Point(6,6)
-    };
+		url: this.style.markerImage,
+		size: new google.maps.Size(11,11),
+		anchor: new google.maps.Point(6,6)
+	};
 };
 
 MPolyDragControl.prototype.initialRectangle = function(sw_lat, sw_lon, ne_lat, ne_lon) {
