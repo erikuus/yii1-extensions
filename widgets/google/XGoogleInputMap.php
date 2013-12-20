@@ -98,13 +98,13 @@ class XGoogleInputMap extends CInputWidget
 	 */
 	public function init()
 	{
-		if(!isset($this->googleApiKey))
+		if(!$this->googleApiKey)
 			throw new CException('"googleApiKey" have to be set!');
 
-		if(!isset($this->form))
+		if(!$this->form)
 			throw new CException('"form" have to be set!');
 
-		if(!isset($this->model))
+		if(!$this->model)
 			throw new CException('"model" have to be set!');
 
 		if(!$this->checkBounds() && !$this->model->{$this->zoom})
