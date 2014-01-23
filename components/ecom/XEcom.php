@@ -119,6 +119,8 @@ class XEcom extends CApplicationComponent
 	 */
 	public function renderPayButton()
 	{
+		$this->setEcuno();
+
 		$file=dirname(__FILE__).DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'_form.php';
 
 		Yii::app()->controller->renderFile($file, array(
@@ -157,8 +159,6 @@ class XEcom extends CApplicationComponent
 	 */
 	protected function getMac()
 	{
-		$this->setEcuno();
-
 		// construct data string
 		$serviceId=sprintf("%-10s", $this->serviceId);
 		$feedbackurl=sprintf("%-128s", $this->feedBackUrl);
@@ -237,9 +237,10 @@ class XEcom extends CApplicationComponent
 	 */
 	protected function hex2str($hex)
 	{
+		$str='';
 		for($i=0;$i<strlen($hex);$i+=2)
 			$str.=chr(hexdec(substr($hex,$i,2)));
-	  	return $str;
+		return $str;
 	}
 
 	/**
@@ -257,7 +258,7 @@ class XEcom extends CApplicationComponent
 	/**
 	 * Multibyte safe vsprintf
 	 */
-	protected function mb_vsprintf($format,$argv,$encoding=null)
+	protected function mb_vsprintf($format, $argv, $encoding=null)
 	{
 		if(is_null($encoding))
 			$encoding=mb_internal_encoding();
@@ -296,7 +297,7 @@ class XEcom extends CApplicationComponent
 				if($precision!=='')
 				{
 					$precision=intval(substr($precision,1));
-					if($precision>0&&mb_strlen($arg,$encoding)>$precision)
+					if($precision>0 && mb_strlen($arg,$encoding)>$precision)
 						$arg=mb_substr($precision,0,$precision,$encoding);
 				}
 

@@ -5,6 +5,7 @@ Yii::import('zii.widgets.grid.CGridView');
 /**
 * A Grid View that groups rows by any column(s)
 *
+* @link           http://www.yiiframework.com/extension/groupgridview/
 * @category       User Interface
 * @package        extensions
 * @author         Vitaliy Potapov <noginsk@rambler.ru>
