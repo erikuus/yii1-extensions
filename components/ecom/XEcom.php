@@ -19,19 +19,38 @@
  * )
  * </pre>
  *
- * Render pay button:
+ * Create ecuno in model:
  * <pre>
- * $ecom = Yii::app()->ecom;
- * $ecom->lang = Yii::app()->language;
- * $ecom->datetime = date("YmdHis");
- * $ecom->eamount = $price * 100;
- * $ecom->feedBackUrl = Yii::app()->createAbsoluteUrl('pay');
- * $ecom->renderPayButton();
+ * public function createEcuno()
+ * {
+ *     do {
+ *         $this->ecuno=date("Ym").rand(100000,999999);
+ *     } while(self::model()->findByAttributes(array('ecuno'=>$this->ecuno))!==null);
+ *
+ *     $this->save();
+ *     return $this->ecuno;
+ * }
  * </pre>
  *
- * Validate payment:
+ * Submit payment in controller:
  * <pre>
- * public function actionPay()
+ * public function actionSubmitPayment()
+ * {
+ *     $model=$this->loadModel();
+ *
+ *     $ecom = Yii::app()->ecom;
+ *     $ecom->lang = Yii::app()->language;
+ *     $ecom->datetime = date("YmdHis");
+ *     $ecom->eamount = $model->price * 100;
+ *     $ecom->feedBackUrl = Yii::app()->createAbsoluteUrl('validatePayment',array('id'=>$model->id));
+ *     $ecom->ecuno = $model->createEcuno();
+ *     $ecom->submitPayment();
+ * }
+ * </pre>
+ *
+ * Validate payment in controller:
+ * <pre>
+ * public function actionValidatePayment()
  * {
  *     if(Yii::app()->request->isPostRequest && Yii::app()->ecom->validatePayment())
  *         // Update database and display message that payment was successful
@@ -85,14 +104,6 @@ class XEcom extends CApplicationComponent
 	 */
  	public $cur='EUR';
 	/**
-	 * @var string $payButtonLabel label for pay button. Defaults to 'Pay'
-	 */
- 	public $payButtonLabel='Pay';
-	/**
-	 * @var array $payButtonHtmlOptions thml options for pay button
-	 */
- 	public $payButtonHtmlOptions=array();
-	/**
 	 * @var string $lang interface language ISO 639-1
 	 */
 	public $lang;
@@ -108,20 +119,17 @@ class XEcom extends CApplicationComponent
 	 * @var string $feedBackUrl feedback url
 	 */
  	public $feedBackUrl;
+	/**
+	 * @var integer $ecuno the unique transaction number as time stamp [YYYYMM] + random number between 100000-999999
+	 */
+	public $ecuno;
 
 	/**
-	 * @var integer $ecuno the unique transaction number
+	 * Render form with hidden fields and autosubmit
 	 */
-	private $_ecuno;
-
-	/**
-	 * Render pay button inside form with hidden fields
-	 */
-	public function renderPayButton()
+	public function submitPayment()
 	{
-		$this->setEcuno();
-
-		$file=dirname(__FILE__).DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'_form.php';
+		$file=dirname(__FILE__).DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'form.php';
 
 		Yii::app()->controller->renderFile($file, array(
 			'serviceUrl'=>$this->serviceUrl,
@@ -131,26 +139,13 @@ class XEcom extends CApplicationComponent
 			'delivery'=>$this->delivery,
 			'charEncoding'=>$this->charEncoding,
 			'cur'=>$this->cur,
-			'payButtonLabel'=>$this->payButtonLabel,
-			'payButtonHtmlOptions'=>$this->payButtonHtmlOptions,
 			'lang'=>$this->lang,
 			'datetime'=>$this->datetime,
 			'feedBackUrl'=>$this->feedBackUrl,
 			'eamount'=>sprintf("%012s", $this->eamount),
-			'ecuno'=>$this->_ecuno,
+			'ecuno'=>$this->ecuno,
 			'mac'=>$this->getMac(),
 		));
-	}
-
-	/**
-	 * Set unique transaction number
-	 * as time stamp [YYYYMM] + random number between 100000-999999
-	 */
-	protected function setEcuno()
-	{
-		$rnd=rand(100000,999999);
-		$date=$datetime=date("Ym");
-		$this->_ecuno=$date.$rnd;
 	}
 
 	/**
@@ -162,7 +157,7 @@ class XEcom extends CApplicationComponent
 		// construct data string
 		$serviceId=sprintf("%-10s", $this->serviceId);
 		$feedbackurl=sprintf("%-128s", $this->feedBackUrl);
-		$ecuno=sprintf("%012s", $this->_ecuno);
+		$ecuno=sprintf("%012s", $this->ecuno);
 		$eamount=sprintf("%012s", $this->eamount);
 
 		$data=
