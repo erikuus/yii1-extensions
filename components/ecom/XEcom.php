@@ -52,12 +52,17 @@
  * <pre>
  * public function actionValidatePayment()
  * {
- *     if(Yii::app()->request->isPostRequest && Yii::app()->ecom->validatePayment())
- *         // Update database and display message that payment was successful
+ *     if(Yii::app()->request->isPostRequest && Yii::app()->ecom->validatePayment()) // bad request or invalid response
+ *     {
+ *         if($_POST['respcode']==000) // successful payment
+ *             // update database, set success flash message
+ *         else
+ *            // set failure flash message
+ *     }
  *     else
- *         // Log request and display message that payment failed
+ *         // set failure flash message
  *
- *     // redirect or render view
+ *     // redirect to order list
  * }
  * </pre>
  *
