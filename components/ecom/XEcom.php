@@ -52,15 +52,15 @@
  * <pre>
  * public function actionValidatePayment()
  * {
- *     if(Yii::app()->request->isPostRequest && Yii::app()->ecom->validatePayment()) // bad request or invalid response
+ *     if(Yii::app()->request->isPostRequest)
  *     {
- *         if($_POST['respcode']==000) // successful payment
+ *         if(Yii::app()->ecom->validatePayment())
  *             // update database, set success flash message
  *         else
- *            // set failure flash message
+ *             // set failure flash message
  *     }
  *     else
- *         // set failure flash message
+ *         throw new CHttpException(400,'Invalid request. Please do not repeat this request again.');
  *
  *     // redirect to order list
  * }
@@ -211,8 +211,8 @@ class XEcom extends CApplicationComponent
 			sprintf("%06s", $_POST['receipt_no']) .
 			sprintf("%012s", $_POST['eamount']) .
 			sprintf("%3s", $_POST['cur']) .
-			$_REQUEST['respcode'] .
-			$_REQUEST['datetime'] .
+			$_POST['respcode'] .
+			$_POST['datetime'] .
 			$this->mb_sprintf("%-40s",$_POST['msgdata']) .
 			$this->mb_sprintf("%-40s", $_POST['actiontext']);
 
@@ -227,7 +227,16 @@ class XEcom extends CApplicationComponent
 
 		// return whether signature is okay or not
 		$ok = openssl_verify($data, $mac, $publicKeyId);
-		return ($ok == 1) ? true : false;
+
+		// free the key from memory
+		openssl_free_key($publicKeyId);
+
+		if ($ok==1) // Signature OK
+			return ($_POST['respcode']==000) ? true : false;
+		elseif ($ok == 0)
+			throw new CHttpException(402, Yii::t('XEcom.ecom', 'Payment failed! Invalid signature!'));
+		else
+			throw new CHttpException(402, Yii::t('XEcom.ecom', 'Payment failed! Could not validate signature!'));
 	}
 
 	/**
