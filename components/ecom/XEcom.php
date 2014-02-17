@@ -81,13 +81,17 @@ class XEcom extends CApplicationComponent
 	 */
  	public $serviceId;
 	/**
+	 * @var string $certificate the path to https ssl certificate
+	 */
+	public $certificatePath;
+	/**
 	 * @var string $privateKey the path to https ssl private key
 	 */
 	public $privateKeyPath;
 	/**
-	 * @var string $certificate the path to https ssl certificate
+	 * @var string $privateKeyPass the passphrase must be used if the specified key is encrypted (protected by a passphrase).
 	 */
-	public $certificatePath;
+	public $privateKeyPass;
 	/**
 	 * @var string $action iPay action name. Defaults to 'gaf'
 	 */
@@ -183,7 +187,7 @@ class XEcom extends CApplicationComponent
 
 		// sign
 		$signature=sha1($data);
-		$privateKeyId=openssl_get_privatekey($privateKey);
+		$privateKeyId=openssl_get_privatekey($privateKey, $this->privateKeyPass);
 		openssl_sign($data, $signature, $privateKeyId);
 		openssl_free_key($privateKeyId);
 
