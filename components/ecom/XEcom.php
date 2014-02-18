@@ -237,7 +237,7 @@ class XEcom extends CApplicationComponent
 
 		if ($ok==1) // Signature OK
 			return ($_POST['respcode']==000) ? true : false;
-		elseif ($ok == 0)
+		elseif ($ok==0)
 			throw new CHttpException(402, Yii::t('XEcom.ecom', 'Payment failed! Invalid signature!'));
 		else
 			throw new CHttpException(402, Yii::t('XEcom.ecom', 'Payment failed! Could not validate signature!'));
@@ -265,7 +265,7 @@ class XEcom extends CApplicationComponent
 	{
 		$argv = func_get_args() ;
 		array_shift($argv) ;
-		return $this->mb_vsprintf($format, $argv) ;
+		return $this->mb_vsprintf($format, $argv);
 	}
 
 	/**
