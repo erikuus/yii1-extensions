@@ -7,9 +7,9 @@ $this->breadcrumbs=array(
 
 <h2><?php echo Yii::t('UserModule.ui', 'Users'); ?></h2>
 
-<?php //if(Yii::app()->user->checkAccess('adminSystem')): ?>
+<p>
 	<?php echo CHtml::link(Yii::t('UserModule.ui', 'New User'), array('create'));?>
-<?php //endif; ?>
+</p>
 
 <?php $this->widget('zii.widgets.grid.CGridView', array(
 	'id'=>'user-grid',
