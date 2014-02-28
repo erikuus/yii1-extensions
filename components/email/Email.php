@@ -15,7 +15,7 @@
  * - Property "type" is also sent to debug view.
  * - In view, if type is 'text/plain', nl2br function is applied to message
  * - Function mail returns true in debug mode
- * - Replaced Yii::app()->user->setFlash('email', $debug) with Yii::app()->user->setFlash(uniqid(), $debug)
+ * - Replaced Yii::app()->user->setFlash('email', $debug) with Yii::app()->user->setFlash('debug.email'.$uniqid, $debug)
  * to support dumping info for multiple e-mails in debug mode
  *
  * @author Erik Uus <erik.uus@gmail.com>
@@ -212,10 +212,12 @@ class Email extends CApplicationComponent {
 				mb_language($this->language);
 				return mb_send_mail($to, $subject, $message, implode("\r\n", $this->createHeaders()),'-fadmin.vau@ra.ee');
 			case 'debug':
-				$debug = Yii::app()->controller->renderPartial('email.debug',
-						array_merge(compact('to', 'subject', 'message'), array('headers'=>$this->createHeaders(),'type'=>$this->type)),
-						true);
-				Yii::app()->user->setFlash('debug.email'.uniqid(), $debug);
+				$debug = Yii::app()->controller->renderPartial('email.debug', array_merge(
+					compact('to', 'subject', 'message'),
+					array('headers'=>$this->createHeaders(),'type'=>$this->type)
+				), true);
+				$uniqid = md5(uniqid(rand(), true));
+				Yii::app()->user->setFlash('debug.email'.$uniqid, $debug);
 				return true;
 				break;
 		}
