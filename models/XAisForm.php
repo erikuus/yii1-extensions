@@ -157,8 +157,6 @@ class XAisForm extends CFormModel
 		return Yii::app()->aisdb->cache(self::CACHE_DURATION)->createCommand($sql)->queryRow();
 	}
 
-
-
 	/**
 	 * Find item data alongside with storage info
 	 * @param string item reference code
@@ -193,6 +191,7 @@ class XAisForm extends CFormModel
 			LEFT OUTER JOIN ra.kapp k ON s.kapp=k.kood
 			LEFT OUTER JOIN ra.laudi l ON s.laudi=l.kood
 			WHERE ky.staatus='AKT'
+			AND ky.tyyp IN ('KOLL','AHV')
 			AND ky.leidandmed=".$this->quote($reference)."
 		";
 		return Yii::app()->aisdb->cache(self::CACHE_DURATION)->createCommand($sql)->queryRow();
@@ -260,6 +259,7 @@ class XAisForm extends CFormModel
 				LEFT OUTER JOIN ra.kapp k ON s.kapp=k.kood
 				LEFT OUTER JOIN ra.laudi l ON s.laudi=l.kood
 				WHERE ky.staatus='AKT'
+				AND ky.tyyp IN ('KOLL','AHV')
 				AND s.leidandmed BETWEEN '$from' AND '$to'
 				AND s.yksus in ($archiveIds)
 			";
