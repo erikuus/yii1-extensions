@@ -88,15 +88,6 @@ class XGoogleBboxMap extends CWidget
 
 		if(!$this->model)
 			throw new CException('"model" have to be set!');
-
-		if(!$this->checkBounds() && !$this->model->{$this->zoom})
-			$this->model->{$this->zoom}=$this->defaultZoom;
-
-		if(!$this->checkBounds() && !$this->model->{$this->ce_lat})
-			$this->model->{$this->ce_lat}=$this->defaultCeLat;
-
-		if(!$this->checkBounds() && !$this->model->{$this->ce_lon})
-			$this->model->{$this->ce_lon}=$this->defaultCeLon;
 	}
 
 	/**
@@ -207,13 +198,14 @@ class XGoogleBboxMap extends CWidget
 	protected function registerClientScript()
 	{
 		$id=$this->getId();
+		$initZoom=$this->model->{$this->zoom} ? $this->model->{$this->zoom} : $this->defaultZoom;
 
 		$cs=Yii::app()->clientScript;
 		$cs->registerScriptFile('https://maps.googleapis.com/maps/api/js?sensor=false&key='.$this->googleApiKey,CClientScript::POS_HEAD);
 		$cs->registerScript(__CLASS__.'#'.$id,"
 			function {$id}_initialize() {
 				var mapOptions = {
-					zoom: {$this->defaultZoom},
+					zoom: {$initZoom},
 					mapTypeId: google.maps.MapTypeId.ROADMAP,
 					panControl: true,
 					streetViewControl: false
