@@ -147,16 +147,16 @@ class XHtml extends CHtml
 
 	/**
 	 * Label boolean
-	 * @param boolean $value
+	 * @param mixed $value boolean or integer
 	 * @param string $fallback message to display when value is not boolean
 	 * @return string yes/no label for boolean
 	 */
 	public static function booleanLabel($value, $fallback=null)
 	{
-		if($fallback && !is_bool($value))
+		if($fallback && !$value)
 			return $fallback;
 		else
-			return $value===true ? Yii::t('zii','Yes') : Yii::t('zii','No');
+			return $value ? Yii::t('zii','Yes') : Yii::t('zii','No');
 	}
 
 	/**
