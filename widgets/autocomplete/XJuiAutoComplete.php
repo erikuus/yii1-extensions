@@ -2,7 +2,7 @@
 /**
  * XJuiAutoComplete class file.
  *
- * XJuiAutoComplete is replica of CJuiAutoComplete with only difference that XJuiAutoComplete prints javascript directly into
+ * XJuiAutoComplete extends CJuiInputWidget so that javascript is printed directly into
  * HTML code when widget is called via ajax request.
  *
  * @author Erik Uus <erik.uus@gmail.com>
