@@ -1,6 +1,6 @@
 <?php
 /**
- * Foundation class file.
+ * XFoundation class file.
  *
  * Inserts client scripts needed for selected components of Foundation 5 CSS Framework.
  *
@@ -23,7 +23,7 @@
  * ),
  * 'components'=>array(
  *     'foundation'=>array(
- *          'class'=>'ext.components.foundation.Foundation',
+ *          'class'=>'ext.components.foundation.XFoundation',
  *          'maxWidth'=>'75em'
  *     ),
  * )
@@ -92,7 +92,7 @@
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 1.0
  */
-class Foundation extends CApplicationComponent
+class XFoundation extends CApplicationComponent
 {
 	/**
 	 * @var string grid max width. If not set, default max-width defined in foundation.css is used.
