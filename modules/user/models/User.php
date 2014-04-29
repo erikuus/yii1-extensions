@@ -145,6 +145,7 @@ class User extends CActiveRecord
 	{
 		return CHtml::listData($this->findAll(array(
 			'select'=>"id, firstname||' '||lastname as lastname",
+			'condition'=>"username!='admin'",
 			'order'=>'lastname, firstname'
 		)),'id', 'lastname');
 	}
