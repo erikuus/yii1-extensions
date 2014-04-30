@@ -8,7 +8,7 @@
  * - XReorderAction
  * - XReorderBehavior
  *
- * The following shows how to use XReorderColumn action.
+ * The following shows how to use XReorderColumn.
  *
  * <pre>
  * $this->widget('zii.widgets.grid.CGridView', array(
@@ -22,8 +22,6 @@
  *            'class'=>'ext.widgets.grid.reordercolumn.XReorderColumn',
  *            'name'=>'sort',
  *            'callbackUrl'=>array('reorderPersons'),
- *            'cssClass'=>'reorderPersons',
- *            'visible'=>!Yii::app()->user->isGuest,
  *        ),
  *    ),
  * ));
