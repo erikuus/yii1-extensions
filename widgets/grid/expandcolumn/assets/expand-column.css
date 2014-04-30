@@ -1,0 +1,11 @@
+.expand-column {
+    text-decoration: none;
+    border-bottom: dashed 1px #08C;
+    cursor: pointer;
+    color: #08C;
+}
+
+.expand-row, .expand-row:hover {
+    padding: 20px !important;
+    background: #fff !important;
+}
