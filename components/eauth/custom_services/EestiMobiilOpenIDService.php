@@ -16,7 +16,7 @@ class EestiMobiilOpenIDService extends EestiOpenIDService
 
 	protected $requiredAttributes = array(
 		'name' => array('fullname', 'namePerson'),
-		'email' => array('email', 'contact/email'),
+		//'email' => array('email', 'contact/email'),
 		'birthday' => array('dob', 'birthDate'),
 	);
 }
