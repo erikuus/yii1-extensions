@@ -60,7 +60,6 @@ class XScrollUp extends CWidget
 		$cs=Yii::app()->getClientScript();
 		$assets=Yii::app()->assetManager->publish(dirname(__FILE__).DIRECTORY_SEPARATOR.'assets');
 
-		echo 'theme: '.$this->theme;
 		switch($this->theme)
 		{
 			case 'tab':
