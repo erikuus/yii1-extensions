@@ -2,7 +2,7 @@
 /**
  * XHEditorUpload action
  *
- * This action uploads file for XHEditor
+ * This action enables XHEditor to upload files to server.
  *
  * The following shows how to use XHEditorUpload action.
  *
@@ -38,39 +38,46 @@
 class XHEditorUpload extends CAction
 {
 	/**
-	 * @var file form field name
+	 * @var string the name of file input.
+	 * Defaults to 'filedata'
 	 */
-	public $inputName='filedata';
+	public $fileInputName='filedata';
 	/**
-	 * @var upload file path, do not end with /
+	 * @var string the name of the root directory where files are uploaded
+	 * Defaults to 'upload'
 	 */
-	public $attachDir='upload';
+	public $rootDir='upload';
 	/**
-	 * @var directory type: 1- by day, 2- by month, 3- by extension
+	 * @var string the type of directory structure for uploaded files
+	 * Possible values are [day- directory per day, month- directory per month, ext- directory per extension]
+	 * Defaults to 'day'
 	 */
-	public $dirType=1;
+	public $dirStructure='day';
 	/**
-	 * @var maximum upload size, the default is 2M
+	 * @var integer the maximum upload size for files.
+	 * Defaults to 2097152 (=2MB)
 	 */
-	public $maxAttachSize=2097152;
+	public $maxSize=2097152;
 	/**
-	 * @var upload extension
+	 * @var string the list extensions that are allowed to be uploaded
 	 */
-	public $upExt='pdf,txt,rar,zip,jpg,jpeg,gif,png,swf,wmv,avi,wma,mp3,mid';
+	public $allowedExtensions='pdf,txt,rar,zip,jpg,jpeg,gif,png,swf,wmv,avi,wma,mp3,mid';
 	/**
-	 * @var return format after upload: 1- only the url, 2- parameter array
+	 * @var integer the type of return message
+	 * Possible values are [1- only the url, 2- parameter array]
+	 * Defaults to 2
 	 */
-	public $msgType=2;
+	public $returnMessageType=2;
 
 	/**
 	 * Fills treeview based on the current user input.
 	 */
 	public function run()
 	{
-		if(!is_dir($this->attachDir))
+		if(!is_dir($this->rootDir))
 		{
-			@mkdir($this->attachDir);
-			@chmod($this->attachDir,0777);
+			@mkdir($this->rootDir);
+			@chmod($this->rootDir,0777);
 		}
 
 		$immediate=isset($_GET['immediate']) ? $_GET['immediate'] : 0;
@@ -78,7 +85,7 @@ class XHEditorUpload extends CAction
 		{
 			if(preg_match('/attachment;\s+name="(.+?)";\s+filename="(.+?)"/i',$_SERVER['HTTP_CONTENT_DISPOSITION'],$info))
 			{
-				$temp_name=$this->attachDir.'/'.date("YmdHis").mt_rand(1000,9999).'.tmp';
+				$temp_name=$this->rootDir.'/'.date("YmdHis").mt_rand(1000,9999).'.tmp';
 				file_put_contents($temp_name,file_get_contents("php://input"));
 				$size=filesize($temp_name);
 				$_FILES[$info[1]]=array('name'=>$info[2],'tmp_name'=>$temp_name,'size'=>$size,'type'=>'','error'=>0);
@@ -88,7 +95,7 @@ class XHEditorUpload extends CAction
 		$err = "";
 		$msg = "''";
 
-		$upfile=@$_FILES[$this->inputName];
+		$upfile=@$_FILES[$this->fileInputName];
 		if(!isset($upfile))
 			$err='Filename field was not sent.';
 		elseif(!empty($upfile['error']))
@@ -128,42 +135,42 @@ class XHEditorUpload extends CAction
 			$temppath=$upfile['tmp_name'];
 			$fileinfo=pathinfo($upfile['name']);
 			$extension=$fileinfo['extension'];
-			if(preg_match('/'.str_replace(',','|',$this->upExt).'/i',$extension))
+			if(preg_match('/'.str_replace(',','|',$this->allowedExtensions).'/i',$extension))
 			{
 				$bytes=filesize($temppath);
-				if($bytes > $this->maxAttachSize)
-					$err='The file exceeds size limit '.formatBytes($this->maxAttachSize);
+				if($bytes > $this->maxSize)
+					$err='The file exceeds size limit '.formatBytes($this->maxSize);
 				else
 				{
-					switch($this->dirType)
+					switch($this->dirStructure)
 					{
-						case 1: $attach_subdir = 'day_'.date('ymd'); break;
-						case 2: $attach_subdir = 'month_'.date('ym'); break;
-						case 3: $attach_subdir = 'ext_'.$extension; break;
+						case 'day': $uploadSubDir = 'day_'.date('ymd'); break;
+						case 'month': $uploadSubDir = 'month_'.date('ym'); break;
+						case 'ext': $uploadSubDir = 'ext_'.$extension; break;
 					}
-					$attach_dir = $this->attachDir.'/'.$attach_subdir;
-					if(!is_dir($attach_dir))
+					$uploadDir = $this->rootDir.'/'.$uploadSubDir;
+					if(!is_dir($uploadDir))
 					{
-						@mkdir($attach_dir);
-						@chmod($attach_dir,0777);
-						@fclose(fopen($attach_dir.'/index.htm', 'w'));
+						@mkdir($uploadDir);
+						@chmod($uploadDir,0777);
+						@fclose(fopen($uploadDir.'/index.htm', 'w'));
 					}
 					PHP_VERSION < '4.2.0' && mt_srand((double)microtime() * 1000000);
 					$filename=date("YmdHis").mt_rand(1000,9999).'.'.$extension;
-					$target = $attach_dir.'/'.$filename;
+					$target = $uploadDir.'/'.$filename;
 
 					rename($upfile['tmp_name'],$target);
 					@chmod($target,0755);
 					$target=$this->jsonString($target);
 					if($immediate=='1')
 						$target='!'.$target;
-					if($this->msgType==1)
+					if($this->returnMessageType==1)
 						$msg="'$target'";
 					else
 						$msg="{'url':'".Yii::app()->baseUrl.'/'.$target."','localname':'".$this->jsonString($upfile['name'])."','id':'1'}";
 				}
 			}
-			else $err='Allowed extensions are '.$this->upExt;
+			else $err='Allowed extensions are '.$this->allowedExtensions;
 
 			@unlink($temppath);
 		}
