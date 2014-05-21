@@ -1,0 +1,28 @@
+body {
+	margin: 0;
+	padding: 0;
+	background: white;
+	color: #333;
+	font-family: verdana, tahoma, arial, sans-serif;
+	font-size: 8pt;
+}
+
+a {
+	color: #0088cc;
+	text-decoration: none;
+}
+
+a:hover {
+	color: #005580;
+}
+
+ul {
+	margin-top: 5px;
+	margin-bottom: 10px;
+	list-style: none;
+}
+
+ul>li {
+	margin-left: -30px;
+	margin-bottom: 10px;
+}

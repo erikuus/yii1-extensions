@@ -1,0 +1,122 @@
+/* side content */
+.page-article-side-content {
+	float: right;
+	margin: 0 0 20px 20px;
+	width: 180px;
+	border-left: 1px solid #e3e3e3;
+	padding: 0 10px;
+	font-size: 90%;
+	color: #333333;
+}
+.page-article-side-content>p {
+	margin: 0 0 10px 0;
+}
+.page-article-side-content>ul {
+	margin: 5px 0 10px 0;
+	list-style: none;
+}
+.page-article-side-content>ul>li {
+	margin: 0 0 10px 0;
+}
+
+/* sub navigation */
+.page-article-sub-nav {
+	overflow: auto;
+	margin: 0 0 20px 0;
+	border-top: 1px solid #e3e3e3;
+	border-bottom: 1px solid #e3e3e3;
+	background-color: #f9f9f9;
+	padding: 10px;
+	line-height: 125%;
+	font-size: 90%;
+}
+
+.page-article-sub-nav>ol {
+	margin: 4px 0 4px 0;
+	color: #666666;
+}
+
+.page-article-sub-nav>ol>li {
+	padding: 4px 0;
+}
+
+/* article titles */
+h1.page-article-title,
+h2.page-article-subtitle {
+	margin: 0 10px 10px 0;
+}
+
+h1.page-article-title img,
+h2.page-article-subtitle img {
+	vertical-align: middle;
+}
+
+/* article body */
+.page-article-body {
+	margin: 10px 0 0 0;
+	line-height: 150%;
+	font-size: 100%;
+}
+
+.page-article-body p {
+	margin: 10px 0 10px 0;
+}
+
+.page-article-body p:last-child {
+	margin-bottom: 0;
+}
+
+.page-article-body>table td {
+	vertical-align: top;
+}
+
+.page-article-body table td p:first-child {
+	margin-top: 0;
+}
+
+.page-article-body img {
+	cursor: pointer;
+}
+
+.page-article-body table.dataGrid {
+	background: white;
+	border-collapse: collapse;
+	width: 100%;
+}
+
+.page-article-body table.dataGrid th,
+.page-article-body table.dataGrid td {
+	border: 1px #e8e8e8 solid;
+	padding: 5px;
+	vertical-align: top;
+}
+
+.page-article-body table.dataGrid th {
+	border-top: 1px #dddddd solid;
+	border-bottom: 1px #dddddd solid;
+	padding: 7px 5px 7px 5px;
+	background: #f7f7f7;
+	text-align: left;
+}
+
+.page-article-body table.dataGrid th.label {
+	width: 150px;
+}
+
+.page-article-body table.dataGrid tr.odd {
+	background: #f9f9f9;
+}
+
+.page-article-body table.dataGrid td>p {
+	margin: 0;
+}
+
+.page-article-body .separator {
+	overflow: auto;
+	margin: 25px 0 25px 0;
+	border-bottom: 1px solid #e3e3e3;
+}
+
+.page-article-body:last-child .separator{
+	border-bottom: 0;
+}
