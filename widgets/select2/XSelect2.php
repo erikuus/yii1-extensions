@@ -171,8 +171,7 @@
  *         'data-placeholder'=>Yii::t('ui','Search for person'),
  *     )
  * ));
-</pre>
-
+ * </pre>
  *
  * @author Anggiajuang Patria <anggiaj@gmail.com>
  * @author Erik Uus <erik.uus@gmail.com>
