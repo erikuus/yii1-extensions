@@ -5,7 +5,7 @@
  * XDynamicForm enables to use checkbox and radio button lists so that
  * when a checkbox or radio button is checked/unchecked some content is shown/hidden
  *
- * For example we may have model Person where there is 'gender' property
+ * For example, we may have model Person where there is 'gender' property
  * and gender options defined as follows:
  *
  * <pre>
@@ -85,13 +85,16 @@ SCRIPT;
 	 * enabling to render buttons separately ($radio[0], $radio[1], etc)
 	 * @param CModel $model the data model
 	 * @param string $attribute the attribute
-	 * @param array $data value-label pairs used to generate the radio button list.
+	 * @param array $data value-label pairs used to generate the radio button list
+	 * @param string $class css class nam.
 	 * @return array of radio buttons
 	 */
-	public function explodeRadioButtonList($model, $attribute, $data)
+	public function explodeRadioButtonList($model, $attribute, $data, $class=null)
 	{
 		$radioButtons=explode('|',$this->radioButtonList($model, $attribute, $data, array(
-			'template'=>'{input}{label}','separator'=>'|'
+			'template'=>'{input}{label}',
+			'separator'=>'|',
+			'class'=>$class
 		)));
 
 		$dataKeys=array_keys($data);
@@ -108,13 +111,16 @@ SCRIPT;
 	 * enabling to render boxes separately ($box[0], $box[1], etc)
 	 * @param CModel $model the data model
 	 * @param string $attribute the attribute
-	 * @param array $data value-label pairs used to generate the check box list.
+	 * @param array $data value-label pairs used to generate the check box list
+	 * @param string $class css class name
 	 * @return array of check boxes
 	 */
-	public function explodeCheckBoxList($model, $attribute, $data)
+	public function explodeCheckBoxList($model, $attribute, $data, $class=null)
 	{
 		$checkBoxes=explode('|',$this->checkBoxList($model, $attribute, $data, array(
-			'template'=>'{input}{label}','separator'=>'|'
+			'template'=>'{input}{label}',
+			'separator'=>'|',
+			'class'=>$class
 		)));
 
 		$dataKeys=array_keys($data);
