@@ -2,9 +2,68 @@
 /**
  * PageModule class file.
  *
- * PageModule is a module that provides pages or article management system.
+ * PageModule is a yii framework {@link http://www.yiiframework.com/} module that provides simple
+ * content management system that is most suitable for presenting guides or tutorials.
  *
- * To use PageModule, you must include it as a module in the application configuration as follows:
+ * Resources:
+ *
+ * 1. Code on github {@link https://github.com/erikuus/Yii-Extensions/tree/master/modules/page}
+ * 2. Live example {@link http://www.ra.ee/vau/index.php/en/page}
+ *
+ * Requirements:
+ *
+ * 1. Tested with Yii 1.1.8, should work in earlier versions
+ * 2. Requires following extensions that can be downloaded from {@link https://github.com/erikuus/Yii-Extensions}
+ *    ext.behaviors.XReturnableBehavior
+ *    ext.behaviors.XReorderBehavior
+ *    ext.actions.XReorderAction
+ *    ext.actions.XHEditorUpload
+ *    ext.validators.XCompareRequiredValidator
+ *    ext.widgets.grid.groupgridview.XGroupGridView
+ *    ext.widgets.grid.reordercolumn.XReorderColumn
+ *    ext.widgets.alert.XAlert
+ *    ext.widgets.xheditor.XHeditor
+ *    ext.widgets.fancybox.XFancyBox
+ *    ext.widgets.form.XDynamicForm
+ *
+ * Quickstart:
+ *
+ * 1. Create a skeleton Yii application
+ * 2. Add page module to your application config
+ *
+ * <pre>
+ * return array(
+ *     'modules'=>array(
+ *         'page'=>array(
+ *             'class'=>'application.modules.page.PageModule',
+ *         ),
+ *     ),
+ * )
+ * </pre>
+ *
+ * 3. Create database tables by running migration commands
+ *
+ * yiic migrate --migrationPath=ext.modules.page.migrations
+ * yiic migrate --migrationPath=ext.modules.page.migrations
+ *
+ * Note that migration examples are for PostgreSQL. For other databases modify migration scrpts
+ * or create tables manually.
+ *
+ * 4. Now you will be able to access PageModule in your browser using the following URL
+ * http://localhost/path/to/app/index.php?r=page
+ * or if your application is using path-format URLs, you can access PageModule via:
+ * http://localhost/path/to/app/index.php/page
+ *
+ * 5. You can also plug anywhere into your application PageMenuWidget as follows:
+ * <pre>
+ * $this->widget('application.modules.page.components.PageMenuWidget');
+ * </pre>
+ *
+ * Customize:
+ *
+ * 1. You can configure the page module to use different database and/or
+ * different table names
+ *
  * <pre>
  * return array(
  *     'modules'=>array(
@@ -13,35 +72,40 @@
  *             'dbConnectionString'=>'mysql:host=127.0.0.1;dbname=test',
  *             'dbUsername'=>'user',
  *             'dbPassword'=>'password',
+ *             'menuTableName'=>'my_page_menu',
+ *             'articleTableName'=>'my_page_article',
  *         ),
  *     ),
  * )
  * </pre>
  *
- * With the above configuration, you will be able to access PageModule in your browser using
- * the following URL:
- * http://localhost/path/to/index.php?r=page
+ * 2. Most often you need to customize layout and style. For example,
+ * in case of skeleton application you probably want to configure layout
+ * as follows:
  *
- * If your application is using path-format URLs, you can then access PageModule via:
- * http://localhost/path/to/index.php/page
- *
- * You can plug into your application PageModule menu widget as follows:
  * <pre>
- * $this->widget('application.modules.page.components.PageMenuWidget');
+ * return array(
+ *     'modules'=>array(
+ *         'page'=>array(
+ *             'class'=>'application.modules.page.PageModule',
+ *             'pageLayout'=>'
+ *                 <div class="span-19">
+ *                     <div id="content">
+ *                         {content}
+ *                     </div>
+ *                 </div>
+ *                 <div class="span-5 last">
+ *                     <div id="sidebar">
+ *                         {menu}
+ *                     </div>
+ *                 </div>
+ *             ',
+ *         ),
+ *     ),
+ * )
  * </pre>
  *
- * Page module depends on following extensions:
- * - ext.behaviors.XReturnableBehavior
- * - ext.behaviors.XReorderBehavior
- * - ext.actions.XReorderAction
- * - ext.actions.XHEditorUpload
- * - ext.validators.XCompareRequiredValidator
- * - ext.widgets.grid.groupgridview.XGroupGridView
- * - ext.widgets.grid.reordercolumn.XReorderColumn
- * - ext.widgets.alert.XAlert
- * - ext.widgets.xheditor.XHeditor
- * - ext.widgets.fancybox.XFancyBox
- * - ext.widgets.form.XDynamicForm
+ * For all possible customizations refer to PageModule class properties below.
  *
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 1.0.0
@@ -52,17 +116,6 @@ class PageModule extends CWebModule
 	 * @var string the ID of the default controller for this module.
 	 */
 	public $defaultController='article';
-	/**
-	 * @var string the template used to render page modul. In this template,
-	 * the token "{menu}" will be replaced with the PageMenuWidget,
-	 * the token "{breadcrumbs}" will be replaced with the CBreadcrumbs widget,
-	 * the token "{content}" will be replaced with the article content
-	 */
-	public $pageLayout='{menu}<br />{breadcrumbs}{content}';
-
-	public $formSimpleRow='<div class="row">{content}</div>';
-
-	public $formButtonsRow='<div class="row buttons">{content}</div>';
 	/**
 	 * @var string the module database connection string.
 	 */
@@ -86,13 +139,66 @@ class PageModule extends CWebModule
 	 */
 	public $articleTableName='tbl_page_article';
 	/**
-	 * @var string css class for primary buttons
+	 * @var mixed authorization item name (an operation, a task or a role) that has access to restricted pages (content management pages).
+	 * Defaults to false, meaning authorization component is not used at all and only admin user has access to restricted pages.
+	 */
+	public $authItemName=false;
+	/**
+	 * @var string the template used to render page modul. In this template,
+	 * the token "{menu}" will be replaced with the PageMenuWidget,
+	 * the token "{breadcrumbs}" will be replaced with the CBreadcrumbs widget,
+	 * the token "{content}" will be replaced with the article content
+	 */
+	public $pageLayout='{menu}<br />{breadcrumbs}{content}';
+	/**
+	 * @var string the template used to render form row. In this template,
+	 * the token "{content}" will be replaced with input, label and error element.
+	 */
+	public $formRow='<div class="row">{content}</div>';
+	/**
+	 * @var string the template used to render form bottons row. In this template,
+	 * the token "{content}" will be replaced with save and cancel buttons.
+	 */
+	public $formButtonsRow='<div class="row buttons">{content}</div>';
+	/**
+	 * @var string css class for primary (save) buttons
 	 */
 	public $primaryButtonCssClass;
 	/**
-	 * @var string css class for secondary buttons
+	 * @var string css class for secondary (cancel) buttons
 	 */
 	public $secondaryButtonCssClass;
+	/**
+	 * @var string The base script URL for all module resources (e.g. javascript, CSS file, images).
+	 * If NULL (default) the integrated module resources (which are published as assets) are used.
+	 */
+	public $baseScriptUrl;
+	/**
+	 * @var mixed the CSS file used for the menu. Defaults to null, meaning
+	 * using the default CSS file included together with the module.
+	 * If false, no CSS file will be used. Otherwise, the specified CSS file
+	 * will be included when using this module.
+	 */
+	public $menuCssFile;
+	/**
+	 * @var mixed the CSS file used for the article. Defaults to null, meaning
+	 * using the default CSS file included together with the module.
+	 * If false, no CSS file will be used. Otherwise, the specified CSS file
+	 * will be included when using this module.
+	 */
+	public $pageCssFile;
+	/**
+	 * @var mixed the CSS file used by wysiwyg editor for the article content.
+	 * Defaults false, meaning no CSS file will be used.
+	 * Otherwise, the specified CSS file will be loaded by editor.
+	 */
+	public $editorArticleCssFile=false;
+	/**
+	 * @var mixed the CSS file used by wysiwyg editor for the article content.
+	 * Defaults false, meaning no CSS file will be used.
+	 * Otherwise, the specified CSS file will be loaded by editor.
+	 */
+	public $editorSideContentCssFile=false;
 	/**
 	 * @var string list of XHeditor tools for menu content
 	 * Possible values are also 'mini', 'simple', 'full'
@@ -121,21 +227,12 @@ class PageModule extends CWebModule
 	/**
 	 * @var string the list extensions that are allowed to be uploaded by editor
 	 */
-	public $editorUploadAllowedExtensions='pdf,txt,rar,zip';
+	public $editorUploadAllowedLinkExtensions='pdf,txt,rar,zip';
 	/**
 	 * @var string the list image extensions that are allowed to be uploaded by editor
 	 */
 	public $editorUploadAllowedImageExtensions='jpg,jpeg,gif,png';
-	/**
-	 * @var mixed authorization item name (operation, a task or a role) that has access to restricted pages (pages that are not set as public routes).
-	 * Defaults to false, meaning authorization component is not used at all and only admin user has access to restricted pages
-	 */
-	public $authItemName=false;
-	/**
-	 * @var string The base script URL for all module resources (e.g. javascript, CSS file, images).
-	 * If NULL (default) the integrated module resources (which are published as assets) are used.
-	 */
-	public $baseScriptUrl;
+
 	/**
 	 * @var array the list of routes that are publicly accessible
 	 */
@@ -167,7 +264,6 @@ class PageModule extends CWebModule
 				),
 			));
 		}
-
 
 		// publish module assets
 		if (!is_string($this->baseScriptUrl)) {

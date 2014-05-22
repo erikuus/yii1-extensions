@@ -14,13 +14,6 @@
 class PageMenuWidget extends CWidget
 {
 	/**
-	 * @var mixed the CSS file used for the widget. Defaults to null, meaning
-	 * using the default CSS file included together with the widget.
-	 * If false, no CSS file will be used. Otherwise, the specified CSS file
-	 * will be included when using this widget.
-	 */
-	public $cssFile;
-	/**
 	 * @var string the HTML tag name for the container of the widget. Defaults to 'div'.
 	 */
 	public $containerTagName='div';
@@ -51,10 +44,10 @@ class PageMenuWidget extends CWidget
 		$this->_module=Yii::app()->getModule('page');
 
 		// register css file
-		if($this->cssFile===null)
+		if($this->_module->menuCssFile===null)
 			Yii::app()->clientScript->registerCssFile($this->_module->baseScriptUrl.'/css/menu.css');
-		else if($this->cssFile!==false)
-			Yii::app()->clientScript->registerCssFile($this->cssFile);
+		else if($this->_module->menuCssFile!==false)
+			Yii::app()->clientScript->registerCssFile($this->_module->menuCssFile);
 
 		// set container html options
 		if(isset($this->containerHtmlOptions['class']))

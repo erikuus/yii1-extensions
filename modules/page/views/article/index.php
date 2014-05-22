@@ -2,7 +2,12 @@
 $this->pageTitle=Yii::app()->name . ' - ' . $menu->title;
 
 $cs=Yii::app()->clientScript;
-$cs->registerCssFile($this->getAsset('/css/page.css'));
+
+if($this->module->pageCssFile===null)
+	$cs->registerCssFile($this->getAsset('/css/page.css'));
+else if($this->module->pageCssFile!==false)
+	$cs->registerCssFile($this->module->pageCssFile);
+
 $cs->registerScript('enhanceArticleContent', "
 	$('.page-article-body>table:not(.layout)').addClass('dataGrid');
 	$('.page-article-body>table:not(.layout) tr:nth-child(odd)').addClass('odd');

@@ -1,10 +1,6 @@
-<?php
-$cs=Yii::app()->clientScript;
-$cs->registerCssFile($this->getAsset('/css/page.css'));
-$cs->registerCssFile($this->getAsset('/css/xheditor.css'));
-?>
+<?php Yii::app()->clientScript->registerCssFile($this->getAsset('/css/xheditor.css')); ?>
 
-<div class="form">
+<div class="form" style="width: auto">
 
 <?php $form=$this->beginWidget('CActiveForm', array(
 	'id'=>'article-form',
@@ -17,33 +13,33 @@ $cs->registerCssFile($this->getAsset('/css/xheditor.css'));
 
 	<?php echo $form->errorSummary($model); ?>
 
-	<?php $this->beginContent('/decorators/formSimpleRow')?>
+	<?php $this->beginContent('/decorators/formRow')?>
 		<?php echo $form->labelEx($model,'menu_id'); ?>
 		<?php echo $form->DropDownList($model,'menu_id',PageMenu::model()->activeItemOptions,array('prompt'=>'','style'=>'width:250px'));?>
 		<?php echo $form->error($model,'menu_id'); ?>
 	<?php $this->endContent()?>
 
-	<?php $this->beginContent('/decorators/formSimpleRow')?>
+	<?php $this->beginContent('/decorators/formRow')?>
 		<?php echo $form->labelEx($model,'title'); ?>
 		<?php echo $form->textField($model,'title',array('style'=>'width:725px;')); ?>
 		<?php echo $form->error($model,'title'); ?>
 	<?php $this->endContent()?>
 
-	<?php $this->beginContent('/decorators/formSimpleRow')?>
+	<?php $this->beginContent('/decorators/formRow')?>
 		<?php echo $form->labelEx($model,'content'); ?>
 		<?php $this->widget('ext.widgets.xheditor.XHeditor',array(
 			'model'=>$model,
 			'modelAttribute'=>'content',
 			'config'=>array(
 				'id'=>CHtml::activeId($model,'content'),
-				'loadCSS'=>$this->getAsset('/css/editor_article_content.css'),
+				'loadCSS'=>$this->module->editorArticleCssFile ? $this->module->editorArticleCssFile : null,
 				'tools'=>$this->module->editorArticleTools,
 				'width'=>'730px',
 				'height'=>'600px',
 				'upImgUrl'=>$this->createUrl('request/uploadFile'),
 				'upImgExt'=>$this->module->editorUploadAllowedImageExtensions,
 				'upLinkUrl'=>$this->createUrl('request/uploadFile'),
-				'upLinkExt'=>$this->module->editorUploadAllowedExtensions,
+				'upLinkExt'=>$this->module->editorUploadAllowedLinkExtensions,
 				'plugins'=>array(
 					'Template'=>array(
 						'c'=>'xheditorTemplateIcon', // css class form plugin icon on editor toolbar

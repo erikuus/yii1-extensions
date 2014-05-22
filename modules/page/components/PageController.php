@@ -35,6 +35,6 @@ class PageController extends Controller
 	 */
 	public function getAsset($file)
 	{
-		return $this->getModule()->baseScriptUrl.$file;
+		return $this->module->baseScriptUrl.$file;
 	}
 }

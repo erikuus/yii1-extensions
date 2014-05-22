@@ -13,7 +13,9 @@ class RequestController extends CController
 				'rootDir'=>$this->module->editorUploadRootDir,
 				'dirStructure'=>$this->module->editorUploadDirStructure,
 				'maxSize'=>$this->module->editorUploadMaxSize,
-				'allowedExtensions'=>$this->module->editorUploadAllowedExtensions,
+				'allowedExtensions'=>
+					$this->module->editorUploadAllowedLinkExtensions.','.
+					$this->module->editorUploadAllowedImageExtensions,
 			),
 		);
 	}
