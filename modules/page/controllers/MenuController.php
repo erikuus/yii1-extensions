@@ -50,10 +50,7 @@ class MenuController extends PageController
 			}
 		}
 		else
-		{
-			$model->type=PageMenu::TYPE_HEADER;
 			$model->url='http://';
-		}
 
 		$this->render('create',array(
 			'model'=>$model,

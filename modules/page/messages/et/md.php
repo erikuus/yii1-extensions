@@ -19,13 +19,11 @@
  * @version $Id: $
  */
 return array (
-  'Side Content' => 'Seotud sisu',
   'Content' => 'Sisu',
-  'External Link' => 'Väline link',
-  'Header' => 'Jaotus',
-  'Menu' => 'Menüü link',
-  'Menu Item' => 'Link',
+  'Menu' => 'Menüü',
   'Title' => 'Pealkiri',
-  'Type' => 'Liik',
+  'Type' => 'Tüüp',
+  'Label' => 'Silt',
+  'Content' => 'Sisu',
   'Url' => 'Viide',
 );

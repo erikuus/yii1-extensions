@@ -100,7 +100,7 @@ class PageMenuWidget extends CWidget
 	 */
 	protected function getHtmlOptions($menu)
 	{
-		if($menu->type==PageMenu::TYPE_HEADER)
+		if($menu->type==PageMenu::TYPE_LABEL)
 			return array('class'=>$this->headerCssClass);
 		if($menu->id==Yii::app()->getRequest()->getParam('menuId'))
 			return array('class'=>$this->activeCssClass);

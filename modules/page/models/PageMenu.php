@@ -17,9 +17,9 @@ class PageMenu extends CActiveRecord
 	 * @property boolean $deleted
 	 */
 
-	const TYPE_HEADER=0;
-	const TYPE_ITEM=1;
-	const TYPE_LINK=2;
+	const TYPE_LABEL=0;
+	const TYPE_CONTENT=1;
+	const TYPE_URL=2;
 
 	/**
 	 * Returns the database connection used by active record.
@@ -70,7 +70,7 @@ class PageMenu extends CActiveRecord
 				'condition'=>'deleted IS FALSE'
 			),
 			'activeItem'=>array(
-				'condition'=>'deleted IS FALSE AND type='.self::TYPE_ITEM
+				'condition'=>'deleted IS FALSE AND type='.self::TYPE_CONTENT
 			),
 		);
 	}
@@ -95,16 +95,16 @@ class PageMenu extends CActiveRecord
 	{
 		return array(
 			array('title, type', 'required'),
-			array('url', 'ext.validators.XCompareRequiredValidator', 'compareAttribute'=>'type', 'compareValue'=>self::TYPE_LINK),
+			array('url', 'ext.validators.XCompareRequiredValidator', 'compareAttribute'=>'type', 'compareValue'=>self::TYPE_URL),
 			array('url', 'url'),
 			array('position, type', 'numerical', 'integerOnly'=>true),
-			array('type', 'in', 'range'=>array(self::TYPE_HEADER, self::TYPE_ITEM, self::TYPE_LINK)),
+			array('type', 'in', 'range'=>array(self::TYPE_LABEL, self::TYPE_CONTENT, self::TYPE_URL)),
 			array('lang', 'length', 'max'=>5),
 			array('title, url', 'length', 'max'=>256),
 			array('deleted', 'boolean'),
 			array('content', 'safe'),
 			// defaults
-			array('type', 'default', 'value'=>self::TYPE_HEADER),
+			array('type', 'default', 'value'=>self::TYPE_LABEL),
 			array('deleted', 'default', 'value'=>0),
 			// filters
 			array('title', 'filter', 'filter'=>'strip_tags'),
@@ -130,7 +130,7 @@ class PageMenu extends CActiveRecord
 		return array(
 			'type' => Yii::t('PageModule.md', 'Type'),
 			'title' => Yii::t('PageModule.md', 'Title'),
-			'content' => Yii::t('PageModule.md', 'Side Content'),
+			'content' => Yii::t('PageModule.md', 'Content'),
 			'url' => Yii::t('PageModule.md', 'Url'),
 		);
 	}
@@ -172,9 +172,9 @@ class PageMenu extends CActiveRecord
 	public function getTypeOptions()
 	{
 		return array(
-			self::TYPE_HEADER => Yii::t('PageModule.md', 'Header'),
-			self::TYPE_ITEM => Yii::t('PageModule.md', 'Menu Item'),
-			self::TYPE_LINK => Yii::t('PageModule.md', 'External Link'),
+			self::TYPE_LABEL => Yii::t('PageModule.md', 'Label'),
+			self::TYPE_CONTENT => Yii::t('PageModule.md', 'Content'),
+			self::TYPE_URL => Yii::t('PageModule.md', 'Url'),
 		);
 	}
 
@@ -185,9 +185,9 @@ class PageMenu extends CActiveRecord
 	public function getTypeCssClassOptions()
 	{
 		return array(
-			self::TYPE_HEADER =>'type-header',
-			self::TYPE_ITEM =>'type-item',
-			self::TYPE_LINK =>'type-link',
+			self::TYPE_LABEL =>'type-header',
+			self::TYPE_CONTENT =>'type-item',
+			self::TYPE_URL =>'type-link',
 		);
 	}
 
@@ -216,10 +216,10 @@ class PageMenu extends CActiveRecord
 	public function getFormattedItem()
 	{
 		switch ($this->type) {
-			case self::TYPE_ITEM:
+			case self::TYPE_CONTENT:
 				return CHtml::link(CHtml::encode($this->title), array('/page/article/index','menuId'=>$this->id));
 			break;
-			case self::TYPE_LINK:
+			case self::TYPE_URL:
 				return CHtml::link(CHtml::encode($this->title), $this->url);
 			break;
 			default:
@@ -233,7 +233,7 @@ class PageMenu extends CActiveRecord
 	 */
 	public function getArticleCounter()
 	{
-		return $this->type==self::TYPE_ITEM ? $this->articleCount : null;
+		return $this->type==self::TYPE_CONTENT ? $this->articleCount : null;
 	}
 
 	/**
@@ -243,10 +243,10 @@ class PageMenu extends CActiveRecord
 	{
 		parent::beforeValidate();
 
-		if($this->type!=self::TYPE_ITEM)
+		if($this->type!=self::TYPE_CONTENT)
 			$this->content=null;
 
-		if($this->type!=self::TYPE_LINK)
+		if($this->type!=self::TYPE_URL)
 			$this->url=null;
 
 		return true;

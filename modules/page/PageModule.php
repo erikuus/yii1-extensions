@@ -24,7 +24,6 @@
  *    ext.widgets.alert.XAlert
  *    ext.widgets.xheditor.XHeditor
  *    ext.widgets.fancybox.XFancyBox
- *    ext.widgets.form.XDynamicForm
  *
  * Quickstart:
  *
