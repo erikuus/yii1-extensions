@@ -33,7 +33,7 @@
 
 	<?php $this->beginContent('/decorators/formRow')?>
 		<?php echo $form->labelEx($model, 'type'); ?>
-		<?php echo $form->dropDownList($model, 'type', $model->typeOptions, array('prompt'=>'')); ?>
+		<?php echo $form->dropDownList($model, 'type', $model->typeOptions, array('prompt'=>'','style'=>'width:300px')); ?>
 		<?php echo $form->error($model, 'type'); ?>
 	<?php $this->endContent()?>
 

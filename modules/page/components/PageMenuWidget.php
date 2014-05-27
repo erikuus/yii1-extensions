@@ -22,17 +22,33 @@ class PageMenuWidget extends CWidget
 	 */
 	public $containerCssClass='page-menu';
 	/**
+	 * @var array HTML attributes for widget container. Defaults to array().
+	 */
+	public $containerHtmlOptions=array();
+	/**
+	 * @var string the HTML tag name for the menu list. Defaults to 'ul'.
+	 */
+	public $listTagName='ul';
+	/**
+	 * Default CSS class for the menu list.
+	 */
+	public $listCssClass='page-menu-list';
+	/**
+	 * @var string the HTML tag name for the menu header. Defaults to 'li'.
+	 */
+	public $headerTagName='li';
+	/**
 	 * Default CSS class for the menu header.
 	 */
 	public $headerCssClass='page-menu-header';
 	/**
+	 * @var string the HTML tag name for the menu list item. Defaults to 'li'.
+	 */
+	public $itemTagName='li';
+	/**
 	 * Default CSS class for the active menu item.
 	 */
-	public $activeCssClass='active';
-	/**
-	 * @var array HTML attributes for widget container. Defaults to array('class'=>'page-menu').
-	 */
-	public $containerHtmlOptions=array();
+	public $activeItemCssClass='active';
 
 	private $_module;
 
@@ -69,12 +85,12 @@ class PageMenuWidget extends CWidget
 
 			$this->printAdminButton();
 
-			echo '<ul>';
+			echo CHtml::openTag($this->listTagName, array('class'=>$this->listCssClass));
 
 			foreach ($menuItems as $menu)
-				echo CHtml::tag('li',$this->getHtmlOptions($menu),$menu->formattedItem);
+				echo $this->getMenuTag($menu);
 
-			echo '</ul>';
+			echo CHtml::closeTag($this->listTagName);
 
 		echo CHtml::closeTag($this->containerTagName);
 	}
@@ -96,15 +112,15 @@ class PageMenuWidget extends CWidget
 
 	/**
 	 * @param active record of menu
-	 * @return array html options for menu list tag
+	 * @return string html menu tag
 	 */
-	protected function getHtmlOptions($menu)
+	protected function getMenuTag($menu)
 	{
 		if($menu->type==PageMenu::TYPE_LABEL)
-			return array('class'=>$this->headerCssClass);
+			return CHtml::tag($this->headerTagName, array('class'=>$this->headerCssClass),$menu->formattedItem);
 		if($menu->id==Yii::app()->getRequest()->getParam('menuId'))
-			return array('class'=>$this->activeCssClass);
+			return CHtml::tag($this->itemTagName, array('class'=>$this->activeItemCssClass),$menu->formattedItem);
 		else
-			return array();
+			return CHtml::tag($this->itemTagName, array(),$menu->formattedItem);
 	}
 }

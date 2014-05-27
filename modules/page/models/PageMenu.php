@@ -142,7 +142,6 @@ class PageMenu extends CActiveRecord
 	{
 		$criteria=new CDbCriteria(array(
 			'scopes'=>'active',
-			'with'=>'articleCount'
 		));
 
 		return new CActiveDataProvider(get_class($this), array(

@@ -33,7 +33,10 @@ $this->breadcrumbs=array(
 <?php $this->widget('zii.widgets.grid.CGridView', array(
 	'id'=>'menu-grid',
 	'dataProvider'=>$dataProvider,
+	'hideHeader'=>true,
 	'enableSorting'=>false,
+	'summaryText'=>false,
+	'cssFile'=>$this->module->gridCssFile,
 	'rowCssClass'=>null, // no zebra
 	'rowCssClassExpression'=>'$data->typeCssClassName',
 	'columns'=>array(
@@ -41,10 +44,6 @@ $this->breadcrumbs=array(
 			'name'=>'title',
 			'type'=>'raw',
 			'value'=>'$data->formattedItem',
-		),
-		array(
-			'header'=>Yii::t('PageModule.ui' ,'Articles'),
-			'value'=>'$data->articleCounter',
 		),
 		array(
 			'header'=>'',

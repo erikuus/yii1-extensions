@@ -37,7 +37,10 @@ Yii::app()->clientScript->registerScript('search', "
 <?php $this->widget('ext.widgets.grid.groupgridview.XGroupGridView', array(
 	'id'=>'article-grid',
 	'dataProvider'=>$model->search(),
+	'hideHeader'=>true,
 	'enableSorting'=>false,
+	'summaryText'=>false,
+	'cssFile'=>$this->module->gridCssFile,
 	'rowCssClass'=>null, // no zebra
 	'selectableRows'=>0,
     'extraRowColumns'=>array('menu_id'),

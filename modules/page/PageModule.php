@@ -68,7 +68,7 @@
  *     'modules'=>array(
  *         'page'=>array(
  *             'class'=>'application.modules.page.PageModule',
- *             'dbConnectionString'=>'mysql:host=127.0.0.1;dbname=test',
+ *             'dbConnectionString'=>'mysql:host=127.0.0.1;dbname=mydatabase',
  *             'dbUsername'=>'user',
  *             'dbPassword'=>'password',
  *             'menuTableName'=>'my_page_menu',
@@ -103,6 +103,69 @@
  *     ),
  * )
  * </pre>
+ *
+ * 3. You can customize the page module to be usable also when application
+ * is based on zurb foundation css framework (tested with foundation 5.2.2)
+ *
+ * First you can save some custom style to application/css/menu.css:
+ * .page-menu {
+ *     background-color: #f9f9f9;
+ *     padding: 5px 15px;
+ * }
+ * .page-menu-header {
+ *     text-transform: uppercase;
+ *     font-weight: bold;
+ *     color: #666666;
+ * }
+ * .page-menu-admin {
+ *     float: right;
+ *     margin: 15px 10px 0 0;
+ * }
+ *
+ * Then configure page module as follows:
+ * <pre>
+ * return array(
+ *     'modules'=>array(
+ *         'page'=>array(
+ *             'class'=>'ext.modules.page.PageModule',
+ *             'gridCssFile'=>false,
+ *             'menuCssFile'=>rtrim(dirname($_SERVER['SCRIPT_NAME']), '/.\\').'/css/menu.css',
+ *             'menuWidgetConfig'=>array(
+ *                 'listCssClass'=>'side-nav'
+ *             ),
+ *             'pageLayout'=>'
+ *                 <div class="row">
+ *                     <div class="large-3 columns">
+ *                         {menu}
+ *                     </div>
+ *                     <div class="large-9 columns">
+ *                         {content}
+ *                     </div>
+ *                 </div>
+ *             ',
+ *             'formRow'=>'
+ *                 <div class="row">
+ *                     <div class="large-12 columns">
+ *                         {content}
+ *                     </div>
+ *                 </div>
+ *             ',
+ *             'formButtonsRow'=>'
+ *                 <div class="row">
+ *                     <div class="large-12 columns">
+ *                        <br />{content}
+ *                     </div>
+ *                 </div>
+ *             ',
+ *             'primaryButtonCssClass'=>'small button radius',
+ *             'secondaryButtonCssClass'=>'small button radius secondary'
+ *         ),
+ *     ),
+ * )
+ * </pre>
+ *
+ * Note that for polished look of forms you also have to provide css for
+ * error labels and summary!
  *
  * For all possible customizations refer to PageModule class properties below.
  *
@@ -186,6 +249,17 @@ class PageModule extends CWebModule
 	 * will be included when using this module.
 	 */
 	public $pageCssFile;
+	/**
+	 * @var mixed the CSS file used for the gridviews. Defaults to null, meaning
+	 * using the default CSS file. If false, no CSS file will be used. Otherwise,
+	 * the specified CSS file will be included when using this module.
+	 */
+	public $gridCssFile;
+	/**
+	 * @var array configuration for PageMenuWidget when used trough page template.
+	 * Defaults to array()
+	 */
+	public $menuWidgetConfig=array();
 	/**
 	 * @var mixed the CSS file used by wysiwyg editor for the article content.
 	 * Defaults false, meaning no CSS file will be used.
