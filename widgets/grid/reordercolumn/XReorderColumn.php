@@ -48,9 +48,9 @@ class XReorderColumn extends CGridColumn
 	public $cssClass='reorder';
 	/**
 	 * @var array the HTML options for the data cell tags.
-	 * Defaults to array('class'=>'button-column','style'=>'width:32px')
+	 * Defaults to array('class'=>'button-column')
 	 */
-	public $htmlOptions=array('class'=>'button-column','style'=>'width:32px');
+	public $htmlOptions=array('class'=>'button-column');
 
 	private $_upIcon;
 	private $_downIcon;
