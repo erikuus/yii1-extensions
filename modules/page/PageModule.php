@@ -256,7 +256,8 @@ class PageModule extends CWebModule
 	 */
 	public $gridCssFile;
 	/**
-	 * @var array configuration for PageMenuWidget when used trough page template.
+	 * @var array configuration for PageMenuWidget when used via page template.
+	 * Refer to PageMenuWidget class for possible configuration.
 	 * Defaults to array()
 	 */
 	public $menuWidgetConfig=array();

@@ -2,11 +2,32 @@
 /**
  * PageMenuWidget class file.
  *
- * This widget displays bootstrap style navigation list
+ * This widget displays navigation list for page module
  *
- * Call this widget as follows:
+ * Examples of usage:
  *
- * $this->widget('application.modules.page.components');
+ * 1. Default side navigation
+ * <pre>
+ * $this->widget('application.modules.page.components.PageMenuWidget');
+ * </pre>
+ *
+ * 2. Zurb Foundation CSS framework side navigation {@link http://foundation.zurb.com/docs/components/sidenav.html}
+ * <pre>
+ * $this->widget('ext.modules.page.components.PageMenuWidget', array(
+ *     'listCssClass'=>'side-nav',
+ * ));
+ * </pre>
+ *
+ * 3. Zurb Foundation CSS framework sub navigation {@link http://foundation.zurb.com/docs/components/subnav.html}
+ * <pre>
+ * $this->widget('ext.modules.page.components.PageMenuWidget', array(
+ *     'containerCssClass'=>null,
+ *     'listTagName'=>'dl',
+ *     'listCssClass'=>'sub-nav',
+ *     'headerTagName'=>'dt',
+ *     'itemTagName'=>'dd'
+ * ));
+ * </pre>
  *
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 1.0.0
