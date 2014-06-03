@@ -112,7 +112,7 @@
  *     background-color: #f9f9f9;
  *     padding: 5px 15px;
  * }
- * .page-menu-header {
+ * .page-menu-label {
  *     text-transform: uppercase;
  *     font-weight: bold;
  *     color: #666666;

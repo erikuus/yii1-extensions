@@ -24,10 +24,26 @@
  *     'containerCssClass'=>null,
  *     'listTagName'=>'dl',
  *     'listCssClass'=>'sub-nav',
- *     'headerTagName'=>'dt',
+ *     'labelTagName'=>'dt',
  *     'itemTagName'=>'dd'
  * ));
  * </pre>
+ *
+ * 4. Zurb Foundation CSS framework topbar dropdown {@link http://foundation.zurb.com/docs/components/topbar.html}
+ * <nav class="top-bar" data-topbar>
+ *     <section class="top-bar-section">
+ *         <ul class="left">
+ *             <li class="has-dropdown"><a href="#">Docs</a>
+ *             <?php $this->widget('ext.modules.page.components.PageMenuWidget', array(
+ *                 'containerTagName'=>null,
+ *                 'listTagName'=>'ul',
+ *                 'listCssClass'=>'dropdown',
+ *                 'labelTemplate'=>'<label>{label}</label>',
+ *             )); ?>
+ *             </li>
+ *         </ul>
+ *     </section>
+ * </nav>
  *
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 1.0.0
@@ -35,7 +51,9 @@
 class PageMenuWidget extends CWidget
 {
 	/**
-	 * @var string the HTML tag name for the container of the widget. Defaults to 'div'.
+	 * @var string the HTML tag name for the container of the widget.
+	 * If set to null no conatiner is used.
+	 * Defaults to 'div'.
 	 */
 	public $containerTagName='div';
 	/**
@@ -55,13 +73,18 @@ class PageMenuWidget extends CWidget
 	 */
 	public $listCssClass='page-menu-list';
 	/**
-	 * @var string the HTML tag name for the menu header. Defaults to 'li'.
+	 * @var string the HTML tag name for the menu label. Defaults to 'li'.
 	 */
-	public $headerTagName='li';
+	public $labelTagName='li';
 	/**
-	 * Default CSS class for the menu header.
+	 * Default CSS class for the menu label.
 	 */
-	public $headerCssClass='page-menu-header';
+	public $labelCssClass='page-menu-label';
+	/**
+	 * @var string the template used to render label. In this template,
+	 * the token "{label}" will be replaced with the corresponding text.
+	 */
+	public $labelTemplate;
 	/**
 	 * @var string the HTML tag name for the menu list item. Defaults to 'li'.
 	 */
@@ -102,7 +125,8 @@ class PageMenuWidget extends CWidget
 			'order'=>'position'
 		));
 
-		echo CHtml::openTag($this->containerTagName, $this->containerHtmlOptions);
+		if($this->containerTagName)
+			echo CHtml::openTag($this->containerTagName, $this->containerHtmlOptions);
 
 			$this->printAdminButton();
 
@@ -113,7 +137,8 @@ class PageMenuWidget extends CWidget
 
 			echo CHtml::closeTag($this->listTagName);
 
-		echo CHtml::closeTag($this->containerTagName);
+		if($this->containerTagName)
+			echo CHtml::closeTag($this->containerTagName);
 	}
 
 	/**
@@ -138,10 +163,13 @@ class PageMenuWidget extends CWidget
 	protected function getMenuTag($menu)
 	{
 		if($menu->type==PageMenu::TYPE_LABEL)
-			return CHtml::tag($this->headerTagName, array('class'=>$this->headerCssClass),$menu->formattedItem);
+		{
+			$formattedItem=$this->labelTemplate ? strtr($this->labelTemplate, array('{label}'=>$menu->formattedItem)) : $menu->formattedItem;
+			return CHtml::tag($this->labelTagName, array('class'=>$this->labelCssClass), $formattedItem);
+		}
 		if($menu->id==Yii::app()->getRequest()->getParam('menuId'))
-			return CHtml::tag($this->itemTagName, array('class'=>$this->activeItemCssClass),$menu->formattedItem);
+			return CHtml::tag($this->itemTagName, array('class'=>$this->activeItemCssClass), $menu->formattedItem);
 		else
-			return CHtml::tag($this->itemTagName, array(),$menu->formattedItem);
+			return CHtml::tag($this->itemTagName, array(), $menu->formattedItem);
 	}
 }
