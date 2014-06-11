@@ -128,11 +128,6 @@
  *     'modules'=>array(
  *         'page'=>array(
  *             'class'=>'ext.modules.page.PageModule',
- *             'gridCssFile'=>false,
- *             'menuCssFile'=>rtrim(dirname($_SERVER['SCRIPT_NAME']), '/.\\').'/css/menu.css',
- *             'menuWidgetConfig'=>array(
- *                 'listCssClass'=>'side-nav'
- *             ),
  *             'pageLayout'=>'
  *                 <div class="row">
  *                     <div class="large-3 columns">
@@ -143,20 +138,12 @@
  *                     </div>
  *                 </div>
  *             ',
- *             'formRow'=>'
- *                 <div class="row">
- *                     <div class="large-12 columns">
- *                         {content}
- *                     </div>
- *                 </div>
- *             ',
- *             'formButtonsRow'=>'
- *                 <div class="row">
- *                     <div class="large-12 columns">
- *                        <br />{content}
- *                     </div>
- *                 </div>
- *             ',
+ *             'menuCssFile'=>rtrim(dirname($_SERVER['SCRIPT_NAME']), '/.\\').'/css/menu.css',
+ *             'menuWidgetConfig'=>array(
+ *                 'listCssClass'=>'side-nav'
+ *             ),
+ *             'gridCssFile'=>false,
+ *             'gridCssClass'=>'large-12 columns',
  *             'primaryButtonCssClass'=>'small button radius',
  *             'secondaryButtonCssClass'=>'small button radius secondary'
  *         ),
@@ -164,10 +151,36 @@
  * )
  * </pre>
  *
- * Note that for polished look of forms you also have to provide css for
- * error labels and summary!
- * 
- * 
+ * 4. You can customize the page module to be usable also when application
+ * is based on bootstrap css framework (tested with bootstrap 3.1.1)
+ * <pre>
+ * return array(
+ *     'modules'=>array(
+ *         'page'=>array(
+ *             'class'=>'ext.modules.page.PageModule',
+ *             'pageLayout'=>'
+ *                 <div class="row">
+ *                     <div class="col-md-3">
+ *                         {menu}
+ *                     </div>
+ *                     <div class="col-md-9">
+ *                         {breadcrumbs}<br />{content}
+ *                     </div>
+ *                 </div>
+ *             ',
+ *             'menuCssFile'=>false,
+ *             'menuWidgetConfig'=>array(
+ *                 'listCssClass'=>'nav nav-pills nav-stacked'
+ *                 'labelTemplate'=>'<h4>{label}</h4>',
+ *             ),
+ *             'gridCssFile'=>false,
+ *             'gridCssClass'=>'table',
+ *             'primaryButtonCssClass'=>'btn btn-primary',
+ *             'secondaryButtonCssClass'=>'btn btn-default'
+ *         ),
+ *     ),
+ * )
+ * </pre>
  *
  * For all possible customizations refer to PageModule class properties below.
  *
@@ -215,16 +228,6 @@ class PageModule extends CWebModule
 	 */
 	public $pageLayout='{menu}<br />{breadcrumbs}{content}';
 	/**
-	 * @var string the template used to render form row. In this template,
-	 * the token "{content}" will be replaced with input, label and error element.
-	 */
-	public $formRow='<div class="row">{content}</div>';
-	/**
-	 * @var string the template used to render form bottons row. In this template,
-	 * the token "{content}" will be replaced with save and cancel buttons.
-	 */
-	public $formButtonsRow='<div class="row buttons">{content}</div>';
-	/**
 	 * @var string css class for primary (save) buttons
 	 */
 	public $primaryButtonCssClass;
@@ -251,6 +254,13 @@ class PageModule extends CWebModule
 	 * will be included when using this module.
 	 */
 	public $pageCssFile;
+	/**
+	 * @var mixed the CSS file used for the forms. Defaults to null, meaning
+	 * using the default CSS file included together with the module.
+	 * If false, no CSS file will be used. Otherwise, the specified CSS file
+	 * will be included when using this module.
+	 */
+	public $formCssFile;
 	/**
 	 * @var mixed the CSS file used for the gridviews. Defaults to null, meaning
 	 * using the default CSS file. If false, no CSS file will be used. Otherwise,

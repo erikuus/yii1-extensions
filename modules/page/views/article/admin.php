@@ -31,7 +31,7 @@ Yii::app()->clientScript->registerScript('search', "
 	<div class="search-article">
 		<?php $this->renderPartial('_search', array('model'=>$model)); ?>
 	</div>
-	<div style="clear:both;">&nbsp;</div>
+	<div style="clear:both;"></div>
 <?php $this->endWidget(); ?>
 
 <?php $this->widget('ext.widgets.grid.groupgridview.XGroupGridView', array(
@@ -46,7 +46,7 @@ Yii::app()->clientScript->registerScript('search', "
 	'selectableRows'=>0,
     'extraRowColumns'=>array('menu_id'),
 	'extraRowExpression'=>'$data->menu->title',
-	'template'=>$this->clips['toolbarClip'].'{summary}{items}',
+	'template'=>$this->clips['toolbarClip'].'<br />{summary}{items}',
 	'columns'=>array(
 		array(
 			'name'=>'title',

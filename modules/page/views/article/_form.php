@@ -1,31 +1,34 @@
-<?php Yii::app()->clientScript->registerCssFile($this->getAsset('/css/xheditor.css')); ?>
+<?php
+$cs=Yii::app()->clientScript;
 
-<div class="form" style="width: auto">
+if($this->module->formCssFile===null)
+	$cs->registerCssFile($this->getAsset('/css/form.css'));
+else if($this->module->formCssFile!==false)
+	$cs->registerCssFile($this->module->formCssFile);
+
+$cs->registerCssFile($this->getAsset('/css/xheditor.css'));
+?>
+
+<div class="page-form">
 
 <?php $form=$this->beginWidget('CActiveForm', array(
 	'id'=>'article-form',
 	'enableAjaxValidation'=>false,
 )); ?>
 
-	<p><?php echo Yii::t('PageModule.ui', 'Fields with {mark} are required',
-	array('{mark}'=>'<span class="required">*</span>')); ?>
-</p>
-
 	<?php echo $form->errorSummary($model); ?>
 
-	<?php $this->beginContent('/decorators/formRow')?>
+	<div class="field">
 		<?php echo $form->labelEx($model,'menu_id'); ?>
 		<?php echo $form->DropDownList($model,'menu_id',PageMenu::model()->activeItemOptions,array('prompt'=>'','style'=>'width:250px'));?>
-		<?php echo $form->error($model,'menu_id'); ?>
-	<?php $this->endContent()?>
+	</div>
 
-	<?php $this->beginContent('/decorators/formRow')?>
+	<div class="field">
 		<?php echo $form->labelEx($model,'title'); ?>
 		<?php echo $form->textField($model,'title',array('style'=>'width:725px;')); ?>
-		<?php echo $form->error($model,'title'); ?>
-	<?php $this->endContent()?>
+	</div>
 
-	<?php $this->beginContent('/decorators/formRow')?>
+	<div class="field">
 		<?php echo $form->labelEx($model,'content'); ?>
 		<?php $this->widget('ext.widgets.xheditor.XHeditor',array(
 			'model'=>$model,
@@ -54,13 +57,12 @@
 				)
 			)
 		));?>
-		<?php echo $form->error($model,'content'); ?>
-	<?php $this->endContent()?>
+	</div>
 
-	<?php $this->beginContent('/decorators/formButtonsRow')?>
+	<div class="buttons">
 		<?php echo CHtml::submitButton($model->isNewRecord ? Yii::t('PageModule.ui', 'Create') : Yii::t('PageModule.ui','Save'), array('class'=>$this->module->primaryButtonCssClass)); ?>
 		<?php echo CHtml::link(Yii::t('PageModule.ui', 'Cancel'), $this->getReturnUrl() ? $this->getReturnUrl() : array('admin'), array('class'=>$this->module->secondaryButtonCssClass)); ?>
-	<?php $this->endContent()?>
+	</div>
 
 <?php $this->endWidget(); ?>
 

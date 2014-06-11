@@ -1,4 +1,12 @@
-<?php Yii::app()->clientScript->registerScript('toggle', "
+<?php
+$cs=Yii::app()->clientScript;
+
+if($this->module->formCssFile===null)
+	$cs->registerCssFile($this->getAsset('/css/form.css'));
+else if($this->module->formCssFile!==false)
+	$cs->registerCssFile($this->module->formCssFile);
+
+$cs->registerScript('toggle', "
 	var typeContentVal=".PageMenu::TYPE_CONTENT.";
 	var typeUrlVal=".PageMenu::TYPE_URL.";
 	var typeCssId='".CHtml::activeId($model,'type')."';
@@ -13,7 +21,7 @@
 ");
 ?>
 
-<div class="form" style="width: auto">
+<div class="page-form">
 
 <?php $form=$this->beginWidget('CActiveForm', array(
 	'id'=>'menu-form',
@@ -25,20 +33,17 @@
 
 	<?php echo $form->errorSummary($model); ?>
 
-	<?php $this->beginContent('/decorators/formRow')?>
+	<div class="field">
 		<?php echo $form->labelEx($model, 'title'); ?>
 		<?php echo $form->textField($model, 'title', array('style'=>'width: 300px')); ?>
-		<?php echo $form->error($model, 'title'); ?>
-	<?php $this->endContent()?>
+	</div>
 
-	<?php $this->beginContent('/decorators/formRow')?>
+	<div class="field">
 		<?php echo $form->labelEx($model, 'type'); ?>
 		<?php echo $form->dropDownList($model, 'type', $model->typeOptions, array('prompt'=>'','style'=>'width:300px')); ?>
-		<?php echo $form->error($model, 'type'); ?>
-	<?php $this->endContent()?>
+	</div>
 
-	<div id="content-container" style="display: none">
-	<?php $this->beginContent('/decorators/formRow')?>
+	<div class="field" id="content-container" style="display: none">
 		<?php echo $form->labelEx($model,'content'); ?>
 		<?php $this->widget('ext.widgets.xheditor.XHeditor',array(
 			'model'=>$model,
@@ -55,22 +60,17 @@
 				'upLinkExt'=>$this->module->editorUploadAllowedLinkExtensions,
 			)
 		));?>
-		<?php echo $form->error($model,'content'); ?>
-	<?php $this->endContent()?>
 	</div>
 
-	<div id="url-container" style="display: none">
-	<?php $this->beginContent('/decorators/formRow')?>
+	<div class="field" id="url-container" style="display: none">
 		<?php echo CHtml::activeLabel($model,'url',array('required'=>true)); ?>
 		<?php echo $form->textField($model,'url', array('style'=>'width: 600px')); ?>
-		<?php echo $form->error($model,'url'); ?>
-	<?php $this->endContent()?>
 	</div>
 
-	<?php $this->beginContent('/decorators/formButtonsRow')?>
+	<div class="buttons">
 		<?php echo CHtml::submitButton($model->isNewRecord ? Yii::t('PageModule.ui', 'Create') : Yii::t('PageModule.ui','Save'), array('class'=>$this->module->primaryButtonCssClass)); ?>
 		<?php echo CHtml::link(Yii::t('PageModule.ui', 'Cancel'), $this->getReturnUrl() ? $this->getReturnUrl() : array('admin'), array('class'=>$this->module->secondaryButtonCssClass)); ?>
-	<?php $this->endContent()?>
+	</div>
 
 <?php $this->endWidget(); ?>
 

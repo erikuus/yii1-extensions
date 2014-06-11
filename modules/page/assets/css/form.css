@@ -1,0 +1,65 @@
+div.page-form {
+	border: 1px solid #dddddd;
+	background: #f9f9f9;
+	color: #333333;
+	margin : 0;
+	padding: 15px;
+	width: 600px;
+	margin: 0;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	width: auto;
+}
+div.page-form form {
+	margin: 0;
+}
+div.page-form div.buttons {
+	clear: left;
+	margin-left: 150px;
+	padding: 20px 0;
+}
+div.page-form div.field {
+	clear: left;
+	padding: 4px 0;
+}
+div.page-form span.required {
+	color: #c00000;
+}
+div.page-form div.field label {
+	display: block;
+	float: left;
+	margin-right: 10px;
+	position: relative;
+	text-align: right;
+	width: 140px;
+}
+div.page-form input.error,
+div.page-form textarea.error,
+div.page-form select.error,
+div.page-form input.error:focus,
+div.page-form textarea.error:focus,
+div.page-form select.error:focus {
+	background: #feeeee;
+	border-color: #c00000;
+}
+label.error {
+	color: #c00000;
+}
+div.page-form div.errorSummary {
+	border: 2px solid #c00000;
+	padding: 7px 7px 12px 7px;
+	margin: 0 0 20px 0;
+	background: #feeeee;
+}
+div.page-form div.errorSummary p {
+	margin: 0;
+	padding: 5px;
+}
+div.page-form div.errorSummary ul {
+	margin: 0;
+	padding: 0 0 0 20px;
+}
+div.page-form div.errorSummary ul li {
+	list-style: square;
+}

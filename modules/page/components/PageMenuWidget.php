@@ -35,6 +35,7 @@
  *         <ul class="left">
  *             <li class="has-dropdown"><a href="#">Docs</a>
  *             <?php $this->widget('ext.modules.page.components.PageMenuWidget', array(
+ *                 'enableAdminButton'=>false,
  *                 'containerTagName'=>null,
  *                 'listTagName'=>'ul',
  *                 'listCssClass'=>'dropdown',
@@ -93,6 +94,10 @@ class PageMenuWidget extends CWidget
 	 * Default CSS class for the active menu item.
 	 */
 	public $activeItemCssClass='active';
+	/**
+	 * Boolean whether to display admin button. Defaults to true.
+	 */
+	public $enableAdminButton=true;
 
 	private $_module;
 
@@ -128,7 +133,8 @@ class PageMenuWidget extends CWidget
 		if($this->containerTagName)
 			echo CHtml::openTag($this->containerTagName, $this->containerHtmlOptions);
 
-			$this->printAdminButton();
+			if($this->enableAdminButton)
+				$this->printAdminButton();
 
 			echo CHtml::openTag($this->listTagName, array('class'=>$this->listCssClass));
 
