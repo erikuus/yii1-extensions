@@ -166,6 +166,8 @@
  *
  * Note that for polished look of forms you also have to provide css for
  * error labels and summary!
+ * 
+ * 
  *
  * For all possible customizations refer to PageModule class properties below.
  *
@@ -255,6 +257,10 @@ class PageModule extends CWebModule
 	 * the specified CSS file will be included when using this module.
 	 */
 	public $gridCssFile;
+	/**
+	 * @var string css class for grid table. Defaults to 'items'.
+	 */
+	public $gridCssClass='items';
 	/**
 	 * @var array configuration for PageMenuWidget when used via page template.
 	 * Refer to PageMenuWidget class for possible configuration.

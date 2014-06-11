@@ -31,7 +31,7 @@ Yii::app()->clientScript->registerScript('search', "
 	<div class="search-article">
 		<?php $this->renderPartial('_search', array('model'=>$model)); ?>
 	</div>
-	<div style="clear:both"></div>
+	<div style="clear:both;">&nbsp;</div>
 <?php $this->endWidget(); ?>
 
 <?php $this->widget('ext.widgets.grid.groupgridview.XGroupGridView', array(
@@ -41,6 +41,7 @@ Yii::app()->clientScript->registerScript('search', "
 	'enableSorting'=>false,
 	'summaryText'=>false,
 	'cssFile'=>$this->module->gridCssFile,
+	'itemsCssClass'=>$this->module->gridCssClass,
 	'rowCssClass'=>null, // no zebra
 	'selectableRows'=>0,
     'extraRowColumns'=>array('menu_id'),

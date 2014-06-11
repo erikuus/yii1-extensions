@@ -5,7 +5,6 @@
 	width: 180px;
 	border-left: 1px solid #e3e3e3;
 	padding: 0 10px;
-	font-size: 90%;
 	color: #333333;
 }
 .page-article-side-content>p {
@@ -31,7 +30,6 @@
 	background-color: #f9f9f9;
 	padding: 10px;
 	line-height: 125%;
-	font-size: 90%;
 }
 
 .page-article-sub-nav>ol {

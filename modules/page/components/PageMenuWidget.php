@@ -168,8 +168,8 @@ class PageMenuWidget extends CWidget
 			return CHtml::tag($this->labelTagName, array('class'=>$this->labelCssClass), $formattedItem);
 		}
 		if($menu->id==Yii::app()->getRequest()->getParam('menuId'))
-			return CHtml::tag($this->itemTagName, array('class'=>$this->activeItemCssClass), $menu->formattedItem);
+			return CHtml::tag($this->itemTagName, array('class'=>$this->activeItemCssClass), $menu->formattedItem)."\n";
 		else
-			return CHtml::tag($this->itemTagName, array(), $menu->formattedItem);
+			return CHtml::tag($this->itemTagName, array(), $menu->formattedItem)."\n";
 	}
 }

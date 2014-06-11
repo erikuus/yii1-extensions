@@ -37,6 +37,7 @@ $this->breadcrumbs=array(
 	'enableSorting'=>false,
 	'summaryText'=>false,
 	'cssFile'=>$this->module->gridCssFile,
+	'itemsCssClass'=>$this->module->gridCssClass,
 	'rowCssClass'=>null, // no zebra
 	'rowCssClassExpression'=>'$data->typeCssClassName',
 	'columns'=>array(
