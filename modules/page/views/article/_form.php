@@ -9,7 +9,7 @@ else if($this->module->formCssFile!==false)
 $cs->registerCssFile($this->getAsset('/css/xheditor.css'));
 ?>
 
-<div class="page-form">
+<div class="form">
 
 <?php $form=$this->beginWidget('CActiveForm', array(
 	'id'=>'article-form',
@@ -18,17 +18,17 @@ $cs->registerCssFile($this->getAsset('/css/xheditor.css'));
 
 	<?php echo $form->errorSummary($model); ?>
 
-	<div class="field">
+	<div class="simple">
 		<?php echo $form->labelEx($model,'menu_id'); ?>
 		<?php echo $form->DropDownList($model,'menu_id',PageMenu::model()->activeItemOptions,array('prompt'=>'','style'=>'width:250px'));?>
 	</div>
 
-	<div class="field">
+	<div class="simple">
 		<?php echo $form->labelEx($model,'title'); ?>
 		<?php echo $form->textField($model,'title',array('style'=>'width:725px;')); ?>
 	</div>
 
-	<div class="field">
+	<div class="simple">
 		<?php echo $form->labelEx($model,'content'); ?>
 		<?php $this->widget('ext.widgets.xheditor.XHeditor',array(
 			'model'=>$model,
@@ -59,7 +59,7 @@ $cs->registerCssFile($this->getAsset('/css/xheditor.css'));
 		));?>
 	</div>
 
-	<div class="buttons">
+	<div class="action">
 		<?php echo CHtml::submitButton($model->isNewRecord ? Yii::t('PageModule.ui', 'Create') : Yii::t('PageModule.ui','Save'), array('class'=>$this->module->primaryButtonCssClass)); ?>
 		<?php echo CHtml::link(Yii::t('PageModule.ui', 'Cancel'), $this->getReturnUrl() ? $this->getReturnUrl() : array('admin'), array('class'=>$this->module->secondaryButtonCssClass)); ?>
 	</div>

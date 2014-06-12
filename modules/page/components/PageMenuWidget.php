@@ -21,7 +21,7 @@
  * 3. Zurb Foundation CSS framework sub navigation {@link http://foundation.zurb.com/docs/components/subnav.html}
  * <pre>
  * $this->widget('ext.modules.page.components.PageMenuWidget', array(
- *     'containerCssClass'=>null,
+ *     'containerTagName'=>null,
  *     'listTagName'=>'dl',
  *     'listCssClass'=>'sub-nav',
  *     'labelTagName'=>'dt',
@@ -45,6 +45,27 @@
  *         </ul>
  *     </section>
  * </nav>
+ *
+ * 5. Bootstrap CSS framework navigation {@link http://getbootstrap.com/components/#nav}
+ * <pre>
+ * $this->widget('ext.modules.page.components.PageMenuWidget', array(
+ *     'containerTagName'=>null,
+ *     'listCssClass'=>'nav nav-pills nav-stacked',
+ *     'labelTemplate'=>'<h4>{label}</h4>',
+ * ));
+ * </pre>
+ *
+ * 6. Bootstrap CSS framework list group {@link http://getbootstrap.com/components/#list-group}
+ * <pre>
+ * $this->widget('ext.modules.page.components.PageMenuWidget', array(
+ *     'containerTagName'=>null,
+ *     'listCssClass'=>'list-group',
+ *     'labelCssClass'=>'list-group-item',
+ *     'itemCssClass'=>'list-group-item',
+ *     'activeItemCssClass'=>'list-group-item',
+ *     'labelTemplate'=>'<b>{label}</b>',
+ * ));
+ * </pre>
  *
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 1.0.0
@@ -91,7 +112,11 @@ class PageMenuWidget extends CWidget
 	 */
 	public $itemTagName='li';
 	/**
-	 * Default CSS class for the active menu item.
+	 * Default CSS class for the menu item.
+	 */
+	public $itemCssClass;
+	/**
+	 * Default CSS class for the active menu item. Defaults to 'active'.
 	 */
 	public $activeItemCssClass='active';
 	/**
@@ -176,6 +201,6 @@ class PageMenuWidget extends CWidget
 		if($menu->id==Yii::app()->getRequest()->getParam('menuId'))
 			return CHtml::tag($this->itemTagName, array('class'=>$this->activeItemCssClass), $menu->formattedItem)."\n";
 		else
-			return CHtml::tag($this->itemTagName, array(), $menu->formattedItem)."\n";
+			return CHtml::tag($this->itemTagName, array('class'=>$this->itemCssClass), $menu->formattedItem)."\n";
 	}
 }

@@ -1,4 +1,4 @@
-div.page-form {
+div.form {
 	border: 1px solid #dddddd;
 	background: #f9f9f9;
 	color: #333333;
@@ -11,55 +11,55 @@ div.page-form {
 	border-radius: 3px;
 	width: auto;
 }
-div.page-form form {
+div.form form {
 	margin: 0;
 }
-div.page-form div.buttons {
+div.form div.action {
 	clear: left;
-	margin-left: 150px;
+	margin-left: 130px;
 	padding: 20px 0;
 }
-div.page-form div.field {
+div.form div.simple {
 	clear: left;
 	padding: 4px 0;
 }
-div.page-form span.required {
+div.form span.required {
 	color: #c00000;
 }
-div.page-form div.field label {
+div.form div.simple label {
 	display: block;
 	float: left;
 	margin-right: 10px;
 	position: relative;
 	text-align: right;
-	width: 140px;
+	width: 120px;
 }
-div.page-form input.error,
-div.page-form textarea.error,
-div.page-form select.error,
-div.page-form input.error:focus,
-div.page-form textarea.error:focus,
-div.page-form select.error:focus {
+div.form input.error,
+div.form textarea.error,
+div.form select.error,
+div.form input.error:focus,
+div.form textarea.error:focus,
+div.form select.error:focus {
 	background: #feeeee;
 	border-color: #c00000;
 }
 label.error {
 	color: #c00000;
 }
-div.page-form div.errorSummary {
+div.form div.errorSummary {
 	border: 2px solid #c00000;
 	padding: 7px 7px 12px 7px;
 	margin: 0 0 20px 0;
 	background: #feeeee;
 }
-div.page-form div.errorSummary p {
+div.form div.errorSummary p {
 	margin: 0;
 	padding: 5px;
 }
-div.page-form div.errorSummary ul {
+div.form div.errorSummary ul {
 	margin: 0;
 	padding: 0 0 0 20px;
 }
-div.page-form div.errorSummary ul li {
+div.form div.errorSummary ul li {
 	list-style: square;
 }

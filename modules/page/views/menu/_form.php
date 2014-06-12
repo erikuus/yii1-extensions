@@ -21,7 +21,7 @@ $cs->registerScript('toggle', "
 ");
 ?>
 
-<div class="page-form">
+<div class="form">
 
 <?php $form=$this->beginWidget('CActiveForm', array(
 	'id'=>'menu-form',
@@ -33,17 +33,17 @@ $cs->registerScript('toggle', "
 
 	<?php echo $form->errorSummary($model); ?>
 
-	<div class="field">
+	<div class="simple">
 		<?php echo $form->labelEx($model, 'title'); ?>
 		<?php echo $form->textField($model, 'title', array('style'=>'width: 300px')); ?>
 	</div>
 
-	<div class="field">
+	<div class="simple">
 		<?php echo $form->labelEx($model, 'type'); ?>
 		<?php echo $form->dropDownList($model, 'type', $model->typeOptions, array('prompt'=>'','style'=>'width:300px')); ?>
 	</div>
 
-	<div class="field" id="content-container" style="display: none">
+	<div class="simple" id="content-container" style="display: none">
 		<?php echo $form->labelEx($model,'content'); ?>
 		<?php $this->widget('ext.widgets.xheditor.XHeditor',array(
 			'model'=>$model,
@@ -62,12 +62,12 @@ $cs->registerScript('toggle', "
 		));?>
 	</div>
 
-	<div class="field" id="url-container" style="display: none">
+	<div class="simple" id="url-container" style="display: none">
 		<?php echo CHtml::activeLabel($model,'url',array('required'=>true)); ?>
 		<?php echo $form->textField($model,'url', array('style'=>'width: 600px')); ?>
 	</div>
 
-	<div class="buttons">
+	<div class="action">
 		<?php echo CHtml::submitButton($model->isNewRecord ? Yii::t('PageModule.ui', 'Create') : Yii::t('PageModule.ui','Save'), array('class'=>$this->module->primaryButtonCssClass)); ?>
 		<?php echo CHtml::link(Yii::t('PageModule.ui', 'Cancel'), $this->getReturnUrl() ? $this->getReturnUrl() : array('admin'), array('class'=>$this->module->secondaryButtonCssClass)); ?>
 	</div>
