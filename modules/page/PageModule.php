@@ -191,10 +191,12 @@ class PageModule extends CWebModule
 {
 	/**
 	 * @var string the ID of the default controller for this module.
+	 * Defaults to 'tbl_page_menu'.
 	 */
 	public $defaultController='article';
 	/**
 	 * @var string the module database connection string.
+	 * If NULL, application default database (db) is used.
 	 */
 	public $dbConnectionString;
 	/**
@@ -206,7 +208,7 @@ class PageModule extends CWebModule
 	 */
 	public $dbPassword;
 	/**
-	 * @var string the name of the menu table
+	 * @var string the name of the menu table.
 	 * Defaults to 'tbl_page_menu'.
 	 */
 	public $menuTableName='tbl_page_menu';

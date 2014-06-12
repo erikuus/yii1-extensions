@@ -54,7 +54,7 @@ class ArticleController extends PageController
 					$this->goBack();
 			}
 		}
-		elseif ($menuId)
+		elseif($menuId)
 			$model->menu_id=$menuId;
 
 		$this->render('create',array(
@@ -112,13 +112,15 @@ class ArticleController extends PageController
 
 	/**
 	 * List models.
-	 * @param integer menu id
+	 * @param string topic menu slug
 	 */
-	public function actionIndex($menuId=null)
+	public function actionIndex($topic=null)
 	{
 		$this->layout='page';
 
-		if(!$menuId)
+		if($topic)
+			$menuId=PageMenu::model()->getIdFromSlug($topic);
+		else
 			$menuId=PageMenu::model()->firstItemId;
 
 		$menu=PageMenu::model()->activeItem()->with('articles')->findbyPk($menuId);
@@ -140,7 +142,7 @@ class ArticleController extends PageController
 
 		if(isset($_GET['PageArticle']))
 			$model->attributes=$_GET['PageArticle'];
-		elseif($menuId)
+		elseif ($menuId)
 			$model->menu_id=$menuId;
 
 		$this->render('admin',array(

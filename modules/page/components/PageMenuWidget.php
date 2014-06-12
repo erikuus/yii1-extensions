@@ -198,7 +198,7 @@ class PageMenuWidget extends CWidget
 			$formattedItem=$this->labelTemplate ? strtr($this->labelTemplate, array('{label}'=>$menu->formattedItem)) : $menu->formattedItem;
 			return CHtml::tag($this->labelTagName, array('class'=>$this->labelCssClass), $formattedItem);
 		}
-		if($menu->id==Yii::app()->getRequest()->getParam('menuId'))
+		if($menu->id==$menu->getIdFromSlug(Yii::app()->getRequest()->getParam('topic')))
 			return CHtml::tag($this->itemTagName, array('class'=>$this->activeItemCssClass), $menu->formattedItem)."\n";
 		else
 			return CHtml::tag($this->itemTagName, array('class'=>$this->itemCssClass), $menu->formattedItem)."\n";

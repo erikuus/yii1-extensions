@@ -81,6 +81,10 @@ class PageMenu extends CActiveRecord
 	public function behaviors()
 	{
 		return array(
+			'SlugBehavior' => array(
+				'class'=>'ext.behaviors.XSlugBehavior',
+				'sourceStringAttr'=>'title',
+			),
 			'ReorderBehavior' => array(
 				'class'=>'ext.behaviors.XReorderBehavior',
 				'sort'=>'position',
@@ -216,7 +220,7 @@ class PageMenu extends CActiveRecord
 	{
 		switch ($this->type) {
 			case self::TYPE_CONTENT:
-				return CHtml::link(CHtml::encode($this->title), array('/page/article/index','menuId'=>$this->id));
+				return CHtml::link(CHtml::encode($this->title), array('/page/article/index', 'topic'=>$this->SlugBehavior->generateUniqueSlug()));
 			break;
 			case self::TYPE_URL:
 				return CHtml::link(CHtml::encode($this->title), $this->url);

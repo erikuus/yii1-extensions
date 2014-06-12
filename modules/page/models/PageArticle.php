@@ -127,6 +127,7 @@ class PageArticle extends CActiveRecord
 	{
 		$criteria=new CDbCriteria(array(
 			'scopes'=>'active',
+			'with'=>'menu'
 		));
 
 		if($this->menu_id)
@@ -158,7 +159,7 @@ class PageArticle extends CActiveRecord
 	 */
 	public function getTitleLink()
 	{
-		$url=Yii::app()->controller->createUrl('article/index',array('menuId'=>$this->menu_id,'#'=>'article'.$this->id));
+		$url=Yii::app()->controller->createUrl('article/index',array('topic'=>$this->menu->generateUniqueSlug(),'#'=>'article'.$this->id));
 		return CHtml::link(CHtml::encode($this->title), $url);
 	}
 
