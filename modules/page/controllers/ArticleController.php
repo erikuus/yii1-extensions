@@ -45,7 +45,7 @@ class ArticleController extends PageController
 			$model->attributes=$_POST['PageArticle'];
 			if($model->save())
 			{
-				Yii::app()->user->setFlash('saved',Yii::t('PageModule.ui','Article successfully created!'));
+				Yii::app()->user->setFlash('save.success',Yii::t('PageModule.ui','Article successfully created!'));
 
 				// using xreturnable extension to go back
 				if(!$this->goBack())
@@ -77,7 +77,7 @@ class ArticleController extends PageController
 			$model->attributes=$_POST['PageArticle'];
 			if($model->save())
 			{
-				Yii::app()->user->setFlash('saved',Yii::t('PageModule.ui','Article successfully updated!'));
+				Yii::app()->user->setFlash('save.success',Yii::t('PageModule.ui','Article successfully updated!'));
 
 				// using xreturnable extension to go back
 				if(!$this->goBack())
@@ -125,7 +125,7 @@ class ArticleController extends PageController
 
 		$menu=PageMenu::model()->activeItem()->with('articles')->findbyPk($menuId);
 		if($menu===null)
-			$this->redirect(array('article/index'));
+			die($menuId); //$this->redirect(array('article/index'));
 
 		$this->render('index',array(
 			'menu'=>$menu,
@@ -147,6 +147,29 @@ class ArticleController extends PageController
 
 		$this->render('admin',array(
 			'model'=>$model
+		));
+	}
+
+	/**
+	 * List models by search query
+	 * @param string $q the query search word
+	 */
+	public function actionSearch($q=null)
+	{
+		$this->layout='page';
+
+		if($q===null || mb_strlen($q)<2)
+		{
+			Yii::app()->user->setFlash('search.short',Yii::t('PageModule.ui','Search term too short or missing!'));
+			$this->redirect(array('article/index'));
+		}
+
+		$model=new PageArticle('search');
+		$model->searchTerm=$q;
+
+		$this->render('search',array(
+			'dataProvider'=>$model->search('visible'),
+			'q'=>$q,
 		));
 	}
 

@@ -16,6 +16,7 @@
  * 2. Requires following extensions that can be downloaded from {@link https://github.com/erikuus/Yii-Extensions}
  *    ext.behaviors.XReturnableBehavior
  *    ext.behaviors.XReorderBehavior
+ *    ext.behaviors.XSlugBehavior
  *    ext.actions.XReorderAction
  *    ext.actions.XHEditorUpload
  *    ext.validators.XCompareRequiredValidator
@@ -110,7 +111,7 @@
  * First you can save some custom style to application/css/menu.css:
  * .page-menu {
  *     background-color: #f9f9f9;
- *     padding: 5px 15px;
+ *     padding: 15px;
  * }
  * .page-menu-label {
  *     text-transform: uppercase;
@@ -143,7 +144,7 @@
  *                 'listCssClass'=>'side-nav'
  *             ),
  *             'gridCssFile'=>false,
- *             'gridCssClass'=>'large-12 columns',
+ *             'gridCssClass'=>'large-12',
  *             'primaryButtonCssClass'=>'small button radius',
  *             'secondaryButtonCssClass'=>'small button radius secondary'
  *         ),
@@ -224,11 +225,11 @@ class PageModule extends CWebModule
 	public $authItemName=false;
 	/**
 	 * @var string the template used to render page modul. In this template,
-	 * the token "{menu}" will be replaced with the PageMenuWidget,
 	 * the token "{breadcrumbs}" will be replaced with the CBreadcrumbs widget,
+	 * the token "{menu}" will be replaced with the PageMenuWidget,
 	 * the token "{content}" will be replaced with the article content
 	 */
-	public $pageLayout='{menu}<br />{breadcrumbs}{content}';
+	public $pageLayout='{breadcrumbs}{menu}{content}';
 	/**
 	 * @var string css class for primary (save) buttons
 	 */
@@ -330,6 +331,7 @@ class PageModule extends CWebModule
 	 */
 	private $publicRoutes=array(
 		'article/index',
+		'article/search',
 	);
 
 	/**

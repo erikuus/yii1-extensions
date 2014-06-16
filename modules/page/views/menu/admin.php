@@ -2,11 +2,14 @@
 $this->pageTitle=Yii::app()->name . ' - ' . Yii::t('PageModule.ui', 'Manage Menu');
 
 Yii::app()->clientScript->registerCss('gridSpecificStyle', "
-	.grid-view table.items tr.type-header {
+	.grid-view table tr.type-label {
 		text-transform: uppercase;
 		background: #e8e8e8;
 		font-weight: bold;
 		color: #333333;
+	}
+	.grid-view table tr.type-hidden-content a {
+		color: #999999;
 	}
 ", 'screen', CClientScript::POS_HEAD);
 
@@ -26,7 +29,7 @@ $this->breadcrumbs=array(
 
 <?php $this->widget('ext.widgets.alert.XAlert',array(
 	'alerts'=>array(
-		'saved'=>'success'
+		'save.success'=>'success'
 	)
 )); ?>
 

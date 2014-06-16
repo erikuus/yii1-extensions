@@ -120,9 +120,21 @@ class PageMenuWidget extends CWidget
 	 */
 	public $activeItemCssClass='active';
 	/**
+	 * Default CSS class for the search field. Defaults to 'page-menu-search-field'.
+	 */
+	public $searchFieldCssClass='page-menu-search-field';
+	/**
+	 * Default CSS class for the search button. Defaults to 'page-menu-search-btn'.
+	 */
+	public $searchBtnCssClass='page-menu-search-btn';
+	/**
 	 * Boolean whether to display admin button. Defaults to true.
 	 */
-	public $enableAdminButton=true;
+	public $enableAdmin=true;
+	/**
+	 * Boolean whether to display search form. Defaults to true.
+	 */
+	public $enableSearch=false;
 
 	private $_module;
 
@@ -151,14 +163,17 @@ class PageMenuWidget extends CWidget
 	 */
 	public function run()
 	{
-		$menuItems=PageMenu::model()->active()->findAll(array(
+		$menuItems=PageMenu::model()->visible()->findAll(array(
 			'order'=>'position'
 		));
 
 		if($this->containerTagName)
 			echo CHtml::openTag($this->containerTagName, $this->containerHtmlOptions);
 
-			if($this->enableAdminButton)
+			if($this->enableSearch===true)
+				$this->printSearchForm();
+
+			if($this->enableAdmin===true)
 				$this->printAdminButton();
 
 			echo CHtml::openTag($this->listTagName, array('class'=>$this->listCssClass));
@@ -185,6 +200,17 @@ class PageMenuWidget extends CWidget
 				array('class'=>'page-menu-admin')
 			);
 		}
+	}
+
+	/**
+	 * Prints search form
+	 */
+	protected function printSearchForm()
+	{
+		echo CHtml::beginForm(array('/page/article/search'), 'get');
+			echo CHtml::textField('q', yii::app()->request->getParam('q'), array('class'=>$this->searchFieldCssClass));
+			echo CHtml::submitButton(Yii::t('PageModule.ui', 'Search'), array('name'=>'b', 'class'=>$this->searchBtnCssClass));
+		echo CHtml::endForm();
 	}
 
 	/**

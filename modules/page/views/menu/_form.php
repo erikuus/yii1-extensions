@@ -7,16 +7,17 @@ else if($this->module->formCssFile!==false)
 	$cs->registerCssFile($this->module->formCssFile);
 
 $cs->registerScript('toggle', "
-	var typeContentVal=".PageMenu::TYPE_CONTENT.";
-	var typeUrlVal=".PageMenu::TYPE_URL.";
-	var typeCssId='".CHtml::activeId($model,'type')."';
-	var typeVal=$('#'+typeCssId+' option:selected').val();
-	$('#content-container').css('display', typeVal==typeContentVal ? 'block':'none');
-	$('#url-container').css('display', typeVal==typeUrlVal ? 'block':'none');
-	$('#'+typeCssId).change(function(){
-		var typeVal=$('#'+typeCssId+' option:selected').val();
-		$('#content-container').css('display', typeVal==typeContentVal ? 'block':'none');
-		$('#url-container').css('display', typeVal==typeUrlVal ? 'block':'none');
+	var content=".PageMenu::TYPE_CONTENT.";
+	var hidden=".PageMenu::TYPE_HIDDEN_CONTENT.";
+	var url=".PageMenu::TYPE_URL.";
+	var typeId='".CHtml::activeId($model,'type')."';
+	var type=$('#'+typeId+' option:selected').val();
+	$('#content-container').css('display', type==content || type==hidden ? 'block':'none');
+	$('#url-container').css('display', type==url ? 'block':'none');
+	$('#'+typeId).change(function(){
+		var type=$('#'+typeId+' option:selected').val();
+		$('#content-container').css('display', type==content || type==hidden ? 'block':'none');
+		$('#url-container').css('display', type==url ? 'block':'none');
 	});
 ");
 ?>

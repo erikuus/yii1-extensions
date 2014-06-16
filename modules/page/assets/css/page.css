@@ -55,6 +55,33 @@ h2.page-article-subtitle img {
 	vertical-align: middle;
 }
 
+/* filter display style */
+.filter-display {
+	position: relative;
+	margin: 10px 0 10px 0;
+	padding: 10px 30px 10px 10px;
+	border: 1px solid #E4EBD8;
+	background: #F5FCE8;
+	color: #008000;
+	font-weight: bold;
+}
+
+.filter-display a.close {
+	color: #000;
+	position: absolute;
+	right: 4px;
+	top: 0;
+	font-size: 18px;
+	opacity: 0.2;
+	padding: 4px;
+	font-family: verdana;
+}
+
+.filter-display a.close:hover,
+.filter-display a.close:focus {
+	opacity: 0.4;
+}
+
 /* article body */
 .page-article-body {
 	margin: 10px 0 0 0;

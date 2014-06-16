@@ -21,7 +21,15 @@ $cs->registerScript('enhanceArticleContent', "
 $this->breadcrumbs=array(
 	$menu->title,
 );
+
+$this->widget('ext.widgets.alert.XAlert',array(
+	'alerts'=>array(
+		'search.short'=>'error'
+	)
+));
 ?>
+
+<?php  ?>
 
 <div class="page-wrapper">
 

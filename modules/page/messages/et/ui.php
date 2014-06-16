@@ -42,6 +42,7 @@ return array (
   'New Menu' => 'Uus menüüpunkt',
   'Save' => 'Salvesta',
   'Search' => 'Otsi',
+  'Search Result' => 'Otsingu tulemused',
   'Update Article' => 'Muuda artiklit',
   'Update Menu' => 'Muuda menüüpunkti',
   'Up' => 'Üles',

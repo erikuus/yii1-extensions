@@ -25,5 +25,6 @@ return array (
   'Type' => 'Tüüp',
   'Label' => 'Silt',
   'Content' => 'Sisu',
+  'Hidden Content' => 'Varjatud sisu',
   'Url' => 'Viide',
 );

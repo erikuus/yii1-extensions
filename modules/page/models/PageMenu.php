@@ -19,7 +19,8 @@ class PageMenu extends CActiveRecord
 
 	const TYPE_LABEL=0;
 	const TYPE_CONTENT=1;
-	const TYPE_URL=2;
+	const TYPE_HIDDEN_CONTENT=2;
+	const TYPE_URL=3;
 
 	/**
 	 * Returns the database connection used by active record.
@@ -70,6 +71,12 @@ class PageMenu extends CActiveRecord
 				'condition'=>'deleted IS FALSE'
 			),
 			'activeItem'=>array(
+				'condition'=>'deleted IS FALSE AND type IN ('.self::TYPE_CONTENT.','.self::TYPE_HIDDEN_CONTENT.')',
+			),
+			'visible'=>array(
+				'condition'=>'deleted IS FALSE AND type!='.self::TYPE_HIDDEN_CONTENT
+			),
+			'visibleItem'=>array(
 				'condition'=>'deleted IS FALSE AND type='.self::TYPE_CONTENT
 			),
 		);
@@ -102,7 +109,7 @@ class PageMenu extends CActiveRecord
 			array('url', 'ext.validators.XCompareRequiredValidator', 'compareAttribute'=>'type', 'compareValue'=>self::TYPE_URL),
 			array('url', 'url'),
 			array('position, type', 'numerical', 'integerOnly'=>true),
-			array('type', 'in', 'range'=>array(self::TYPE_LABEL, self::TYPE_CONTENT, self::TYPE_URL)),
+			array('type', 'in', 'range'=>array(self::TYPE_LABEL, self::TYPE_CONTENT, self::TYPE_HIDDEN_CONTENT, self::TYPE_URL)),
 			array('lang', 'length', 'max'=>5),
 			array('title, url', 'length', 'max'=>256),
 			array('deleted', 'boolean'),
@@ -162,7 +169,7 @@ class PageMenu extends CActiveRecord
 	 */
 	public function getFirstItemId()
 	{
-		$model=$this->activeItem()->find(array(
+		$model=$this->visibleItem()->find(array(
 			'order'=>'position',
 			'limit'=>1
 		));
@@ -177,6 +184,7 @@ class PageMenu extends CActiveRecord
 		return array(
 			self::TYPE_LABEL => Yii::t('PageModule.md', 'Label'),
 			self::TYPE_CONTENT => Yii::t('PageModule.md', 'Content'),
+			self::TYPE_HIDDEN_CONTENT => Yii::t('PageModule.md', 'Hidden Content'),
 			self::TYPE_URL => Yii::t('PageModule.md', 'Url'),
 		);
 	}
@@ -188,9 +196,10 @@ class PageMenu extends CActiveRecord
 	public function getTypeCssClassOptions()
 	{
 		return array(
-			self::TYPE_LABEL =>'type-header',
-			self::TYPE_CONTENT =>'type-item',
-			self::TYPE_URL =>'type-link',
+			self::TYPE_LABEL =>'type-label',
+			self::TYPE_CONTENT =>'type-content',
+			self::TYPE_HIDDEN_CONTENT =>'type-hidden-content',
+			self::TYPE_URL =>'type-url',
 		);
 	}
 
@@ -220,6 +229,7 @@ class PageMenu extends CActiveRecord
 	{
 		switch ($this->type) {
 			case self::TYPE_CONTENT:
+			case self::TYPE_HIDDEN_CONTENT:
 				return CHtml::link(CHtml::encode($this->title), array('/page/article/index', 'topic'=>$this->SlugBehavior->generateUniqueSlug()));
 			break;
 			case self::TYPE_URL:
@@ -232,21 +242,13 @@ class PageMenu extends CActiveRecord
 	}
 
 	/**
-	 * @return string product couters (active / visible)
-	 */
-	public function getArticleCounter()
-	{
-		return $this->type==self::TYPE_CONTENT ? $this->articleCount : null;
-	}
-
-	/**
 	 * Prepares attributes before performing validation.
 	 */
 	protected function beforeValidate()
 	{
 		parent::beforeValidate();
 
-		if($this->type!=self::TYPE_CONTENT)
+		if($this->type!=self::TYPE_CONTENT && $this->type!=self::TYPE_HIDDEN_CONTENT)
 			$this->content=null;
 
 		if($this->type!=self::TYPE_URL)

@@ -15,6 +15,8 @@ class PageArticle extends CActiveRecord
 	 * @property string $content
 	 */
 
+	public $searchTerm;
+
 	/**
 	 * Returns the database connection used by active record.
 	 * @return CDbConnection the database connection used by active record.
@@ -63,7 +65,11 @@ class PageArticle extends CActiveRecord
 			'active'=>array(
 				'with'=>'menu',
 				'condition'=>'menu.deleted IS FALSE'
-			)
+			),
+			'visible'=>array(
+				'with'=>'menu',
+				'condition'=>'menu.deleted IS FALSE AND menu.type!='.PageMenu::TYPE_HIDDEN_CONTENT
+			),
 		);
 	}
 
@@ -91,7 +97,7 @@ class PageArticle extends CActiveRecord
 			array('menu_id, position', 'numerical', 'integerOnly'=>true),
 			array('lang', 'length', 'max'=>5),
 			array('title', 'length', 'max'=>256),
-			array('menu_id, title', 'safe', 'on'=>'search'),
+			array('menu_id, searchTerm', 'safe', 'on'=>'search'),
 			// filters
 			array('title', 'filter', 'filter'=>'strip_tags'),
 		);
@@ -121,20 +127,23 @@ class PageArticle extends CActiveRecord
 
 	/**
 	 * Retrieves a list of models based on the current search/filter conditions.
+	 * @param mixed scope name(s)
 	 * @return CActiveDataProvider the data provider that can return the models based on the search/filter conditions.
 	 */
-	public function search()
+	public function search($scopes)
 	{
 		$criteria=new CDbCriteria(array(
-			'scopes'=>'active',
-			'with'=>'menu'
+			'scopes'=>$scopes
 		));
 
 		if($this->menu_id)
 			$criteria->addColumnCondition(array('t.menu_id'=>$this->menu_id));
 
-		if($this->title)
-			$criteria->addSearchCondition('LOWER(t.title)', mb_strtolower($this->title));
+		if($this->searchTerm)
+		{
+			$q=Yii::app()->db->quoteValue('%'.mb_strtolower($this->searchTerm).'%');
+			$criteria->addCondition("LOWER(menu.title) LIKE $q OR LOWER(t.title) LIKE $q OR LOWER(t.content) LIKE $q");
+		}
 
 		return new CActiveDataProvider(get_class($this), array(
 			'criteria'=>$criteria,
@@ -143,15 +152,6 @@ class PageArticle extends CActiveRecord
 				'defaultOrder'=>'menu.position, t.position',
 			),
 		));
-	}
-
-	/**
-	 * Check if reorder column can be visible
-	 * @return boolean reorder column visibility
-	 */
-	public function getReorderVisibility()
-	{
-		return $this->title==null ? true : false;
 	}
 
 	/**
