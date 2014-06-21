@@ -153,7 +153,7 @@ class XHtml extends CHtml
 	 */
 	public static function booleanLabel($value, $fallback=null)
 	{
-		if($fallback && !$value)
+		if($fallback && $value===null)
 			return $fallback;
 		else
 			return $value ? Yii::t('zii','Yes') : Yii::t('zii','No');
