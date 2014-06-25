@@ -14,6 +14,8 @@
  * 2. Zurb Foundation CSS framework side navigation {@link http://foundation.zurb.com/docs/components/sidenav.html}
  * <pre>
  * $this->widget('ext.modules.page.components.PageMenuWidget', array(
+ *     'enableSearch'=>true,
+ *     'searchFieldHtmlOptions'=>array('placeholder'=>Yii::t('ui','Search ...')),
  *     'listCssClass'=>'side-nav',
  * ));
  * </pre>
@@ -50,8 +52,9 @@
  * <pre>
  * $this->widget('ext.modules.page.components.PageMenuWidget', array(
  *     'containerTagName'=>null,
+ *     'enableSearch'=>true,
+ *     'searchFieldHtmlOptions'=>array('class'=>'form-control','placeholder'=>Yii::t('ui','Search ...')),
  *     'listCssClass'=>'nav nav-pills nav-stacked',
- *     'labelTemplate'=>'<h4>{label}</h4>',
  * ));
  * </pre>
  *
@@ -120,13 +123,13 @@ class PageMenuWidget extends CWidget
 	 */
 	public $activeItemCssClass='active';
 	/**
-	 * Default CSS class for the search field. Defaults to 'page-menu-search-field'.
+	 * Default CSS class for the search field.
 	 */
 	public $searchFieldCssClass='page-menu-search-field';
 	/**
-	 * Default CSS class for the search button. Defaults to 'page-menu-search-btn'.
+	 * array HTML attributes for the search field.
 	 */
-	public $searchBtnCssClass='page-menu-search-btn';
+	public $searchFieldHtmlOptions=array();
 	/**
 	 * Boolean whether to display admin button. Defaults to true.
 	 */
@@ -152,10 +155,10 @@ class PageMenuWidget extends CWidget
 			Yii::app()->clientScript->registerCssFile($this->_module->menuCssFile);
 
 		// set container html options
-		if(isset($this->containerHtmlOptions['class']))
-			$this->containerHtmlOptions['class'].=' '.$this->containerCssClass;
-		else
-			$this->containerHtmlOptions=array_merge($this->containerHtmlOptions, array('class'=>$this->containerCssClass));
+		$this->containerHtmlOptions=array_merge($this->containerHtmlOptions, array('class'=>$this->containerCssClass));
+
+		// set search field html options
+		$this->searchFieldHtmlOptions=array_merge($this->searchFieldHtmlOptions, array('class'=>$this->searchFieldCssClass));
 	}
 
 	/**
@@ -208,8 +211,7 @@ class PageMenuWidget extends CWidget
 	protected function printSearchForm()
 	{
 		echo CHtml::beginForm(array('/page/article/search'), 'get');
-			echo CHtml::textField('q', yii::app()->request->getParam('q'), array('class'=>$this->searchFieldCssClass));
-			echo CHtml::submitButton(Yii::t('PageModule.ui', 'Search'), array('name'=>'b', 'class'=>$this->searchBtnCssClass));
+			echo CHtml::textField('q', yii::app()->request->getParam('q'), $this->searchFieldHtmlOptions);
 		echo CHtml::endForm();
 	}
 

@@ -15,6 +15,21 @@
 	margin: 3px 6px 0 0;
 }
 
+
+.page-menu-search-field {
+	margin: 10px 15px;
+	padding: 4px;
+	border: 1px solid #dddddd;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	background-color: #ffffff;
+}
+
+.page-menu-search-field:focus {
+	border: 1px solid rgba(82, 168, 236, 0.8);
+}
+
 .page-menu-label {
 	display: block;
 	padding: 3px 15px;
