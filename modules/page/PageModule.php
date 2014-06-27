@@ -14,9 +14,8 @@
  *
  * 1. Tested with Yii 1.1.8, should work in earlier versions
  * 2. Requires following extensions that can be downloaded from {@link https://github.com/erikuus/Yii-Extensions}
- *    ext.behaviors.XReturnableBehavior
- *    ext.behaviors.XReorderBehavior
  *    ext.behaviors.XSlugBehavior
+ *    ext.behaviors.XReorderBehavior
  *    ext.actions.XReorderAction
  *    ext.actions.XHEditorUpload
  *    ext.validators.XCompareRequiredValidator

@@ -34,7 +34,7 @@ $cs->registerScript('search', "
 
 <?php $this->beginWidget('CClipWidget', array('id'=>'toolbarClip')); ?>
 	<div style="float:right;">
-		<?php echo CHtml::link(Yii::t('PageModule.ui', 'New Article'), $this->createReturnableUrl('create',array('menuId'=>$model->menu_id))); ?>
+		<?php echo CHtml::link(Yii::t('PageModule.ui', 'New Article'), $this->createUrl('create',array('menuId'=>$model->menu_id))); ?>
 	</div>
 	<div class="filter">
 		<?php $this->renderPartial('_filter', array('model'=>$model)); ?>

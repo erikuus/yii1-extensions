@@ -27,8 +27,8 @@
 		array(
 			'class'=>'CButtonColumn',
 			'template'=>'{update} {delete}',
-			'updateButtonUrl'=>'$this->grid->controller->createReturnableUrl("update",array("id"=>$data->primaryKey))',
-			'deleteButtonUrl'=>'$this->grid->controller->createReturnableUrl("delete",array("id"=>$data->primaryKey))',
+			'updateButtonUrl'=>'$this->grid->controller->createUrl("update",array("id"=>$data->primaryKey))',
+			'deleteButtonUrl'=>'$this->grid->controller->createUrl("delete",array("id"=>$data->primaryKey))',
 			'deleteConfirmation'=>Yii::t('PageModule.ui','Are you sure to delete this article?'),
 			'visible'=>$this->isAdminAccess() && $this->action->id=='admin'
 		),

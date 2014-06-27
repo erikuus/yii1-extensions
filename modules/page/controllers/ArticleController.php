@@ -46,12 +46,7 @@ class ArticleController extends PageController
 			if($model->save())
 			{
 				Yii::app()->user->setFlash('save.success',Yii::t('PageModule.ui','Article successfully created!'));
-
-				// using xreturnable extension to go back
-				if(!$this->goBack())
-					$this->redirect(array('admin'));
-				else
-					$this->goBack();
+				$this->redirect(array('admin'));
 			}
 		}
 		elseif($menuId)
@@ -78,12 +73,7 @@ class ArticleController extends PageController
 			if($model->save())
 			{
 				Yii::app()->user->setFlash('save.success',Yii::t('PageModule.ui','Article successfully updated!'));
-
-				// using xreturnable extension to go back
-				if(!$this->goBack())
-					$this->redirect(array('admin'));
-				else
-					$this->goBack();
+				$this->redirect(array('admin'));
 			}
 		}
 

@@ -7,18 +7,6 @@ class PageController extends Controller
 	public $breadcrumbs=array();
 
 	/**
-	 * @return array behaviors
-	 */
-	public function behaviors()
-	{
-		return array(
-			'returnable'=>array(
-				'class'=>'ext.behaviors.XReturnableBehavior',
-			),
-		);
-	}
-
-	/**
 	 * @return boolean whether admin access is available
 	 */
 	public function isAdminAccess()
