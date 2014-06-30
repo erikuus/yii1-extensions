@@ -29,75 +29,72 @@
  * $my_model_obj = MyModel::model()->findByPk($id);
  * </pre>
  *
- * Note! Original name of this extension is "PcSimpleSlugBehavior"
- *
+ * Original version
  * @link http://www.yiiframework.com/extension/pcsimpleslugbehavior
- * @license:
- * Copyright (c) 2012, Boaz Rymland
- * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
- * following conditions are met:
- * - Redistributions of source code must retain the above copyright notice, this list of conditions and the following
- *      disclaimer.
- * - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
- *      disclaimer in the documentation and/or other materials provided with the distribution.
- * - The names of the contributors may not be used to endorse or promote products derived from this software without
- *      specific prior written permission.
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
- * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * @author Boaz Rymland
+ * @version 1.0.0
+ *
+ * @author Erik Uus <erik.uus@gmail.com>
+ * @version 2.0.0
  */
-class XSlugBehavior extends CActiveRecordBehavior {
+class XSlugBehavior extends CActiveRecordBehavior
+{
 	/**
 	 * @var string the attribute that contains the 'main string' that is used when building the slug
 	 */
 	public $sourceStringAttr = "title";
-
 	/**
 	 * @var string the attribute that contains the 'main string' that is used when building the slug
 	 */
 	public $sourceStringPrepareMethod = false;
-
 	/**
 	 * @var string the attribute/column name that holds the Id/primary-key for this model.
 	 */
 	public $sourceIdAttr = 'id';
-
 	/**
 	 * @var bool Supports avoiding prefixing the 'id' attribute of the model in the beginning of the slug. Use
 	 * with caution(!) as this is tricky can can lead to two record with the same slug (consider carefully
 	 * your requirements before setting this to true).
 	 */
 	public $avoidIdPrefixing = false;
-
 	/**
 	 * @var int maximum allowed slug length. slug will be crudely trimmed to this length if longer than it.
 	 */
 	public $maxChars = 100;
-
 	/**
 	 * @var bool whether to lowercase the resulted URLs or not. default = yes.
 	 */
 	public $lowercaseUrl = true;
 	/**
+	 * @var array CDbCriteria default scope criteria.
+	 */
+	public $scope = array();
+
+	/**
+	 * @var CDbCriteria null scope CDbCriteria cache.
+	 */
+	private $_scopeCriteria = null;
+	/**
 	 * @var string the slug.
 	 */
-	private $slug;
+	private $_slug;
+	/**
+	 * @var CDbConnection
+	 */
+	private $_conn;
+
 
 	/**
 	 * @return string: the prepared slug for 'this->owner' model object
 	 * @throws CException
 	 */
-	public function generateUniqueSlug() {
-		if (!$this->avoidIdPrefixing) {
+	public function generateUniqueSlug()
+	{
+		if (!$this->avoidIdPrefixing)
+		{
 			// check that the defined 'id attribute' exists for 'this' model. explode if not.
-			if (!$this->owner->hasAttribute($this->sourceIdAttr)) {
+			if (!$this->owner->hasAttribute($this->sourceIdAttr))
+			{
 				throw new CException ("requested to prepare a slug for " .
 						get_class($this->owner) .
 						" (id=" . $this->owner->getPrimaryKey() .
@@ -107,11 +104,12 @@ class XSlugBehavior extends CActiveRecordBehavior {
 			}
 		}
 		// if we're supposed to get the slug raw material from a method, check it exists and if so run it.
-		if ($this->sourceStringPrepareMethod) {
-			if (method_exists($this->owner, $this->sourceStringPrepareMethod)) {
-				$this->slug = $this->createBaseSlug($this->owner->{$this->sourceStringPrepareMethod}());
-			}
-			else {
+		if ($this->sourceStringPrepareMethod)
+		{
+			if (method_exists($this->owner, $this->sourceStringPrepareMethod))
+				$this->_slug = $this->createBaseSlug($this->owner->{$this->sourceStringPrepareMethod}());
+			else
+			{
 				throw new CException ("requested to prepare a slug for " .
 						get_class($this->owner) .
 						" (id=" . $this->owner->getPrimaryKey() .
@@ -122,8 +120,10 @@ class XSlugBehavior extends CActiveRecordBehavior {
 
 		}
 		// no preparation method - check that the defined 'source string attribute' exists for 'this' model. explode if not.
-		else {
-			if (!$this->owner->hasAttribute($this->sourceStringAttr)) {
+		else
+		{
+			if (!$this->owner->hasAttribute($this->sourceStringAttr))
+			{
 				throw new CException ("requested to prepare a slug for " .
 						get_class($this->owner) .
 						" (id=" . $this->owner->getPrimaryKey() .
@@ -133,27 +133,26 @@ class XSlugBehavior extends CActiveRecordBehavior {
 			}
 			// create the base slug out of this attribute:
 			// convert all spaces to underscores:
-			$this->slug = $this->createBaseSlug($this->owner->{$this->sourceStringAttr});
+			$this->_slug = $this->createBaseSlug($this->owner->{$this->sourceStringAttr});
 		}
 
 		// prepend everything with the id of the model followed by a dash
-		if (!$this->avoidIdPrefixing) {
+		if (!$this->avoidIdPrefixing)
+		{
 			$id_attr = $this->sourceIdAttr;
-			$this->slug = $this->owner->$id_attr . "-" . $this->slug;
+			$this->_slug = $this->owner->$id_attr . "-" . $this->_slug;
 		}
 
 		// trim if necessary:
-		if (mb_strlen($this->slug) > $this->maxChars) {
-			$this->slug = mb_substr($this->slug, 0, $this->maxChars);
-		}
+		if (mb_strlen($this->_slug) > $this->maxChars)
+			$this->_slug = mb_substr($this->_slug, 0, $this->maxChars);
 
 		// lowercase url if needed to
-		if ($this->lowercaseUrl) {
-			$this->slug = mb_strtolower($this->slug, 'UTF-8');
-		}
+		if ($this->lowercaseUrl)
+			$this->_slug = mb_strtolower($this->_slug, 'UTF-8');
 
 		// done
-		return $this->slug;
+		return $this->_slug;
 	}
 
 	/**
@@ -167,7 +166,8 @@ class XSlugBehavior extends CActiveRecordBehavior {
 	 * @param string $str source string
 	 * @return string resulted string after manipulation.
 	 */
-	public function createBaseSlug($str) {
+	public function createBaseSlug($str)
+	{
 		// convert all spaces to underscores:
 		$treated = strtr($str, " ", "_");
 		// convert what's needed to convert to nothing (remove them...)
@@ -175,9 +175,8 @@ class XSlugBehavior extends CActiveRecordBehavior {
 		// convert underscores to dashes
 		$treated = strtr($treated, "_", "-");
 
-		if ($this->lowercaseUrl) {
+		if ($this->lowercaseUrl)
 			$treated = mb_strtolower($treated, 'UTF-8');
-		}
 
 		return $treated;
 	}
@@ -189,21 +188,35 @@ class XSlugBehavior extends CActiveRecordBehavior {
 	 * @param bool $id_prefix if an id prefix is expected in the slug or not.
 	 * @return int
 	 */
-	public function getIdFromSlug($slug, $id_prefix = true) {
+	public function getIdFromSlug($slug, $id_prefix = true)
+	{
 		$parts = explode("-", $slug);
-		if ($id_prefix) {
+
+		if ($id_prefix)
 			return $parts[0];
-		}
-		else {
-			// prepare the 'like' query condition
-			$like_construct = implode("%", $parts);
-			$like_construct = '%' . $like_construct . '%';
-			$ids = Yii::app()->db->createCommand()
-				->select('id')
-				->from($this->owner->tableName())
-				->where(array('like', $this->sourceStringAttr, $like_construct))
-				->queryAll();
-			switch (count($ids)) {
+		else
+		{
+			$builder = $this->getConnection()->getCommandBuilder();
+
+			$findCriteria = new CDbCriteria(array(
+				'select' => 't.'.$this->sourceIdAttr,
+				'params' => array(
+					':slug' => '%'.implode('%', $parts).'%'
+				),
+			));
+
+			$findCriteria->addCondition("LOWER(t.$this->sourceStringAttr) LIKE :slug");
+
+			if($this->getScopeCriteria())
+				$findCriteria->mergeWith($this->getScopeCriteria());
+
+			$ids = $builder->createFindCommand(
+				$this->owner->tableName(),
+				$findCriteria
+			)->queryColumn();
+
+			switch (count($ids))
+			{
 				case 0:
 				{
 					// no such record found! Wierd and probably indicate a problem with selecting id-less slugs in the first
@@ -216,11 +229,11 @@ class XSlugBehavior extends CActiveRecordBehavior {
 				}
 				case 1:
 				{
-					return $ids[0]['id'];
+					return $ids[0];
 					break;
 				}
 				default:
-					{
+				{
 					/*
 					 * more than 1? This means you have more than 1 record with a title like the one we got a slug for.
 					 * this probably means that choosing id-less slug wasn't a good design decision... .
@@ -233,9 +246,39 @@ class XSlugBehavior extends CActiveRecordBehavior {
 					Yii::log("Error: more than matched record for given slug! Returning just one (no particular order). Model" .
 						" class: " . get_class($this->owner) . ", slug: '" . $slug . "', (id prefixing=false). Got these IDs: " .
 						$ids_concat, CLogger::LEVEL_ERROR, __METHOD__);
-					return $ids[0]['id'];
-					}
+					return $ids[0];
+				}
 			}
 		}
+	}
+
+	/**
+	 * Get DB connection.
+	 * @return CDbConnection
+	 */
+	protected function getConnection()
+	{
+		if(!isset($this->_conn))
+			$this->_conn = $this->getOwner()->dbConnection;
+		return $this->_conn;
+	}
+
+	/**
+	 * Get default scope criteria.
+	 * @return CDbCriteria
+	 */
+	protected function getScopeCriteria()
+	{
+		if(!$this->_scopeCriteria)
+		{
+			$scope = $this->scope;
+
+			if(is_array($this->scope) && !empty($this->scope))
+				$scope = new CDbCriteria($this->scope);
+
+			if($scope instanceof CDbCriteria)
+				$this->_scopeCriteria = $scope;
+		}
+		return $this->_scopeCriteria;
 	}
 }
