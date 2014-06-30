@@ -280,6 +280,13 @@ class PageModule extends CWebModule
 	 * Defaults to array()
 	 */
 	public $menuWidgetConfig=array();
+
+	/**
+	 * @var boolean whether an id prefix is expected in the slug or not.
+	 * @see XSlugBehavior class
+	 */
+	public $slugIdPrefix=true;
+
 	/**
 	 * @var mixed the CSS file used by wysiwyg editor for the article content.
 	 * Defaults false, meaning no CSS file will be used.

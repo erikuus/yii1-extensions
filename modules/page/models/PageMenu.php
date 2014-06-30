@@ -91,6 +91,13 @@ class PageMenu extends CActiveRecord
 			'SlugBehavior' => array(
 				'class'=>'ext.behaviors.XSlugBehavior',
 				'sourceStringAttr'=>'title',
+				'avoidIdPrefixing' => Yii::app()->getModule('page')->slugIdPrefix ? false : true,
+				'scope'=>array(
+					'condition'=>'t.lang=:lang AND deleted IS FALSE',
+					'params'=>array(
+						':lang'=>yii::app()->language,
+					),
+				),
 			),
 			'ReorderBehavior' => array(
 				'class'=>'ext.behaviors.XReorderBehavior',
@@ -106,14 +113,27 @@ class PageMenu extends CActiveRecord
 	{
 		return array(
 			array('title, type', 'required'),
-			array('url', 'ext.validators.XCompareRequiredValidator', 'compareAttribute'=>'type', 'compareValue'=>self::TYPE_URL),
-			array('url', 'url'),
-			array('position, type', 'numerical', 'integerOnly'=>true),
-			array('type', 'in', 'range'=>array(self::TYPE_LABEL, self::TYPE_CONTENT, self::TYPE_HIDDEN_CONTENT, self::TYPE_URL)),
 			array('lang', 'length', 'max'=>5),
 			array('title, url', 'length', 'max'=>256),
+			array('url', 'url'),
+			array('position, type', 'numerical', 'integerOnly'=>true),
 			array('deleted', 'boolean'),
 			array('content', 'safe'),
+			array('url', 'ext.validators.XCompareRequiredValidator', 'compareAttribute'=>'type', 'compareValue'=>self::TYPE_URL, 'allowEmpty'=>false),
+			array('type', 'in', 'range'=>array(
+				self::TYPE_LABEL,
+				self::TYPE_CONTENT,
+				self::TYPE_HIDDEN_CONTENT,
+				self::TYPE_URL
+			)),
+			array('title', 'unique','on'=>'noSlugIdPrefix',
+				'criteria'=>array(
+					'condition'=>'t.lang=:lang AND deleted IS FALSE',
+					'params'=>array(
+						':lang'=>yii::app()->language,
+					),
+				),
+			),
 			// defaults
 			array('type', 'default', 'value'=>self::TYPE_LABEL),
 			array('deleted', 'default', 'value'=>0),

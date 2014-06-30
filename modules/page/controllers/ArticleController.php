@@ -119,13 +119,13 @@ class ArticleController extends PageController
 		$this->layout='page';
 
 		if($topic)
-			$menuId=PageMenu::model()->getIdFromSlug($topic);
+			$menuId=PageMenu::model()->getIdFromSlug($topic, $this->module->slugIdPrefix);
 		else
 			$menuId=PageMenu::model()->firstItemId;
 
 		$menu=PageMenu::model()->activeItem()->with('articles')->findbyPk($menuId);
 		if($menu===null)
-			die($menuId); //$this->redirect(array('article/index'));
+			$this->redirect(array('article/index'));
 
 		$this->render('index',array(
 			'menu'=>$menu,

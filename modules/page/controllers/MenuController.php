@@ -32,6 +32,9 @@ class MenuController extends PageController
 	{
 		$model=new PageMenu;
 
+		if(!$this->module->slugIdPrefix)
+			$model->scenario='noSlugIdPrefix';
+
 		// Uncomment the following line if AJAX validation is needed
 		// $this->performAjaxValidation($model);
 
@@ -63,6 +66,9 @@ class MenuController extends PageController
 	public function actionUpdate()
 	{
 		$model=$this->loadModel();
+
+		if(!$this->module->slugIdPrefix)
+			$model->scenario='noSlugIdPrefix';
 
 		// Uncomment the following line if AJAX validation is needed
 		// $this->performAjaxValidation($model);
