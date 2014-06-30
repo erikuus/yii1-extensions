@@ -51,8 +51,22 @@
  *
  * 4. Now you will be able to access PageModule in your browser using the following URL
  * http://localhost/path/to/app/index.php?r=page
- * or if your application is using path-format URLs, you can access PageModule via:
+ *
+ * If your application is using path-format URLs, you can access PageModule via:
  * http://localhost/path/to/app/index.php/page
+ *
+ * You can also configure your application Url Manager to set special rule for page module.
+ * For example:
+ * <pre>
+ * 'urlManager'=>array(
+ *     'urlFormat'=>'path',
+ *     'showScriptName'=>false,
+ *     'appendParams'=>false,
+ *     'rules'=>array(
+ *         'article/<topic:\S+>' => 'page/article/index',
+ *     ),
+ * ),
+ * </pre>
  *
  * 5. You can also plug anywhere into your application PageMenuWidget as follows:
  * <pre>
