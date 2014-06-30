@@ -70,19 +70,8 @@ class XSlugBehavior extends CActiveRecordBehavior
 	 */
 	public $scope = array();
 
-	/**
-	 * @var CDbCriteria null scope CDbCriteria cache.
-	 */
-	private $_scopeCriteria = null;
-	/**
-	 * @var string the slug.
-	 */
 	private $_slug;
-	/**
-	 * @var CDbConnection
-	 */
-	private $_conn;
-
+	private $_ids;
 
 	/**
 	 * @return string: the prepared slug for 'this->owner' model object
@@ -196,25 +185,7 @@ class XSlugBehavior extends CActiveRecordBehavior
 			return $parts[0];
 		else
 		{
-			$builder = $this->getConnection()->getCommandBuilder();
-
-			$findCriteria = new CDbCriteria(array(
-				'select' => 't.'.$this->sourceIdAttr,
-				'params' => array(
-					':slug' => '%'.implode('%', $parts).'%'
-				),
-			));
-
-			$findCriteria->addCondition("LOWER(t.$this->sourceStringAttr) LIKE :slug");
-
-			if($this->getScopeCriteria())
-				$findCriteria->mergeWith($this->getScopeCriteria());
-
-			$ids = $builder->createFindCommand(
-				$this->owner->tableName(),
-				$findCriteria
-			)->queryColumn();
-
+			$ids = $this->getIds($parts);
 			switch (count($ids))
 			{
 				case 0:
@@ -253,32 +224,35 @@ class XSlugBehavior extends CActiveRecordBehavior
 	}
 
 	/**
-	 * Get DB connection.
-	 * @return CDbConnection
+	 * @param array $slugParts the exploded parts of slug
+	 * @return array ids for a given slug
 	 */
-	protected function getConnection()
+	protected function getIds($slugParts)
 	{
-		if(!isset($this->_conn))
-			$this->_conn = $this->getOwner()->dbConnection;
-		return $this->_conn;
-	}
-
-	/**
-	 * Get default scope criteria.
-	 * @return CDbCriteria
-	 */
-	protected function getScopeCriteria()
-	{
-		if(!$this->_scopeCriteria)
+		if($this->_ids===null)
 		{
-			$scope = $this->scope;
+			$builder = $this->getOwner()->dbConnection->getCommandBuilder();
+
+			$findCriteria = new CDbCriteria(array(
+				'select' => 't.'.$this->sourceIdAttr,
+				'params' => array(
+					':slug' => '%'.implode('%', $slugParts).'%'
+				),
+			));
+
+			$findCriteria->addCondition("LOWER(t.$this->sourceStringAttr) LIKE :slug");
 
 			if(is_array($this->scope) && !empty($this->scope))
-				$scope = new CDbCriteria($this->scope);
+			{
+				$scopeCriteria = new CDbCriteria($this->scope);
+				$findCriteria->mergeWith($scopeCriteria);
+			}
 
-			if($scope instanceof CDbCriteria)
-				$this->_scopeCriteria = $scope;
+			$this->_ids = $builder->createFindCommand(
+				$this->owner->tableName(),
+				$findCriteria
+			)->queryColumn();
 		}
-		return $this->_scopeCriteria;
+		return $this->_ids;
 	}
 }
