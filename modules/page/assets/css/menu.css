@@ -10,21 +10,14 @@
 	background-color: #ffffff;
 }
 
-.page-menu form {
-	display: block;
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	box-sizing: border-box;
-	width: 100%;
-	padding: 10px 15px;
+.page-menu-admin {
+	float: right;
+	margin: 3px 6px 0 0;
 }
 
+
 .page-menu-search-field {
-	display: block;
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	box-sizing: border-box;
-	width: 100%;
+	margin: 10px 15px;
 	padding: 4px;
 	border: 1px solid #dddddd;
 	-webkit-border-radius: 3px;
@@ -35,11 +28,6 @@
 
 .page-menu-search-field:focus {
 	border: 1px solid rgba(82, 168, 236, 0.8);
-}
-
-.page-menu-admin {
-	float: right;
-	margin: 3px 6px 0 0;
 }
 
 .page-menu-label {

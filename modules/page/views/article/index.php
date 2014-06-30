@@ -38,7 +38,7 @@ $this->widget('ext.widgets.alert.XAlert',array(
 		<?php if($this->isAdminAccess()):?>
 			<?php echo CHtml::link(
 				CHtml::image($this->getAsset('/images/update.png'),Yii::t('PageModule.ui', 'Update Menu')),
-				$this->createUrl('menu/update',array('id'=>$menu->id))
+				$this->createReturnableUrl('menu/update',array('id'=>$menu->id))
 			);?>
 			<?php echo CHtml::link(
 				CHtml::image($this->getAsset('/images/admin.png'),Yii::t('PageModule.ui', 'Manage Articles')),
@@ -46,7 +46,7 @@ $this->widget('ext.widgets.alert.XAlert',array(
 			); ?>
 			<?php echo CHtml::link(
 				CHtml::image($this->getAsset('/images/new.png'),Yii::t('PageModule.ui', 'New Article')),
-				$this->createUrl('article/create',array('menuId'=>$menu->id))
+				$this->createReturnableUrl('article/create',array('menuId'=>$menu->id))
 			); ?>
 		<?php endif; ?>
 	</h1>
@@ -78,7 +78,7 @@ $this->widget('ext.widgets.alert.XAlert',array(
 					CHtml::image($this->getAsset('/images/update.png'),
 					Yii::t('PageModule.ui', 'Update Article')
 				),
-				$this->createUrl('article/update',array('id'=>$article->id,'#'=>'article'.$article->id))
+				$this->createReturnableUrl('article/update',array('id'=>$article->id),array('#'=>'article'.$article->id))
 			);?>
 		<?php endif?>
 		</h2>

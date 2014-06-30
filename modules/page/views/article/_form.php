@@ -61,7 +61,7 @@ $cs->registerCssFile($this->getAsset('/css/xheditor.css'));
 
 	<div class="action">
 		<?php echo CHtml::submitButton($model->isNewRecord ? Yii::t('PageModule.ui', 'Create') : Yii::t('PageModule.ui','Save'), array('class'=>$this->module->primaryButtonCssClass)); ?>
-		<?php echo CHtml::link(Yii::t('PageModule.ui', 'Cancel'), array('admin'), array('class'=>$this->module->secondaryButtonCssClass)); ?>
+		<?php echo CHtml::link(Yii::t('PageModule.ui', 'Cancel'), $this->getReturnUrl() ? $this->getReturnUrl() : array('admin'), array('class'=>$this->module->secondaryButtonCssClass)); ?>
 	</div>
 
 <?php $this->endWidget(); ?>
