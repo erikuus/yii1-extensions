@@ -89,9 +89,10 @@ class PageMenu extends CActiveRecord
 	{
 		return array(
 			'SlugBehavior' => array(
-				'class'=>'ext.behaviors.XSlugBehavior',
+				'class'=>'ext.behaviors.sluggable.XSluggableBehavior',
 				'sourceStringAttr'=>'title',
-				'avoidIdPrefixing' => Yii::app()->getModule('page')->slugIdPrefix ? false : true,
+				'slugIdPrefix' => Yii::app()->getModule('page')->slugIdPrefix,
+				'slugInflector' => Yii::app()->getModule('page')->slugInflector,
 				'scope'=>array(
 					'condition'=>'t.lang=:lang AND deleted IS FALSE',
 					'params'=>array(
@@ -128,14 +129,13 @@ class PageMenu extends CActiveRecord
 			)),
 			array('title', 'unique','on'=>'noSlugIdPrefix',
 				'criteria'=>array(
-					'condition'=>'t.lang=:lang AND deleted IS FALSE',
+					'condition'=>'t.lang=:lang AND t.deleted IS FALSE',
 					'params'=>array(
 						':lang'=>yii::app()->language,
 					),
 				),
 			),
 			// defaults
-			array('type', 'default', 'value'=>self::TYPE_LABEL),
 			array('deleted', 'default', 'value'=>0),
 			// filters
 			array('title', 'filter', 'filter'=>'strip_tags'),

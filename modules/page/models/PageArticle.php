@@ -79,6 +79,12 @@ class PageArticle extends CActiveRecord
 	public function behaviors()
 	{
 		return array(
+			'SlugBehavior' => array(
+				'class'=>'ext.behaviors.sluggable.XSluggableBehavior',
+				'sourceStringAttr'=>'title',
+				'slugIdPrefix' => Yii::app()->getModule('page')->slugIdPrefix,
+				'slugInflector' => Yii::app()->getModule('page')->slugInflector,
+			),
 			'ReorderBehavior' => array(
 				'class'=>'ext.behaviors.XReorderBehavior',
 				'groupId'=>'menu_id',
@@ -94,9 +100,9 @@ class PageArticle extends CActiveRecord
 	{
 		return array(
 			array('menu_id, title, content','required'),
-			array('menu_id, position', 'numerical', 'integerOnly'=>true),
 			array('lang', 'length', 'max'=>5),
 			array('title', 'length', 'max'=>256),
+			array('menu_id, position', 'numerical', 'integerOnly'=>true),
 			array('menu_id, searchTerm', 'safe', 'on'=>'search'),
 			// filters
 			array('title', 'filter', 'filter'=>'strip_tags'),

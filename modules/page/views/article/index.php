@@ -62,7 +62,7 @@ $this->widget('ext.widgets.alert.XAlert',array(
 		<div class="page-article-sub-nav">
 			<ol>
 			<?php foreach ($menu->articles as $article): ?>
-				<li><?php echo CHtml::link(CHtml::encode($article->title), '#article'.$article->id); ?></li>
+				<li><?php echo CHtml::link(CHtml::encode($article->title), '#'.$article->generateUniqueSlug()); ?></li>
 			<?php endforeach; ?>
 			</ol>
 		</div>
@@ -71,14 +71,14 @@ $this->widget('ext.widgets.alert.XAlert',array(
 	<?php foreach ($menu->articles as $article): ?>
 		<h2 class="page-article-subtitle">
 		<?php if($menu->articleCount>1): ?>
-			<?php echo CHtml::tag('span', array('id'=>'article'.$article->id), CHtml::encode($article->title)) ?>
+			<?php echo CHtml::tag('span', array('id'=>$article->generateUniqueSlug()), CHtml::encode($article->title)) ?>
 		<?php endif; ?>
 		<?php if($this->isAdminAccess()):?>
 			<?php echo CHtml::link(
 					CHtml::image($this->getAsset('/images/update.png'),
 					Yii::t('PageModule.ui', 'Update Article')
 				),
-				$this->createReturnableUrl('article/update',array('id'=>$article->id),array('#'=>'article'.$article->id))
+				$this->createReturnableUrl('article/update',array('id'=>$article->id),array('#'=>$article->generateUniqueSlug()))
 			);?>
 		<?php endif?>
 		</h2>
