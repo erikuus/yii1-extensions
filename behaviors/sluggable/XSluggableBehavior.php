@@ -10,7 +10,7 @@
  * {
  *     return array(
  *         'slug' => array(
- *             'class' => 'ext.behaviors.XSlugBehavior',
+ *             'class' => 'ext.behaviors.sluggable.XSluggableBehavior',
  *             'sourceStringAttr' => 'title',
  *         ),
  *     );
@@ -34,39 +34,54 @@
  * @author Boaz Rymland
  * @version 1.0.0
  *
+ * Essentially rewritten version
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 2.0.0
  */
-class XSlugBehavior extends CActiveRecordBehavior
+
+include_once __DIR__ . '/Doctrine_Inflector.php';
+
+class XSluggableBehavior extends CActiveRecordBehavior
 {
 	/**
-	 * @var string the attribute that contains the 'main string' that is used when building the slug
+	 * @var string the attribute that contains the 'main string' that is used when building the slug.
+	 * Defaults to 'title'
 	 */
-	public $sourceStringAttr = "title";
-	/**
-	 * @var string the attribute that contains the 'main string' that is used when building the slug
-	 */
-	public $sourceStringPrepareMethod = false;
+	public $sourceStringAttr = 'title';
 	/**
 	 * @var string the attribute/column name that holds the Id/primary-key for this model.
+	 * Defaults to 'id'
 	 */
 	public $sourceIdAttr = 'id';
 	/**
-	 * @var boolean Supports avoiding prefixing the 'id' attribute of the model in the beginning of the slug. Use
-	 * with caution(!) as this is tricky can can lead to two record with the same slug (consider carefully
-	 * your requirements before setting this to true).
+	 * @var boolean whether prefixing the 'id' attribute of the model in the beginning of the slug.
+	 * Use with caution as setting this to false can lead to two record with the same slug (consider carefully
+	 * your requirements).
+	 * Defaults to true
 	 */
-	public $avoidIdPrefixing = false;
+	public $slugIdPrefix = true;
 	/**
-	 * @var integer maximum allowed slug length. slug will be crudely trimmed to this length if longer than it.
+	 * @var boolean whether to use Doctrine_Inflector class to build the slug.
+	 * If Doctrine Inflector is set true, all special chars are
+	 * replaced by standard a-z 0-9 chars.
+	 * Defaults to false
+	 */
+	public $slugInflector = false;
+	/**
+	 * @var integer maximum allowed slug length. Slug will be crudely trimmed to this length if longer than it.
+	 * Defaults to 100
 	 */
 	public $maxChars = 100;
 	/**
-	 * @var boolean whether to lowercase the resulted URLs or not. default = yes.
-	 */
-	public $lowercaseUrl = true;
-	/**
-	 * @var array CDbCriteria default scope criteria.
+	 * @var array CDbCriteria scope criteria that is merged with find slug criteria (if slugIdPrefix is set to false).
+	 * For example, if you use soft delete and multilingual solution, you may want to
+	 * define scope as follows:
+	 * 'scope'=>array(
+	 *     'condition'=>'t.lang=:lang AND deleted IS FALSE',
+	 *     'params'=>array(
+	 *         ':lang'=>yii::app()->language,
+	 *     ),
+	 * ),
 	 */
 	public $scope = array();
 
@@ -79,7 +94,7 @@ class XSlugBehavior extends CActiveRecordBehavior
 	 */
 	public function generateUniqueSlug()
 	{
-		if (!$this->avoidIdPrefixing)
+		if ($this->slugIdPrefix)
 		{
 			// check that the defined 'id attribute' exists for 'this' model. explode if not.
 			if (!$this->owner->hasAttribute($this->sourceIdAttr))
@@ -87,46 +102,40 @@ class XSlugBehavior extends CActiveRecordBehavior
 				throw new CException ("requested to prepare a slug for " .
 						get_class($this->owner) .
 						" (id=" . $this->owner->getPrimaryKey() .
-						") but this model doesn't have an attribute named " . $this->sourceIdAttr .
-						" from which I'm supposed to create the slug. Don't know how to continue. Please help!"
+						") but this model doesn't have an attribute named " . $this->sourceIdAttr
 				);
 			}
 		}
-		// if we're supposed to get the slug raw material from a method, check it exists and if so run it.
-		if ($this->sourceStringPrepareMethod)
-		{
-			if (method_exists($this->owner, $this->sourceStringPrepareMethod))
-				$this->_slug = $this->createBaseSlug($this->owner->{$this->sourceStringPrepareMethod}());
-			else
-			{
-				throw new CException ("requested to prepare a slug for " .
-						get_class($this->owner) .
-						" (id=" . $this->owner->getPrimaryKey() .
-						") but this model doesn't have the method that was supposed to return the string for the slug (method name={$this->sourceStringPrepareMethod})." .
-						" Don't know how to continue. Please fix it!"
-				);
-			}
-
-		}
-		// no preparation method - check that the defined 'source string attribute' exists for 'this' model. explode if not.
 		else
 		{
-			if (!$this->owner->hasAttribute($this->sourceStringAttr))
+			// inflector can not be used when id prefix is not used
+			if ($this->slugInflector)
 			{
-				throw new CException ("requested to prepare a slug for " .
+				throw new CException ("requested inlector to prepare a slug for " .
 						get_class($this->owner) .
 						" (id=" . $this->owner->getPrimaryKey() .
-						") but this model doesn't have an attribute named " . $this->sourceStringAttr .
-						" from which I'm supposed to create the slug. Don't know how to continue. Please fix it!"
+						") but inflector can not be used when id prefix is not used"
 				);
 			}
-			// create the base slug out of this attribute:
-			// convert all spaces to underscores:
-			$this->_slug = $this->createBaseSlug($this->owner->{$this->sourceStringAttr});
 		}
 
+		if (!$this->owner->hasAttribute($this->sourceStringAttr))
+		{
+			throw new CException ("requested to prepare a slug for " .
+					get_class($this->owner) .
+					" (id=" . $this->owner->getPrimaryKey() .
+					") but this model doesn't have an attribute named " . $this->sourceStringAttr
+			);
+		}
+
+		// create the base slug out of this attribute:
+		if($this->slugInflector)
+			$this->_slug = Doctrine_Inflector::urlize($this->owner->{$this->sourceStringAttr});
+		else
+			$this->_slug = $this->createSimpleSlug($this->owner->{$this->sourceStringAttr});
+
 		// prepend everything with the id of the model followed by a dash
-		if (!$this->avoidIdPrefixing)
+		if ($this->slugIdPrefix)
 		{
 			$id_attr = $this->sourceIdAttr;
 			$this->_slug = $this->owner->$id_attr . "-" . $this->_slug;
@@ -135,10 +144,6 @@ class XSlugBehavior extends CActiveRecordBehavior
 		// trim if necessary:
 		if (mb_strlen($this->_slug) > $this->maxChars)
 			$this->_slug = mb_substr($this->_slug, 0, $this->maxChars);
-
-		// lowercase url if needed to
-		if ($this->lowercaseUrl)
-			$this->_slug = mb_strtolower($this->_slug, 'UTF-8');
 
 		// done
 		return $this->_slug;
@@ -155,19 +160,18 @@ class XSlugBehavior extends CActiveRecordBehavior
 	 * @param string $str source string
 	 * @return string resulted string after manipulation.
 	 */
-	public function createBaseSlug($str)
+	public function createSimpleSlug($str)
 	{
 		// convert all spaces to underscores:
-		$treated = strtr($str, " ", "_");
+		$str = strtr($str, array(' '=>'_'));
 		// convert what's needed to convert to nothing (remove them...)
-		$treated = preg_replace('/[\!\@\#\$\%\^\&\*\(\)\+\=\~\:\.\,\;\'\"\<\>\/\\\`]/', "", $treated);
+		$str = preg_replace('/[\?\!\@\#\$\%\^\&\*\(\)\+\=\~\:\.\,\;\'\"\<\>\/\\\`]/', "", $str);
 		// convert underscores to dashes
-		$treated = strtr($treated, "_", "-");
+		$str = strtr($str, "_", "-");
+		// lowercase url
+		$str = mb_strtolower($str, 'UTF-8');
 
-		if ($this->lowercaseUrl)
-			$treated = mb_strtolower($treated, 'UTF-8');
-
-		return $treated;
+		return $str;
 	}
 
 	/**
@@ -236,7 +240,7 @@ class XSlugBehavior extends CActiveRecordBehavior
 			$findCriteria = new CDbCriteria(array(
 				'select' => 't.'.$this->sourceIdAttr,
 				'params' => array(
-					':slug' => '%'.implode('%', $slugParts).'%'
+					':slug' => implode('%', $slugParts).'%'
 				),
 			));
 
