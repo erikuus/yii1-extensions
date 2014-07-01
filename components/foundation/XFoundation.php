@@ -31,7 +31,7 @@
  *
  * 2. In layout or in view files you can now use
  *
- * 2.1 Grid View
+ * 2.1 Grid
  *
  * <div class="row">
  *     <div class="large-4 medium-4 small-12 columns">

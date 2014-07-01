@@ -52,17 +52,17 @@ class XSlugBehavior extends CActiveRecordBehavior
 	 */
 	public $sourceIdAttr = 'id';
 	/**
-	 * @var bool Supports avoiding prefixing the 'id' attribute of the model in the beginning of the slug. Use
+	 * @var boolean Supports avoiding prefixing the 'id' attribute of the model in the beginning of the slug. Use
 	 * with caution(!) as this is tricky can can lead to two record with the same slug (consider carefully
 	 * your requirements before setting this to true).
 	 */
 	public $avoidIdPrefixing = false;
 	/**
-	 * @var int maximum allowed slug length. slug will be crudely trimmed to this length if longer than it.
+	 * @var integer maximum allowed slug length. slug will be crudely trimmed to this length if longer than it.
 	 */
 	public $maxChars = 100;
 	/**
-	 * @var bool whether to lowercase the resulted URLs or not. default = yes.
+	 * @var boolean whether to lowercase the resulted URLs or not. default = yes.
 	 */
 	public $lowercaseUrl = true;
 	/**
