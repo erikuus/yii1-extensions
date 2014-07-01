@@ -3,7 +3,8 @@
  * XDynamicForm class file.
  *
  * XDynamicForm enables to use checkbox and radio button lists so that
- * when a checkbox or radio button is checked/unchecked some content is shown/hidden
+ * when a checkbox or radio button is checked/unchecked some content
+ * next to checkbox or radio button is shown/hidden
  *
  * For example, we may have model Person where there is 'gender' property
  * and gender options defined as follows:
@@ -48,34 +49,45 @@
 class XDynamicForm extends CActiveForm
 {
 	/**
-	 * Default CSS class for container that holds checkbox/radiobutton
+	 * @var string CSS class for container that holds checkbox/radiobutton
 	 * and the sibling tag that is shown only when checkbox/radiobutton is selected.
+	 * Defaults to 'dynamic-container'
 	 */
 	public $containerCssClass='dynamic-container';
 	/**
-	 * Default CSS class for the tag that is shown only when sibling checkbox/radiobutton is selected.
+	 * @var string CSS class for the tag that is shown only when sibling checkbox/radiobutton is selected.
+	 * Defaults to 'dynamic-content'
 	 */
 	public $contentCssClass='dynamic-content';
+	/**
+	 * @var boolean whether to enable radiobutton to toggle dynamic area
+	 * Defaults to true
+	 */
+	public $enableRadioToggle=true;
+	/**
+	 * @var boolean whether to enable checkbox to toggle dynamic area
+	 * Defaults to true
+	 */
+	public $enableChecboxToggle=true;
+	/**
+	 * @var boolean whether to enable select to toggle elements based on their css class names
+	 * Defaults to true
+	 */
+	public $enableSelectToggle=true;
 
 	/**
 	 * Initializes the widget.
 	 */
 	public function init()
 	{
-		$script =
-<<<SCRIPT
-	$('#{$this->id} .{$this->containerCssClass} :radio:not(:checked)').siblings('.{$this->contentCssClass}').hide();
-	$('#{$this->id} .{$this->containerCssClass} :radio').click(function(){
-		$('.{$this->contentCssClass}', $(this).parents('div:first')).css('display', this.checked ? 'inline':'none');
-		$('#{$this->id} .{$this->containerCssClass} :radio:not(:checked)').siblings('.{$this->contentCssClass}').hide();
-	});
-	$('#{$this->id} .{$this->containerCssClass} :checkbox:not(:checked)').siblings('.{$this->contentCssClass}').hide();
-	$('#{$this->id} .{$this->containerCssClass} :checkbox').click(function(){
-		$('.{$this->contentCssClass}', $(this).parents('div:first')).css('display', this.checked ? 'block':'none');
-	});
-SCRIPT;
+		if($this->enableRadioToggle)
+			$this->registerRadioClientScript();
 
-		Yii::app()->clientScript->registerScript(__CLASS__.'#'.$this->id, $script, CClientScript::POS_READY);
+		if($this->enableChecboxToggle)
+			$this->registerCheckboxClientScript();
+
+		if($this->enableSelectToggle)
+			$this->registerSelectClientScript();
 
 		parent::init();
 	}
@@ -177,5 +189,51 @@ SCRIPT;
 			$htmlOptions = array_merge($htmlOptions, array('class'=>$this->containerCssClass));
 
 		echo CHtml::tag('div', $htmlOptions, $input);
+	}
+
+	/**
+	 * Register client script for radio
+	 */
+	protected function registerRadioClientScript()
+	{
+		$script =
+<<<SCRIPT
+	$('#{$this->id} .{$this->containerCssClass} :radio:not(:checked)').siblings('.{$this->contentCssClass}').hide();
+	$('#{$this->id} .{$this->containerCssClass} :radio').click(function(){
+		$('.{$this->contentCssClass}', $(this).parents('div:first')).css('display', this.checked ? 'inline':'none');
+		$('#{$this->id} .{$this->containerCssClass} :radio:not(:checked)').siblings('.{$this->contentCssClass}').hide();
+	});
+SCRIPT;
+		Yii::app()->clientScript->registerScript(__CLASS__.'#radio#'.$this->id, $script, CClientScript::POS_READY);
+	}
+
+	/**
+	 * Register client script for checkbox
+	 */
+	protected function registerCheckboxClientScript()
+	{
+		$script =
+<<<SCRIPT
+	$('#{$this->id} .{$this->containerCssClass} :checkbox:not(:checked)').siblings('.{$this->contentCssClass}').hide();
+	$('#{$this->id} .{$this->containerCssClass} :checkbox').click(function(){
+		$('.{$this->contentCssClass}', $(this).parents('div:first')).css('display', this.checked ? 'block':'none');
+	});
+SCRIPT;
+		Yii::app()->clientScript->registerScript(__CLASS__.'#checkbox#'.$this->id, $script, CClientScript::POS_READY);
+	}
+
+	/**
+	 * Register client script for select
+	 */
+	protected function registerSelectClientScript()
+	{
+		$script =
+<<<SCRIPT
+	$('#{$this->id} select[rel*=toggle]').change(function(){
+		alert($(this).val());
+		//$(this).attr('rel')
+	});
+SCRIPT;
+		Yii::app()->clientScript->registerScript(__CLASS__.'#select#'.$this->id, $script, CClientScript::POS_READY);
 	}
 }
