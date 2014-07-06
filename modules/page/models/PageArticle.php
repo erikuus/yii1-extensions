@@ -1,12 +1,9 @@
 <?php
 
-/**
- * This is the model class for table "vau.tbl_page_article".
- */
 class PageArticle extends CActiveRecord
 {
 	/**
-	 * The followings are the available columns in table 'vau.tbl_page_article':
+	 * The followings are the available columns in table:
 	 * @property integer $id
 	 * @property integer $menu_id
 	 * @property integer $position
@@ -165,7 +162,7 @@ class PageArticle extends CActiveRecord
 	 */
 	public function getTitleLink()
 	{
-		$url=Yii::app()->controller->createUrl('article/index',array('topic'=>$this->menu->generateUniqueSlug(),'#'=>'article'.$this->id));
+		$url=Yii::app()->controller->createUrl('article/index',array('topic'=>$this->menu->generateUniqueSlug(),'#'=>$this->generateUniqueSlug()));
 		return CHtml::link(CHtml::encode($this->title), $url);
 	}
 
