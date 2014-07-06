@@ -113,6 +113,7 @@ class XFoundation extends CApplicationComponent
 	{
 		$cs=Yii::app()->clientScript;
 		$cs->registerCssFile($this->getAssetsUrl().'/css/foundation.css');
+		$cs->registerCssFile($this->getAssetsUrl().'/css/normalize.css');
 
 		// override grid max width
 		if($this->maxWidth)
