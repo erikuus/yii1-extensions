@@ -305,6 +305,13 @@ class PageModule extends CWebModule
 	 */
 	public $slugInflector=true;
 	/**
+	 * @var boolean whether to enable saving reference code for articles.
+	 * Using one reference code for artcles in different languages
+	 * enables to link to same content within multilingual application.
+	 * Defaults false
+	 */
+	public $enableRefcode=false;
+	/**
 	 * @var mixed the CSS file used by wysiwyg editor for the article content.
 	 * Defaults false, meaning no CSS file will be used.
 	 * Otherwise, the specified CSS file will be loaded by editor.

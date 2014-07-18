@@ -16,6 +16,7 @@ class m121017_115122_create_table_menu extends CDbMigration
 				title character varying(256),
 				content text,
 				url character varying(256),
+				refcode character varying(128),
 				deleted boolean DEFAULT false,
 				CONSTRAINT pk_page_menu PRIMARY KEY (id)
 			)

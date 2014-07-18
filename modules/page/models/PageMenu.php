@@ -14,6 +14,7 @@ class PageMenu extends CActiveRecord
 	 * @property string $title
 	 * @property string $content
 	 * @property string $url
+	 * @property string $refcode
 	 * @property boolean $deleted
 	 */
 
@@ -116,6 +117,7 @@ class PageMenu extends CActiveRecord
 			array('title, type', 'required'),
 			array('lang', 'length', 'max'=>5),
 			array('title, url', 'length', 'max'=>256),
+			array('refcode', 'length', 'max'=>128),
 			array('url', 'url'),
 			array('position, type', 'numerical', 'integerOnly'=>true),
 			array('deleted', 'boolean'),
