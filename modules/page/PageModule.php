@@ -288,6 +288,12 @@ class PageModule extends CWebModule
 	 */
 	public $gridCssClass='items';
 	/**
+	 * @var string class name for yii grid button column. Defaults to 'CButtonColumn'.
+	 * When using CSS framework one can extend CButtonColumn to display icon tags
+	 * (<i><i>) instead of images.
+	 */
+	public $gridButtonColumnClass='CButtonColumn';
+	/**
 	 * @var array configuration for PageMenuWidget when used via page template.
 	 * Refer to PageMenuWidget class for possible configuration.
 	 * Defaults to array()

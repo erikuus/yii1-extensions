@@ -49,7 +49,7 @@ $this->breadcrumbs=array(
 			'name'=>'position',
 		),
 		array(
-			'class'=>'CButtonColumn',
+			'class'=>$this->module->gridButtonColumnClass,
 			'template'=>'{update} {delete}',
 			'deleteConfirmation'=>Yii::t('PageModule.ui','Are you sure to delete this item?'),
 		),

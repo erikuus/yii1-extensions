@@ -25,7 +25,7 @@
 			'visible'=>$this->isAdminAccess() && $this->action->id=='admin'
 		),
 		array(
-			'class'=>'CButtonColumn',
+			'class'=>$this->module->gridButtonColumnClass,
 			'template'=>'{update} {delete}',
 			'updateButtonUrl'=>'$this->grid->controller->createReturnableUrl("update",array("id"=>$data->primaryKey))',
 			'deleteButtonUrl'=>'$this->grid->controller->createReturnableUrl("delete",array("id"=>$data->primaryKey))',
