@@ -26,6 +26,17 @@ class MenuController extends PageController
 	}
 
 	/**
+	 * Redirects to articles by refcode
+	 */
+	public function actionRedirect($refcode)
+	{
+		$model=PageMenu::model()->active()->findByAttributes(array('refcode'=>$refcode));
+		if($model===null)
+			throw new CHttpException(404,'The requested page does not exist.');
+		$this->redirect(array('/page/article/index','topic'=>$model->generateUniqueSlug()));
+	}
+
+	/**
 	 * Creates a new model.
 	 */
 	public function actionCreate()

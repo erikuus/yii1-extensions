@@ -26,5 +26,6 @@ return array (
   'Label' => 'Silt',
   'Content' => 'Sisu',
   'Hidden Content' => 'Varjatud sisu',
-  'Url' => 'Viide',
+  'Url' => 'Link',
+  'Refcode' => 'Viitekood',
 );

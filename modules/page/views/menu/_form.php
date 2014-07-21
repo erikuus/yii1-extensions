@@ -44,23 +44,31 @@ $cs->registerScript('toggle', "
 		<?php echo $form->dropDownList($model, 'type', $model->typeOptions, array('prompt'=>'','style'=>'width:300px')); ?>
 	</div>
 
-	<div class="simple" id="content-container" style="display: none">
-		<?php echo $form->labelEx($model,'content'); ?>
-		<?php $this->widget('ext.widgets.xheditor.XHeditor',array(
-			'model'=>$model,
-			'modelAttribute'=>'content',
-			'config'=>array(
-				'id'=>CHtml::activeId($model,'content'),
-				'loadCSS'=>$this->module->editorSideContentCssFile ? $this->module->editorSideContentCssFile : null,
-				'tools'=>$this->module->editorMenuTools,
-				'width'=>'600px',
-				'height'=>'300px',
-				'upImgUrl'=>$this->createUrl('request/uploadFile'),
-				'upImgExt'=>$this->module->editorUploadAllowedImageExtensions,
-				'upLinkUrl'=>$this->createUrl('request/uploadFile'),
-				'upLinkExt'=>$this->module->editorUploadAllowedLinkExtensions,
-			)
-		));?>
+	<div id="content-container" style="display: none">
+		<div class="simple">
+			<?php echo $form->labelEx($model,'content'); ?>
+			<?php $this->widget('ext.widgets.xheditor.XHeditor',array(
+				'model'=>$model,
+				'modelAttribute'=>'content',
+				'config'=>array(
+					'id'=>CHtml::activeId($model,'content'),
+					'loadCSS'=>$this->module->editorSideContentCssFile ? $this->module->editorSideContentCssFile : null,
+					'tools'=>$this->module->editorMenuTools,
+					'width'=>'600px',
+					'height'=>'300px',
+					'upImgUrl'=>$this->createUrl('request/uploadFile'),
+					'upImgExt'=>$this->module->editorUploadAllowedImageExtensions,
+					'upLinkUrl'=>$this->createUrl('request/uploadFile'),
+					'upLinkExt'=>$this->module->editorUploadAllowedLinkExtensions,
+				)
+			));?>
+		</div>
+		<?php if($this->module->enableRefcode): ?>
+		<div class="simple">
+			<?php echo $form->labelEx($model, 'refcode'); ?>
+			<?php echo $form->textField($model,'refcode', array('style'=>'width: 600px')); ?>
+		</div>
+		<?php endif;?>
 	</div>
 
 	<div class="simple" id="url-container" style="display: none">

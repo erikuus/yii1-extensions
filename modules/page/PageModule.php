@@ -363,6 +363,7 @@ class PageModule extends CWebModule
 	private $publicRoutes=array(
 		'article/index',
 		'article/search',
+		'menu/redirect',
 	);
 
 	/**
