@@ -150,7 +150,7 @@ class PageMenu extends CActiveRecord
 	public function relations()
 	{
 		return array(
-			'articles' => array(self::HAS_MANY, 'PageArticle', 'menu_id','order'=>'"articles".position'),
+			'articles' => array(self::HAS_MANY, 'PageArticle', 'menu_id','order'=>'articles.position'),
 			'articleCount' => array(self::STAT, 'PageArticle', 'menu_id'),
 		);
 	}
