@@ -27,12 +27,6 @@ $this->breadcrumbs=array(
 
 <div style="clear:both"></div>
 
-<?php $this->widget('ext.widgets.alert.XAlert',array(
-	'alerts'=>array(
-		'save.success'=>'success'
-	)
-)); ?>
-
 <?php $this->widget('zii.widgets.grid.CGridView', array(
 	'id'=>'menu-grid',
 	'dataProvider'=>$dataProvider,

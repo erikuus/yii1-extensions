@@ -43,9 +43,6 @@ div.form select.error:focus {
 	background: #feeeee;
 	border-color: #c00000;
 }
-label.error {
-	color: #c00000;
-}
 div.form div.errorSummary {
 	border: 2px solid #c00000;
 	padding: 7px 7px 12px 7px;
@@ -62,4 +59,7 @@ div.form div.errorSummary ul {
 }
 div.form div.errorSummary ul li {
 	list-style: square;
+}
+div.form label.error {
+	color: #c00000;
 }

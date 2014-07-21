@@ -22,7 +22,6 @@
  *    ext.validators.XCompareRequiredValidator
  *    ext.widgets.grid.groupgridview.XGroupGridView
  *    ext.widgets.grid.reordercolumn.XReorderColumn
- *    ext.widgets.alert.XAlert
  *    ext.widgets.xheditor.XHeditor
  *    ext.widgets.fancybox.XFancyBox
  *

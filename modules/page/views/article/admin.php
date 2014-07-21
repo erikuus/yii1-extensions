@@ -26,12 +26,6 @@ $cs->registerScript('search', "
 
 <h2><?php echo Yii::t('PageModule.ui', 'Manage Articles'); ?></h2>
 
-<?php $this->widget('ext.widgets.alert.XAlert',array(
-	'alerts'=>array(
-		'save.success'=>'success'
-	)
-)); ?>
-
 <?php $this->beginWidget('CClipWidget', array('id'=>'toolbarClip')); ?>
 	<div style="float:right;">
 		<?php echo CHtml::link(Yii::t('PageModule.ui', 'New Article'), $this->createReturnableUrl('create',array('menuId'=>$model->menu_id))); ?>

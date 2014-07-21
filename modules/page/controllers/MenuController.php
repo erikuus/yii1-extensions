@@ -54,8 +54,6 @@ class MenuController extends PageController
 			$model->attributes=$_POST['PageMenu'];
 			if($model->save())
 			{
-				Yii::app()->user->setFlash('save.success',Yii::t('PageModule.ui','Menu successfully created!'));
-
 				// using xreturnable extension to go back
 				if(!$this->goBack())
 					$this->redirect(array('admin'));
@@ -89,8 +87,6 @@ class MenuController extends PageController
 			$model->attributes=$_POST['PageMenu'];
 			if($model->save())
 			{
-				Yii::app()->user->setFlash('save.success',Yii::t('PageModule.ui','Menu successfully updated!'));
-
 				// using xreturnable extension to go back
 				if(!$this->goBack())
 					$this->redirect(array('admin'));

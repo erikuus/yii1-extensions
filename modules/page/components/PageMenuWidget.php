@@ -210,8 +210,10 @@ class PageMenuWidget extends CWidget
 	 */
 	protected function printSearchForm()
 	{
-		echo CHtml::beginForm(array('/page/article/search'), 'get');
+		echo CHtml::beginForm(array('/page/article/search'), 'get', array('class'=>'search-form'));
 			echo CHtml::textField('q', yii::app()->request->getParam('q'), $this->searchFieldHtmlOptions);
+			if(Yii::app()->user->hasFlash('search.short'))
+				echo Yii::app()->user->getFlash('search.short');
 		echo CHtml::endForm();
 	}
 
