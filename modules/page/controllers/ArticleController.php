@@ -119,6 +119,9 @@ class ArticleController extends PageController
 		else
 			$menuId=PageMenu::model()->firstItemId;
 
+		if($menuId===null)
+			$this->redirect(array('/site/index'));
+
 		$menu=PageMenu::model()->activeItem()->with('articles')->findbyPk($menuId);
 		if($menu===null)
 			$this->redirect(array('article/index'));
