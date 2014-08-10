@@ -69,11 +69,6 @@ class XDynamicForm extends CActiveForm
 	 * Defaults to true
 	 */
 	public $enableChecboxToggle=true;
-	/**
-	 * @var boolean whether to enable select to toggle elements based on their css class names
-	 * Defaults to true
-	 */
-	public $enableSelectToggle=true;
 
 	/**
 	 * Initializes the widget.
@@ -85,9 +80,6 @@ class XDynamicForm extends CActiveForm
 
 		if($this->enableChecboxToggle)
 			$this->registerCheckboxClientScript();
-
-		if($this->enableSelectToggle)
-			$this->registerSelectClientScript();
 
 		parent::init();
 	}
@@ -199,8 +191,8 @@ class XDynamicForm extends CActiveForm
 		$script =
 <<<SCRIPT
 	$('#{$this->id} .{$this->containerCssClass} :radio:not(:checked)').siblings('.{$this->contentCssClass}').hide();
-	$('#{$this->id} .{$this->containerCssClass} :radio').click(function(){
-		$('.{$this->contentCssClass}', $(this).parents('div:first')).css('display', this.checked ? 'inline':'none');
+	$('#{$this->id} .{$this->containerCssClass} :radio').live('click',function() {
+		$('.{$this->contentCssClass}', $(this).parents('div:first')).css('display', this.checked ? 'block':'none');
 		$('#{$this->id} .{$this->containerCssClass} :radio:not(:checked)').siblings('.{$this->contentCssClass}').hide();
 	});
 SCRIPT;
@@ -215,25 +207,10 @@ SCRIPT;
 		$script =
 <<<SCRIPT
 	$('#{$this->id} .{$this->containerCssClass} :checkbox:not(:checked)').siblings('.{$this->contentCssClass}').hide();
-	$('#{$this->id} .{$this->containerCssClass} :checkbox').click(function(){
+	$('#{$this->id} .{$this->containerCssClass} :checkbox').live('click',function() {
 		$('.{$this->contentCssClass}', $(this).parents('div:first')).css('display', this.checked ? 'block':'none');
 	});
 SCRIPT;
 		Yii::app()->clientScript->registerScript(__CLASS__.'#checkbox#'.$this->id, $script, CClientScript::POS_READY);
-	}
-
-	/**
-	 * Register client script for select
-	 */
-	protected function registerSelectClientScript()
-	{
-		$script =
-<<<SCRIPT
-	$('#{$this->id} select[rel*=toggle]').change(function(){
-		alert($(this).val());
-		//$(this).attr('rel')
-	});
-SCRIPT;
-		Yii::app()->clientScript->registerScript(__CLASS__.'#select#'.$this->id, $script, CClientScript::POS_READY);
 	}
 }
