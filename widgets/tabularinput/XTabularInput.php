@@ -221,6 +221,11 @@ class XTabularInput extends CWidget
 	 * Default CSS class for the element that adds inputs.
 	 */
 	public $addCssClass='tabular-input-add';
+	/**
+	 * @var string the javascript function that will be invoked after a successful AJAX
+	 * response is received on adding new inputs.
+	 */
+	public $afterAjaxUpdate;
 
 	/**
 	 * Initializes the widget.
@@ -261,9 +266,9 @@ class XTabularInput extends CWidget
 			$this->addHtmlOptions=array_merge($this->addHtmlOptions, array('class'=>$this->addCssClass));
 		else
 			$this->addHtmlOptions['class'].=' '.$this->addCssClass;
-			
+
 		if($this->models===array())
-			$this->headerHtmlOptions=array_merge($this->headerHtmlOptions, array('style'=>'display:none'));			
+			$this->headerHtmlOptions=array_merge($this->headerHtmlOptions, array('style'=>'display:none'));
 	}
 
 	/**
@@ -310,6 +315,7 @@ class XTabularInput extends CWidget
 			success: function(html){
 				input.append('{$openInputTag}'+html+'{$this->getRemoveLinkAndIndexInput("'+index+'")}{$closeInputTag}');
 				input.siblings('.{$this->headerCssClass}').show();
+				$this->afterAjaxUpdate
 			},
 			type: 'get',
 			url: this.href,
