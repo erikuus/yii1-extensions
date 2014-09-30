@@ -5,48 +5,28 @@
  * Based on the Smarty function {html_select_date}
  * http://www.smarty.net/manual/en/language.function.html.select.date.php
  *
- * Example:
- *
- * Widget:
- * <pre>
+ * @author Vladimir Papaev <kosenka@gmail.com>
+ * @version 0.2
+ */
+
+/**
+ * Added day, month and year template properties.
+ * Some bugfixes
+ * @author Erik Uus <erik.uus@gmail.com>
+ */
+
+/**
+ * Usage sample:
+ * </pre>
  * $this->widget('ext.widgets.dateselect.XDateSelect', array(
  *     'model'=>$model,
- *     'attribute'=>'DateOfBirth',
+ *     'attribute'=>'birthdate',
  *     'reverseYears'=>true,
  *     'fieldOrder'=>'DMY',
  *     'startYear'=>1910,
  *     'endYear'=>date("Y",time()),
- *     'dayTemplate'=>'<div>{select}</div>',
- *     'monthTemplate'=>'<div>{select}</div>',
- *     'yearTemplate'=>'<div style="float: left;">{select}</div>',
  * ));
  * </pre>
- *
- * Controller:
- * <pre>
- * public function actionCreate()
- * {
- *     $model=new Account('createAccount');
- *
- *     if(isset($_POST['Account']))
- *     {
- *         $model->attributes=$_POST['Account'];
- *         Yii::import('ext.widgets.dateselect.XDateSelect');
- *         XDateSelect::sanitize($model, 'DateOfBirth');
- *
- *         if($model->save())
- *             $this->redirect(array('admin'));
- *     }
- *
- *     $this->render('create',array(
- *         'model'=>$model,
- *     ));
- * }
- * </pre>
- *
- * @author Vladimir Papaev <kosenka@gmail.com>
- * @author Erik Uus <erik.uus@gmail.com>
- * @version 0.3
  */
 class XDateSelect extends CInputWidget
 {
@@ -119,17 +99,17 @@ class XDateSelect extends CInputWidget
 	// String printed between different fields
 	public $fieldSeparator;
 
-	//If supplied then the first element of the year's select-box has this value as it's label and "" as it's value.
-	//This is useful to make the select-box read "Please select a year" for example.
-	//Note that you can use values like "-MM-DD" as time-attribute to indicate an unselected year.
+	// If supplied then the first element of the year's select-box has this value as it's label and "" as it's value.
+	// This is useful to make the select-box read "Please select a year" for example.
+	// Note that you can use values like "-MM-DD" as time-attribute to indicate an unselected year.
 	public $dayEmpty;
 
-	//If supplied then the first element of the month's select-box has this value as it's label and "" as it's value.
-	//Note that you can use values like "YYYY--DD" as time-attribute to indicate an unselected month.
+	// If supplied then the first element of the month's select-box has this value as it's label and "" as it's value.
+	// Note that you can use values like "YYYY--DD" as time-attribute to indicate an unselected month.
 	public $monthEmpty;
 
-	//If supplied then the first element of the day's select-box has this value as it's label and "" as it's value.
-	//Note that you can use values like "YYYY-MM-" as time-attribute to indicate an unselected day.
+	// If supplied then the first element of the day's select-box has this value as it's label and "" as it's value.
+	// Note that you can use values like "YYYY-MM-" as time-attribute to indicate an unselected day.
 	public $yearEmpty;
 
 	// Specifies how day select element is rendered
@@ -166,12 +146,12 @@ class XDateSelect extends CInputWidget
 			$this->displayYears=true;
 		if(!isset($this->monthFormat) or empty($this->monthFormat))
 			$this->monthFormat="%B";
-		/* Write months as numbers by default  GL */
+		// Write months as numbers by default  GL
 		if(!isset($this->monthValueFormat) or empty($this->monthValueFormat))
 			$this->monthValueFormat="%m";
 		if(!isset($this->dayFormat) or empty($this->dayFormat))
 			$this->dayFormat="%02d";
-		/* Write day values using this format MB */
+		// Write day values using this format MB
 		if(!isset($this->dayValueFormat) or empty($this->dayValueFormat))
 			$this->dayValueFormat="%d";
 		if(!isset($this->yearAsText))
@@ -212,8 +192,6 @@ class XDateSelect extends CInputWidget
 		/* String printed between the different fields. */
 		if(!isset($this->fieldSeparator))
 			$this->fieldSeparator="\n";
-		if(!isset($this->time))
-			$this->time=time();
 		if(!isset($this->dayEmpty))
 			$this->dayEmpty=null;
 		if(!isset($this->monthEmpty))
@@ -331,7 +309,7 @@ class XDateSelect extends CInputWidget
 
 			$monthResult.='>'."\n";
 
-			$monthResult.=$this->htmlOptions(array('output'=>$month_names,'values'=>$month_values,'selected'=>$this->monthEmpty==='' && !$this->model[$this->attribute] ? null : strftime($this->monthValueFormat,mktime(0,0,0,(int)$this->time[1],1,2000)),'print_result'=>false));
+			$monthResult.=$this->htmlOptions(array('output'=>$month_names,'values'=>$month_values,'selected'=>$this->monthEmpty && (!$this->model[$this->attribute] || !$this->time[1]) ? null : strftime($this->monthValueFormat,mktime(0,0,0,(int)$this->time[1],1,2000)),'print_result'=>false));
 			$monthResult.='</select>';
 		}
 
@@ -374,7 +352,7 @@ class XDateSelect extends CInputWidget
 				$dayResult.=' '.$this->dayExtra;
 			}
 			$dayResult.='>'."\n";
-			$dayResult.=$this->htmlOptions(array('output'=>$days,'values'=>$day_values,'selected'=>$this->monthEmpty==='' && !$this->model[$this->attribute] ?  null : $this->time[2],'print_result'=>false));
+			$dayResult.=$this->htmlOptions(array('output'=>$days,'values'=>$day_values,'selected'=>$this->dayEmpty && (!$this->model[$this->attribute] || !$this->time[2]) ?  null : $this->time[2],'print_result'=>false));
 			$dayResult.='</select>';
 		}
 
@@ -438,7 +416,7 @@ class XDateSelect extends CInputWidget
 				}
 
 				$yearResult.='>'."\n";
-				$yearResult.=$this->htmlOptions(array('output'=>$years,'values'=>$yearvals,'selected'=>$this->yearEmpty==='' && !$this->model[$this->attribute] ?  null : $this->time[0], 'print_result'=>false));
+				$yearResult.=$this->htmlOptions(array('output'=>$years,'values'=>$yearvals,'selected'=>$this->yearEmpty && (!$this->model[$this->attribute] || !$this->time[0]) ?  null : $this->time[0], 'print_result'=>false));
 				$yearResult.='</select>';
 			}
 		}
