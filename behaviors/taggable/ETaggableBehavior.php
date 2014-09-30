@@ -35,6 +35,9 @@
  * if($this->tags===array())
  *     $this->tags[]='';
  *
+ * Changed inside php sprintf function
+ * %d to '%s' to enable primary key of text type
+ *
  * @author Erik Uus <erik.uus@gmail.com>
  */
 class ETaggableBehavior extends CActiveRecordBehavior {
@@ -688,7 +691,7 @@ class ETaggableBehavior extends CActiveRecordBehavior {
 			sprintf(
 				"DELETE
 				 FROM %s
-				 WHERE %s = %d",
+				 WHERE %s = '%s'",
 				$this->getTagBindingTableName(),
 				$this->getModelTableFkName(),
 				$this->getOwner()->primaryKey
@@ -728,7 +731,7 @@ class ETaggableBehavior extends CActiveRecordBehavior {
 				sprintf(
 					"UPDATE %s
 					SET %s = %s + %s
-					WHERE %s in (SELECT %s FROM %s WHERE %s = %d)",
+					WHERE %s in (SELECT %s FROM %s WHERE %s = '%s')",
 					$this->tagTable,
 					$this->tagTableCount,
 					$this->tagTableCount,
