@@ -2,7 +2,8 @@
 /**
  * XAjaxBox class file.
  *
- * XAjaxBox is a simple container the contents of which are drawn from an AJAX call
+ * XAjaxBox is a simple container the contents of which are drawn from given url via AJAX call and reloaded
+ * after given interval of milliseconds
  *
  * The following example shows how to use XAjaxBox:
  * <pre>
@@ -20,13 +21,23 @@
 class XAjaxBox extends CWidget
 {
 	/**
-	 * @var string the URL to which the ajax request is sent
+	 * @var string the URL to which the ajax request is sent.
 	 */
 	public $url;
+	/**
+	 * @var integer the interval of milliseconds at which the ajax request is repeated
+	 * Defaults to 30000 (30 sconds)
+	 */
+	public $interval=30000;
 	/**
 	 * @var array HTML attributes for ajax box container tag
 	 */
 	public $htmlOptions=array();
+	/**
+	 * @var boolean whether to enable loading image
+	 * Defaults to false
+	 */
+	public $enableLoadingImage=false;
 
 	private $loadingImageUrl;
 
@@ -66,7 +77,8 @@ class XAjaxBox extends CWidget
 			$this->htmlOptions['class'].=' ajax-box';
 
 		$this->htmlOptions['data-url']=$this->url;
+		$this->htmlOptions['data-interval']=$this->interval;
 
-		echo CHtml::tag('div', $this->htmlOptions, CHtml::image($this->loadingImageUrl));
+		echo CHtml::tag('div', $this->htmlOptions, $this->enableLoadingImage ? CHtml::image($this->loadingImageUrl) : null);
 	}
 }
