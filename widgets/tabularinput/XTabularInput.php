@@ -132,6 +132,11 @@ class XTabularInput extends CWidget
 	 */
 	public $inputUrl;
 	/**
+	 * @var integer the maximum number of tabular inputs that can be added.
+	 * If not set, unlimited number of inputs are allowed.
+	 */
+	public $inputLimit;
+	/**
 	 * @var string the text or html of header.
 	 */
 	public $header;
@@ -232,6 +237,8 @@ class XTabularInput extends CWidget
 	 */
 	public function init()
 	{
+		parent::init();
+
 		if(isset($this->containerHtmlOptions['id']))
 			$this->id=$this->containerHtmlOptions['id'];
 		else
@@ -266,6 +273,9 @@ class XTabularInput extends CWidget
 			$this->addHtmlOptions=array_merge($this->addHtmlOptions, array('class'=>$this->addCssClass));
 		else
 			$this->addHtmlOptions['class'].=' '.$this->addCssClass;
+
+		if($this->inputLimit && count($this->models)==$this->inputLimit)
+			$this->addHtmlOptions['style']='display:none';
 
 		if($this->models===array())
 			$this->headerHtmlOptions=array_merge($this->headerHtmlOptions, array('style'=>'display:none'));
@@ -310,7 +320,8 @@ class XTabularInput extends CWidget
 	$("#{$this->id} .{$this->addCssClass}").click(function(event){
 		event.preventDefault();
 		var input = $(this).parents(".{$this->containerCssClass}:first").children(".{$this->inputContainerCssClass}");
-		var index = input.find(".{$this->indexCssClass}").length>0 ? input.find(".{$this->indexCssClass}").max()+1 : 0;
+		var count = input.find(".{$this->indexCssClass}").length;
+		var index = count>0 ? input.find(".{$this->indexCssClass}").max()+1 : 0;
 		$.ajax({
 			success: function(html){
 				input.append('{$openInputTag}'+html+'{$this->getRemoveLinkAndIndexInput("'+index+'")}{$closeInputTag}');
@@ -325,14 +336,17 @@ class XTabularInput extends CWidget
 			cache: false,
 			dataType: 'html'
 		});
+		if({$this->inputLimit}+1!=1 && count=={$this->inputLimit}-1) {
+			$(this).hide();
+		}
 	});
 	$("#{$this->id} .{$this->removeCssClass}").live("click", function(event) {
 		event.preventDefault();
+		$("#{$this->id} .{$this->addCssClass}").show();
 		$(this).parents(".{$this->inputCssClass}:first").remove();
 		$('.{$this->inputContainerCssClass}').filter(function(){return $.trim($(this).text())==='' && $(this).children().length == 0}).siblings('.{$this->headerCssClass}').hide();
 	});
 SCRIPT;
-
 		$cs->registerScript(__CLASS__.'#'.$this->id, $script, CClientScript::POS_READY);
 	}
 
