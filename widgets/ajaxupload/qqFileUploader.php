@@ -10,7 +10,7 @@ class qqUploadedFileXhr
 	 * Save the file to the specified path
 	 * @return boolean TRUE on success
 	 */
-	function save($path)
+	public function save($path)
 	{
 		$input=fopen("php://input","r");
 		$temp=tmpfile();
@@ -47,12 +47,11 @@ class qqUploadedFileXhr
  */
 class qqUploadedFileForm
 {
-
 	/**
 	 * Save the file to the specified path
 	 * @return boolean TRUE on success
 	 */
-	function save($path)
+	public function save($path)
 	{
 		if(!move_uploaded_file($_FILES['qqfile']['tmp_name'],$path))
 			return false;
@@ -60,12 +59,12 @@ class qqUploadedFileForm
 		return true;
 	}
 
-	function getName()
+	public function getName()
 	{
 		return $_FILES['qqfile']['name'];
 	}
 
-	function getSize()
+	public function getSize()
 	{
 		return $_FILES['qqfile']['size'];
 	}
@@ -127,7 +126,7 @@ class qqFileUploader
 	/**
 	 * Returns array('success'=>true) or array('error'=>'error message')
 	 */
-	function handleUpload($uploadDirectory,$replaceOldFile=FALSE)
+	public function handleUpload($uploadDirectory,$replaceOldFile=FALSE)
 	{
 		if(!is_writable($uploadDirectory))
 			return array('error'=>"Server error. Upload directory isn't writable.");

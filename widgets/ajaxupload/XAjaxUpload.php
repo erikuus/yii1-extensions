@@ -2,79 +2,70 @@
 
 /**
  * XAjaxUpload class file.
- *
- * This widget enables file uploads via ajax
  * This extension is a wrapper of http://valums.com/ajax-upload/
  *
- * Original version by Vladimir Papaev <kosenka@gmail.com>
- *
- * Changes to original version:
- * renamed XAjaxUpload class and property names,
- * restructured code,
- * added htmlOptions property,
- * added better comments,
- * added buttonLabel and buttonClass options for fileuploader.js,
- * added saveAsFilename property for class qqFileUploader (qqFileUploader.php).
- *
- * Example:
- *
- * Inside CActiveForm:
- *
- * <pre>
- * echo $form->labelEx($model,'Photo');
- * $this->widget('ext.widgets.ajaxupload.XAjaxUpload', array(
- *     'id'=>'image',
- *     'options'=>array(
- *         'action'=>Yii::app()->createUrl('/controller/upload'),
- *         'allowedExtensions'=>array('jpg', 'jpeg', 'png', 'gif'),
- *         'sizeLimit'=>2*1024*1024, // maximum file size in bytes
- *         'onSubmit'=>"js:function(file, extension) {
- *             $('div.preview').addClass('loading');
- *         }",
- *         'onComplete'=>"js:function(file, response, responseJSON) {
- *             $('div.preview').removeClass('loading');
- *             $('#".CHtml::activeId($model,'Photo')."').val(responseJSON['filename']); // add filename to hidden input
- *             $('#photo').attr('src', '/app/upload/'+responseJSON['filename']); // change image on page
- *         }",
- *         'messages'=>array(
- *             'typeError'=>Yii::t('vd','{file} has invalid extension. Only {extensions} are allowed.'),
- *             'sizeError'=>Yii::t('vd','{file} is too large, maximum file size is {sizeLimit}.'),
- *             'emptyError'=>Yii::t('vd','{file} is empty, please select files again without it.'),
- *             'onLeave'=>Yii::t('vd','The files are being uploaded, if you leave now the upload will be cancelled.')
- *         ),
- *     )
- * ));
- * echo CHtml::image('image.jpg', 'alternative text', array('id'=>'photo'));
- * echo $form->hiddenField($model,'Photo');
- * echo $form->error($model,'Photo');
- * </pre>
- *
- * In controller:
- *
- * <pre>
- * public function actionUpload()
- * {
- *     Yii::import("ext.widgets.ajaxupload.qqFileUploader");
- *     $folder='upload/'; // folder for uploaded files
- *     $allowedExtensions = array('jpg'); // array('jpg','jpeg','gif','exe','mov' and etc...
- *     $sizeLimit = 10 * 1024 * 1024; // maximum file size in bytes
- *     $fileName = 'new_filename'; // if not set, original filename is used
- *     $uploader = new qqFileUploader($allowedExtensions, $sizeLimit, $fileName);
- *     $result = $uploader->handleUpload($folder);
- *     $result = htmlspecialchars(json_encode($result), ENT_NOQUOTES);
- *     echo $result;
- * }
- * </pre>
- *
- * Above method will return
- * - on success: array('success'=>true,'filename'=>$filename.'.'.$ext);
- * - on failure: array('error'=>'Could not save uploaded file.'.'The upload was cancelled, or server error encountered');
- *
  * @author Vladimir Papaev <kosenka@gmail.com>
+ * @version 0.1
+ * @license http://www.opensource.org/licenses/bsd-license.php
+ */
+
+/**
+ * Renamed XAjaxUpload class and property names
+ * Restructured code
+ * Added htmlOptions property
+ * Added better comments
+ * Added buttonLabel and buttonClass options for fileuploader.js
+ * Added saveAsFilename property for class qqFileUploader (qqFileUploader.php)
+ *
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 2.0
  */
 
+/*
+EXAMPLE OF USAGE:
+In form:
+
+<?php echo $form->labelEx($model,'Photo'); ?>
+<?php $this->widget('ext.widgets.ajaxupload.XAjaxUpload', array(
+	'id'=>'image',
+	'options'=>array(
+		'action'=>Yii::app()->createUrl('/controller/upload'),
+		'allowedExtensions'=>array('jpg', 'jpeg', 'png', 'gif'),
+		'sizeLimit'=>2*1024*1024,// maximum file size in bytes
+		'onSubmit'=>"js:function(file, extension) {
+			$('div.preview').addClass('loading');
+		}",
+		'onComplete'=>"js:function(file, response, responseJSON) {
+			$('div.preview').removeClass('loading');
+			$('#".CHtml::activeId($model,'Photo')."').val(responseJSON['filename']);
+			$('#photo').attr('src', 'pathToDir'+responseJSON['filename']);
+		}",
+		'messages'=>array(
+			'typeError'=>"{file} has invalid extension. Only {extensions} are allowed.",
+			'sizeError'=>"{file} is too large, maximum file size is {sizeLimit}.",
+			'emptyError'=>"{file} is empty, please select files again without it.",
+			'onLeave'=>"The files are being uploaded, if you leave now the upload will be cancelled."
+		),
+	  )
+)); ?>
+<?php echo CHtml::image('image.jpg', 'alternative text', array('id'=>'photo'))?>
+<?php echo $form->textField($model,'Photo'); ?>
+<?php echo $form->error($model,'Photo'); ?>
+
+In controller:
+
+public function actionUpload()
+{
+	Yii::import("ext.widgets.ajaxupload.qqFileUploader");
+	$folder='upload/'; // folder for uploaded files
+	$allowedExtensions = array('jpg'); //array("jpg","jpeg","gif","exe","mov" and etc...
+	$sizeLimit = 10 * 1024 * 1024; // maximum file size in bytes
+	$uploader = new qqFileUploader($allowedExtensions, $sizeLimit);
+	$result = $uploader->handleUpload($folder);
+	$result=htmlspecialchars(json_encode($result), ENT_NOQUOTES);
+	echo $result; // it's array
+}
+*/
 class XAjaxUpload extends CWidget
 {
 	/**
@@ -82,6 +73,9 @@ class XAjaxUpload extends CWidget
 	 * using the default CSS file included together with the widget.
 	 * If false, no CSS file will be used. Otherwise, the specified CSS file
 	 * will be included when using this widget.
+	 *
+	 * NOTE! If you set it false without specifying your own style definitions
+	 * widget may not work as intended.
 	 */
 	public $cssFile;
 

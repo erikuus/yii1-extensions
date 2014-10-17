@@ -111,6 +111,8 @@ class XFoundation extends CApplicationComponent
 	 */
 	public function init()
 	{
+		parent::init();
+
 		$cs=Yii::app()->clientScript;
 		$cs->registerCssFile($this->getAssetsUrl().'/css/foundation.css');
 		$cs->registerCssFile($this->getAssetsUrl().'/css/normalize.css');
