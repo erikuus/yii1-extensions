@@ -12,7 +12,7 @@
  *     'ecom'=> array(
  *         'class'=>'ext.components.ecom.XEcom',
  *         'serviceUrl'=>'https://pos.estcard.ee/test-pos/servlet/iPAYServlet',
- *         'serviceId'=>'B51D77CEE0',
+ *         'serviceId'=>'318DC77DC8',
  *         'certificatePath'=>'/path/to/80_ecom.crt',
  *         'privateKeyPath'=>'/path/to/private.key',
  *     ),

@@ -5,7 +5,6 @@
  */
 class qqUploadedFileXhr
 {
-
 	/**
 	 * Save the file to the specified path
 	 * @return boolean TRUE on success
