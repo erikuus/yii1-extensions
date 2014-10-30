@@ -2,20 +2,9 @@
 /**
  * XFoundation class file.
  *
- * Inserts client scripts needed for selected components of Foundation 5 CSS Framework.
- *
- * Following components are supported:
- * - Grid
- * - Block Grid
- * - Visibility
- * - Off Canvas (optional)
- *
- * This selection is based on author's preference (1) to use components that help to
- * build responsive layout and (2) to avoid using typography and UI components.
+ * Inserts client scripts needed for Foundation 5 CSS Framework.
  *
  * The following shows how to use Foundation component:
- *
- * 1. Configure component
  *
  * <pre>
  * 'preload'=>array(
@@ -29,80 +18,30 @@
  * )
  * </pre>
  *
- * 2. In layout or in view files you can now use
- *
- * 2.1 Grid
- *
- * <div class="row">
- *     <div class="large-4 medium-4 small-12 columns">
- *         ...
- *     </div>
- *     <div class="large-4 medium-4 small-12 columns">
- *         ...
- *     </div>
- *     <div class="large-4 medium-4 small-12 columns">
- *         ...
- *     </div>
- * </div>
- *
- * 2.2 Block Grid
- *
- * <div class="row">
- *     <div class="large-12 columns">
- *         <ul class="small-block-grid-2 medium-block-grid-3 large-block-grid-4">
- *             <li><img src="img.jpg"></li>
- *             <li><img src="img.jpg"></li>
- *             <li><img src="img.jpg"></li>
- *             <li><img src="img.jpg"></li>
- *             <li><img src="img.jpg"></li>
- *             <li><img src="img.jpg"></li>
- *         </ul>
- *     </div>
- * </div>
- *
- * 2.3 Visibility
- *
- * <p class="show-for-small-only">This text is shown only on a small screen.</p>
- * <p class="show-for-medium-up">This text is shown on medium screens and up.</p>
- * <p class="show-for-medium-only">This text is shown only on a medium screen.</p>
- * <p class="show-for-large-up">This text is shown on large screens and up.</p>
- * <p class="show-for-large-only">This text is shown only on a large screen.</p>
- * <p class="show-for-xlarge-up">This text is shown on xlarge screens and up.</p>
- * <p class="show-for-xlarge-only">This text is shown only on an xlarge screen.</p>
- * <p class="show-for-xxlarge-up">This text is shown on xxlarge screens and up.</p>
- * <p class="show-for-landscape">You are in landscape orientation.</p>
- * <p class="show-for-portrait">You are in portrait orientation.</p>
- * <p class="show-for-touch">You are on a touch-enabled device.</p>
- * <p class="hide-for-touch">You are not on a touch-enabled device.</p>
- *
- * 2.3 Off Canvas
- *
- * <div class="show-for-small">
- *     <a class="left-off-canvas-toggle menu-icon">
- *         <span>Menu</span>
- *     </a>
- * </div>
- *
- * <aside class="left-off-canvas-menu">
- * ...
- * </aside>
- *
- * For more info refer to foundation docs http://foundation.zurb.com/docs/
- *
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 1.0
  */
 class XFoundation extends CApplicationComponent
 {
 	/**
+	 * @var boolean whether to register the Foundation core CSS (foundation.css).
+	 * Defaults to true.
+	 */
+	public $coreCss=true;
+	/**
+	 * @var boolean whether to register jQuery and the Foundation JavaScript.
+	 * Defaults to true.
+	 */
+	public $enableJs=true;
+	/**
+	 * @var boolean whether to register jquery.stickyFooter.js for sticky footer.
+	 * Defaults to false.
+	 */
+	public $stickyFooter=false;
+	/**
 	 * @var string grid max width. If not set, default max-width defined in foundation.css is used.
 	 */
 	public $maxWidth;
-
-	/**
-	 * @var boolean whether to include javascripts needed for off canvas component. Defaults to true.
-	 */
-	public $offCanvas=true;
 
 	protected $_assetsUrl;
 
@@ -111,18 +50,16 @@ class XFoundation extends CApplicationComponent
 	 */
 	public function init()
 	{
-		parent::init();
-
 		$cs=Yii::app()->clientScript;
-		$cs->registerCssFile($this->getAssetsUrl().'/css/foundation.css');
 		$cs->registerCssFile($this->getAssetsUrl().'/css/normalize.css');
 
-		// override grid max width
+		if($this->coreCss)
+			$cs->registerCssFile($this->getAssetsUrl().'/css/foundation.css');
+
 		if($this->maxWidth)
 			$cs->registerCss(__CLASS__, ".row {max-width: $this->maxWidth;}", "screen", CClientScript::POS_HEAD);
 
-		// register js only if off canvas is needed
-		if($this->offCanvas)
+		if($this->enableJs)
 			$this->registerJs();
 	}
 
@@ -133,9 +70,14 @@ class XFoundation extends CApplicationComponent
 	{
 		$cs=Yii::app()->clientScript;
 		$cs->registerCoreScript('jquery');
+
+		if($this->stickyFooter)
+			$cs->registerScriptFile($this->getAssetsUrl().'/js/jquery.stickyFooter.js', CClientScript::POS_END);
+
 		$cs->registerScriptFile($this->getAssetsUrl().'/js/modernizr.js', CClientScript::POS_HEAD);
 		$cs->registerScriptFile($this->getAssetsUrl().'/js/foundation.min.js', CClientScript::POS_END);
-		$cs->registerScript(__CLASS__, '$(document).foundation();', CClientScript::POS_END);
+		$cs->registerScriptFile($this->getAssetsUrl().'/js/foundation.dropdown.js', CClientScript::POS_END);
+		$cs->registerScript(__CLASS__, "$(document).foundation();", CClientScript::POS_END);
 	}
 
 	/**

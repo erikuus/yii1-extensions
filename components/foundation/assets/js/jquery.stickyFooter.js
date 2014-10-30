@@ -1,0 +1,122 @@
+/*!
+ * jQuery Sticky Footer 1.1
+ * Corey Snyder
+ * http://tangerineindustries.com
+ *
+ * Released under the MIT license
+ *
+ * Copyright 2013 Corey Snyder.
+ *
+ * Date: Thu Jan 22 2013 13:34:00 GMT-0630 (Eastern Daylight Time)
+ * Modification for jquery 1.9+ Tue May 7 2013
+ * Modification for non-jquery, removed all, now classic JS Wed Jun 12 2013
+ */
+
+window.onload = function() {
+	stickyFooter();
+
+	// you can either uncomment and allow the setInterval to auto correct the
+	// footer
+	// or call stickyFooter() if you have major DOM changes
+	// setInterval(checkForDOMChange, 1000);
+};
+
+// check for changes to the DOM
+function checkForDOMChange() {
+	stickyFooter();
+}
+
+//check for resize event if not IE 9 or greater
+window.onresize = function() {
+	stickyFooter();
+}
+
+//lets get the marginTop for the <footer>
+function getCSS(element, property) {
+
+	var elem = document.getElementsByTagName(element)[0];
+	var css = null;
+
+	if (elem.currentStyle) {
+		css = elem.currentStyle[property];
+
+	} else if (window.getComputedStyle) {
+		css = document.defaultView.getComputedStyle(elem, null)
+				.getPropertyValue(property);
+	}
+
+	return css;
+
+}
+
+function stickyFooter() {
+
+	if (document.getElementsByTagName("footer")[0].getAttribute("style") != null) {
+		document.getElementsByTagName("footer")[0].removeAttribute("style");
+	}
+
+	if (window.innerHeight != document.body.offsetHeight) {
+		var offset = window.innerHeight - document.body.offsetHeight;
+		var current = getCSS("footer", "margin-top");
+
+		if (isNaN(current) == true) {
+			document.getElementsByTagName("footer")[0].setAttribute("style",
+					"margin-top:0px;");
+			current = 0;
+		} else {
+			current = parseInt(current);
+		}
+
+		if (current + offset > parseInt(getCSS("footer", "margin-top"))) {
+			document.getElementsByTagName("footer")[0].setAttribute("style",
+					"margin-top:" + (current + offset) + "px;");
+		}
+	}
+}
+
+$(window).load( function() {
+	stickyFooter();
+});
+
+$(window).resize( function() {
+	stickyFooter();
+});
+
+function stickyFooter() {
+	$("footer").removeAttr('style');
+	if (window.innerHeight != document.body.offsetHeight) {
+		var offset = window.innerHeight - document.body.offsetHeight;
+		var current = parseInt($("footer").css("margin-top"));
+
+		if (current + offset > parseInt($("footer").css("margin-top"))) {
+			$("footer").css( {
+				"margin-top" : (current + offset) + "px"
+			});
+		}
+	}
+}
+/*
+ ! end sticky footer
+ */
+
+/*
+ *
+ * If you want to delay the window resize event
+ *
+ * $(window).load(function() { stickyFooter(); });
+ *
+ * $(window).resize(function () { delay(function() { stickyFooter(); }, 500);
+ * });
+ *
+ * var delay = (function(){ var timer = 0; return function(callback, ms) {
+ * clearTimeout (timer); timer = setTimeout(callback, ms); }; })();
+ *
+ * function stickyFooter() { $("footer").removeAttr('style'); if
+ * (window.innerHeight != document.body.offsetHeight) { var offset =
+ * window.innerHeight - document.body.offsetHeight; var current =
+ * parseInt($("footer").css("margin-top"));
+ *
+ * if (current+offset > parseInt($("footer").css("margin-top"))) {
+ * $("footer").css({"margin-top":(current+offset)+"px"}); } } }
+ *
+ */
