@@ -4,18 +4,35 @@
  *
  * Inserts client scripts needed for Foundation 5 CSS Framework.
  *
- * The following shows how to use Foundation component:
+ * The following shows how to use Foundation component.
  *
+ * Configure (config/main.php)
  * <pre>
- * 'preload'=>array(
- *     'foundation'
- * ),
  * 'components'=>array(
  *     'foundation'=>array(
  *          'class'=>'ext.components.foundation.XFoundation',
  *          'maxWidth'=>'75em'
  *     ),
  * )
+ * </pre>
+ *
+ * Initialize for all controllers and actions (config/main.php)
+ * <pre>
+ * 'preload'=>array(
+ *     'foundation'
+ * )
+ * </pre>
+ *
+ * Or use filter to include exclude individual controllers/actions
+ * <pre>
+ * public function filters()
+ * {
+ *     return array(
+ *         'accessControl',
+ *         'postOnly + delete',
+ *         array('ext.components.foundation.XFoundationFilter - delete')
+ *     );
+ * }
  * </pre>
  *
  * @author Erik Uus <erik.uus@gmail.com>
@@ -43,7 +60,7 @@ class XFoundation extends CApplicationComponent
 	 */
 	public $maxWidth;
 
-	protected $_assetsUrl;
+	private $_assetsUrl;
 
 	/**
 	 * Initializes the component.
@@ -64,7 +81,7 @@ class XFoundation extends CApplicationComponent
 	}
 
 	/**
-	 * Registers the javascripts
+	 * Registers javascripts
 	 */
 	public function registerJs()
 	{
@@ -92,5 +109,24 @@ class XFoundation extends CApplicationComponent
 			$this->_assetsUrl=Yii::app()->assetManager->publish($assetsPath, false, -1, YII_DEBUG);
 		}
 		return $this->_assetsUrl;
+	}
+
+	/**
+	 * @param string the URL route to be checked
+	 * @return boolean whether the given route should be excluded from foundation framework
+	 */
+	protected function isExcludeRoute($route)
+	{
+		if ($this->_excludeMap === null)
+		{
+			foreach ($this->excludeRoutes as $r)
+				$this->_excludeMap[strtolower($r)] = true;
+		}
+		$route = strtolower($route);
+
+		if (isset($this->_excludeMap[$route]))
+			return true;
+		else
+			return ($pos = strpos($route, '/')) !== false && isset($this->_excludeMap[substr($route, 0, $pos)]);
 	}
 }
