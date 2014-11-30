@@ -107,7 +107,7 @@
  * </pre>
  *
  * @author Erik Uus <erik.uus@gmail.com>
- * @version 1.0.0
+ * @version 1.5.0
  */
 class XTabularInput extends CWidget
 {
@@ -227,10 +227,18 @@ class XTabularInput extends CWidget
 	 */
 	public $addCssClass='tabular-input-add';
 	/**
+	 * Default CSS class for the element that is hidden if there is only one tabular input.
+	 */
+	public $hideOnSingleCssClass='tabular-hide-on-single';
+	/**
 	 * @var string the javascript function that will be invoked after a successful AJAX
 	 * response is received on adding new inputs.
 	 */
 	public $afterAjaxUpdate;
+	/**
+	 * @var mixed input limit to be used inside javascript
+	 */
+	private $_jsInputLimit;
 
 	/**
 	 * Initializes the widget.
@@ -274,11 +282,14 @@ class XTabularInput extends CWidget
 		else
 			$this->addHtmlOptions['class'].=' '.$this->addCssClass;
 
-		if($this->inputLimit && count($this->models)==$this->inputLimit)
+		if($this->inputLimit && count($this->models)>=$this->inputLimit)
 			$this->addHtmlOptions['style']='display:none';
 
 		if($this->models===array())
 			$this->headerHtmlOptions=array_merge($this->headerHtmlOptions, array('style'=>'display:none'));
+
+		// Infinity is the value JavaScript will return if you calculate a number outside the largest possible number.
+		$this->_jsInputLimit=$this->inputLimit ? $this->inputLimit : 'Infinity';
 	}
 
 	/**
@@ -319,13 +330,15 @@ class XTabularInput extends CWidget
 <<<SCRIPT
 	$("#{$this->id} .{$this->addCssClass}").click(function(event){
 		event.preventDefault();
-		var input = $(this).parents(".{$this->containerCssClass}:first").children(".{$this->inputContainerCssClass}");
+		var input = $("#{$this->id} .{$this->inputContainerCssClass}");
 		var count = input.find(".{$this->indexCssClass}").length;
 		var index = count>0 ? input.find(".{$this->indexCssClass}").max()+1 : 0;
 		$.ajax({
 			success: function(html){
 				input.append('{$openInputTag}'+html+'{$this->getRemoveLinkAndIndexInput("'+index+'")}{$closeInputTag}');
-				input.siblings('.{$this->headerCssClass}').show();
+				$("#{$this->id} .{$this->addCssClass}").toggle($("#{$this->id} .{$this->indexCssClass}").length<{$this->_jsInputLimit});
+				$("#{$this->id} .{$this->hideOnSingleCssClass}").toggle($("#{$this->id} .{$this->indexCssClass}").length>1);
+				$("#{$this->id} .{$this->headerCssClass}").show();
 				$this->afterAjaxUpdate
 			},
 			type: 'get',
@@ -336,15 +349,13 @@ class XTabularInput extends CWidget
 			cache: false,
 			dataType: 'html'
 		});
-		if({$this->inputLimit}+1!=1 && count=={$this->inputLimit}-1) {
-			$(this).hide();
-		}
 	});
 	$("#{$this->id} .{$this->removeCssClass}").live("click", function(event) {
 		event.preventDefault();
-		$("#{$this->id} .{$this->addCssClass}").show();
 		$(this).parents(".{$this->inputCssClass}:first").remove();
-		$('.{$this->inputContainerCssClass}').filter(function(){return $.trim($(this).text())==='' && $(this).children().length == 0}).siblings('.{$this->headerCssClass}').hide();
+		$("#{$this->id} .{$this->addCssClass}").toggle($("#{$this->id} .{$this->indexCssClass}").length<{$this->_jsInputLimit});
+		$("#{$this->id} .{$this->hideOnSingleCssClass}").toggle($("#{$this->id} .{$this->indexCssClass}").length>1);
+		$("#{$this->id} .{$this->headerCssClass}").toggle($("#{$this->id} .{$this->indexCssClass}").length>0);
 	});
 SCRIPT;
 		$cs->registerScript(__CLASS__.'#'.$this->id, $script, CClientScript::POS_READY);
@@ -357,6 +368,9 @@ SCRIPT;
 	{
 		foreach($this->models as $index=>$model)
 		{
+			if($this->inputLimit && $index==$this->inputLimit)
+				break;
+
 			echo CHtml::openTag($this->inputTagName, $this->inputHtmlOptions);
 			$this->controller->renderPartial($this->inputView, array('model'=>$model, 'index'=>$index));
 			echo $this->getRemoveLinkAndIndexInput($index);
