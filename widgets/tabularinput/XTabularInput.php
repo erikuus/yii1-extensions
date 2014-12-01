@@ -107,7 +107,7 @@
  * </pre>
  *
  * @author Erik Uus <erik.uus@gmail.com>
- * @version 1.5.0
+ * @version 1.5.1
  */
 class XTabularInput extends CWidget
 {
@@ -234,7 +234,11 @@ class XTabularInput extends CWidget
 	 * @var string the javascript function that will be invoked after a successful AJAX
 	 * response is received on adding new inputs.
 	 */
-	public $afterAjaxUpdate;
+	public $afterAddInput;
+	/**
+	 * @var string the javascript function that will be invoked after a removing input
+	 */
+	public $afterRemoveInput;
 	/**
 	 * @var mixed input limit to be used inside javascript
 	 */
@@ -332,15 +336,15 @@ class XTabularInput extends CWidget
 	$("#{$this->id} .{$this->addCssClass}").click(function(event){
 		event.preventDefault();
 		var input = $("#{$this->id} .{$this->inputContainerCssClass}");
-		var count = input.find(".{$this->indexCssClass}").length;
+		var count = input.find(".{$this->inputCssClass}").length;
 		var index = count>0 ? input.find(".{$this->indexCssClass}").max()+1 : 0;
 		$.ajax({
 			success: function(html){
 				input.append('{$openInputTag}'+html+'{$this->getRemoveLinkAndIndexInput("'+index+'")}{$closeInputTag}');
-				$("#{$this->id} .{$this->addCssClass}").toggle($("#{$this->id} .{$this->indexCssClass}").length<{$this->_jsInputLimit});
-				$("#{$this->id} .{$this->hideOnSingleCssClass}").toggle($("#{$this->id} .{$this->indexCssClass}").length>1);
+				$("#{$this->id} .{$this->addCssClass}").toggle($("#{$this->id} .{$this->inputCssClass}").length<{$this->_jsInputLimit});
+				$("#{$this->id} .{$this->hideOnSingleCssClass}").toggle($("#{$this->id} .{$this->inputCssClass}").length>1);
 				$("#{$this->id} .{$this->headerCssClass}").show();
-				$this->afterAjaxUpdate
+				$this->afterAddInput
 			},
 			type: 'get',
 			url: this.href,
@@ -354,9 +358,10 @@ class XTabularInput extends CWidget
 	$("#{$this->id} .{$this->removeCssClass}").live("click", function(event) {
 		event.preventDefault();
 		$(this).parents(".{$this->inputCssClass}:first").remove();
-		$("#{$this->id} .{$this->addCssClass}").toggle($("#{$this->id} .{$this->indexCssClass}").length<{$this->_jsInputLimit});
-		$("#{$this->id} .{$this->hideOnSingleCssClass}").toggle($("#{$this->id} .{$this->indexCssClass}").length>1);
-		$("#{$this->id} .{$this->headerCssClass}").toggle($("#{$this->id} .{$this->indexCssClass}").length>0);
+		$("#{$this->id} .{$this->addCssClass}").toggle($("#{$this->id} .{$this->inputCssClass}").length<{$this->_jsInputLimit});
+		$("#{$this->id} .{$this->hideOnSingleCssClass}").toggle($("#{$this->id} .{$this->inputCssClass}").length>1);
+		$("#{$this->id} .{$this->headerCssClass}").toggle($("#{$this->id} .{$this->inputCssClass}").length>0);
+		$this->afterRemoveInput
 	});
 SCRIPT;
 		$cs->registerScript(__CLASS__.'#'.$this->id, $script, CClientScript::POS_READY);
