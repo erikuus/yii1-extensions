@@ -48,7 +48,7 @@ class XVauHelpdesk extends CWidget
 		$baseUrl=$this->registerClientScript();
 
 		$text=$this->label ?
-			CHtml::encode($this->label) :
+			$this->label :
 			CHtml::image($baseUrl.'/helpdesk.gif',$this->title,array('title'=>$this->title,'style'=>'margin-left: 3px'));
 
 		$params=array(
