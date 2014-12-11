@@ -7,7 +7,6 @@
  * Safari and Opera as well as mobile touch-based browsers for iOS and Android. Although designed for use with the IIP protocol
  * and IIPImage, it has multi-protocol support and is additionally compatible with the Zoomify and Deepzoom protocols.
  * Version 2.0 of IIPMooViewer is HTML5/CSS3 based and uses the Mootools javascript framework (version 1.4+).
- * Please refer to the project site http://iipimage.sourceforge.net for further details
  *
  * IMPORTANT!!! When using this widget start html page as follows:
  *    <!doctype html>
@@ -34,6 +33,8 @@
  *    ));
  * </pre>
  *
+ * @link http://iipimage.sourceforge.net/2011/08/iipmooviewer-2-0-beta/
+ * @link https://github.com/ruven/iipmooviewer
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 1.0.0
  */
