@@ -82,10 +82,10 @@ class XFileForm extends CFormModel
 		if(count($refcodeParts)>4)
 			return '';
 
-		$archive=$this->codeToDir(strtoupper($refcodeParts[0]));
-		$fond=$this->codeToDir($refcodeParts[1], '%04s');
-		$inventory=$this->codeToDir($refcodeParts[2], '%03s');
-		$volume=$this->codeToDir($refcodeParts[3], '%07s');
+		$archive=   isset($refcodeParts[0]) ? $this->codeToDir(strtoupper($refcodeParts[0])) : null;
+		$fond=      isset($refcodeParts[1]) ? $this->codeToDir($refcodeParts[1], '%04s') : null;
+		$inventory= isset($refcodeParts[2]) ? $this->codeToDir($refcodeParts[2], '%03s') : null;
+		$volume=    isset($refcodeParts[3]) ? $this->codeToDir($refcodeParts[3], '%07s') : null;
 
 		// Not all filenames are lowercase as they should.
 		// So we will try few variations
