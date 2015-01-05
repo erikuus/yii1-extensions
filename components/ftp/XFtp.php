@@ -1,13 +1,15 @@
 <?php
-
 /**
- * OOP Ftp library
+ * XFtp class file.
+ *
+ * XFtp handles FTP functionalities
  *
  * The following code is the component registration in the config file:
  *
+ * <pre>
  * 'components'=>array(
  *     'ftp'=>array(
- *         'class'=>'application.extensions.ftp.XFtp',
+ *         'class'=>'ext.components.ftp.XFtp',
  *         'host'=>'127.0.0.1',
  *         'port'=>21,
  *         'username'=>'yourusername',
@@ -17,11 +19,34 @@
  *         'autoConnect'=>true,
  *     )
  * )
+ * </pre>
  *
+ * See the following code example:
+ *
+ * <pre>
+ * $ftp = Yii::app()->ftp;
+ * $ftp->put('remote.txt', 'D:\local.txt');
+ * $ftp->rmdir('exampledir');
+ * $ftp->chdir('aaa');
+ * $ftp->currentDir();
+ * $ftp->delete('remote.txt');
+ * </pre>
+ *
+ * @link http://www.yiiframework.com/extension/ftp
  * @author Miles <cuiming2355_cn@hotmail.com>
+ *
+ * function listFilesDetailed($directory)
+ * @author Erik Uus <erik.uus@gmail.com>
  */
 class XFtp extends CApplicationComponent
 {
+	/**
+	 * Error codes
+	 */
+	const ERROR_NONE=0;
+	const ERROR_CONNECTION_FAILED=1;
+	const ERROR_LOGIN_FAILED=2;
+
 	/**
 	 * @var string the host for establishing FTP connection. Defaults to null.
 	 */
@@ -63,6 +88,15 @@ class XFtp extends CApplicationComponent
 	 * effective when the XFtp object is used as an application component.
 	 */
 	public $autoConnect=true;
+	/**
+	 * @var integer the authentication error code. If there is an error, the error code will be non-zero.
+	 * Defaults to 0, meaning no error.
+	 */
+	public $errorCode=self::ERROR_NONE;
+	/**
+	 * @var string the authentication error message. Defaults to empty.
+	 */
+	public $errorMessage;
 
 	private $_active=false;
 	private $_errors=null;
@@ -111,7 +145,6 @@ class XFtp extends CApplicationComponent
 	/**
 	 * Open or close the FTP connection.
 	 * @param boolean whether to open or close FTP connection
-	 * @throws CException if connection fails
 	 */
 	public function setActive($value)
 	{
@@ -133,11 +166,19 @@ class XFtp extends CApplicationComponent
 		if($this->_connection===null)
 		{
 			// Connect - SSL?
-			$this->_connection=$this->ssl ? ftp_ssl_connect($this->host,$this->port,$this->timeout) : ftp_connect($this->host,$this->port,$this->timeout);
+			$this->_connection=$this->ssl ? @ftp_ssl_connect($this->host,$this->port,$this->timeout) : @ftp_connect($this->host,$this->port,$this->timeout);
+
+			// Check connection
+			if(!$this->_connection)
+			{
+				$this->errorCode=self::ERROR_CONNECTION_FAILED;
+				$this->errorMessage=Yii::t('XFtp.ftp', 'Ftp connection failed!');
+				return false;
+			}
 
 			// Connection anonymous?
 			if(!empty($this->username) and !empty($this->password))
-				$login_result=ftp_login($this->_connection, $this->username, $this->password);
+				$login_result=@ftp_login($this->_connection, $this->username, $this->password);
 			else
 				$login_result=true;
 
@@ -145,15 +186,16 @@ class XFtp extends CApplicationComponent
 			if($this->passiv)
 				ftp_pasv($this->_connection, true);
 
-			// Check connection
-			if(!$this->_connection)
-				throw new CException('FTP Library Error: Connection failed!');
-
 			// Check login
-			if((empty($this->username) and empty($this->password)) and !$login_result)
-				throw new CException('FTP Library Error: Login failed!');
+			if(!$login_result)
+			{
+				$this->errorCode=self::ERROR_LOGIN_FAILED;
+				$this->errorMessage=Yii::t('XFtp.ftp', 'Ftp login failed!');
+				return false;
+			}
 
 			$this->_active=true;
+			return true;
 		}
 	}
 
@@ -176,8 +218,6 @@ class XFtp extends CApplicationComponent
 			$this->_connection=null;
 			$this->_errors=null;
 		}
-		else
-			throw new CDbException('XFtp is inactive and cannot perform any FTP operations.');
 	}
 
 	/**
@@ -191,19 +231,19 @@ class XFtp extends CApplicationComponent
 		if($this->getActive())
 		{
 			if(!is_array($config))
-				throw new CException('XFtp Error: The config parameter must be passed an array!');
+				throw new CException('Ftp Error: The config parameter must be passed an array!');
 
 			// Loop through configuration array
 			foreach($config as $key=>$value)
 			{
 				// Set the options and test to see if they did so successfully - throw an exception if it failed
 				if(!ftp_set_option($this->_connection,$key,$value))
-					throw new CException('XFtp Error: The system failed to set the FTP option: "'.$key.'" with the value: "'.$value.'"');
+					throw new CException('Ftp Error: The system failed to set the FTP option: "'.$key.'" with the value: "'.$value.'"');
 			}
 			return $this;
 		}
 		else
-			throw new CDbException('XFtp is inactive and cannot perform any FTP operations.');
+			throw new CException('Ftp is inactive and cannot perform any operations.');
 	}
 
 	/**
@@ -224,7 +264,7 @@ class XFtp extends CApplicationComponent
 				return false;
 		}
 		else
-			throw new CDbException('XFtp is inactive and cannot perform any FTP operations.');
+			throw new CException('Ftp is inactive and cannot perform any operations.');
 	}
 
 	/**
@@ -249,7 +289,7 @@ class XFtp extends CApplicationComponent
 				return false;
 		}
 		else
-			throw new CDbException('XFtp is inactive and cannot perform any FTP operations.');
+			throw new CException('Ftp is inactive and cannot perform any operations.');
 	}
 
 	/**
@@ -271,7 +311,7 @@ class XFtp extends CApplicationComponent
 				return false;
 		}
 		else
-			throw new CDbException('XFtp is inactive and cannot perform any FTP operations.');
+			throw new CException('Ftp is inactive and cannot perform any operations.');
 	}
 
 	/**
@@ -292,7 +332,7 @@ class XFtp extends CApplicationComponent
 				return false;
 		}
 		else
-			throw new CDbException('XFtp is inactive and cannot perform any FTP operations.');
+			throw new CException('Ftp is inactive and cannot perform any operations.');
 	}
 
 	/**
@@ -312,7 +352,7 @@ class XFtp extends CApplicationComponent
 				return false;
 		}
 		else
-			throw new CDbException('XFtp is inactive and cannot perform any FTP operations.');
+			throw new CException('Ftp is inactive and cannot perform any operations.');
 	}
 
 	/**
@@ -332,7 +372,7 @@ class XFtp extends CApplicationComponent
 				return false;
 		}
 		else
-			throw new CDbException('XFtp is inactive and cannot perform any FTP operations.');
+			throw new CException('Ftp is inactive and cannot perform any operations.');
 	}
 
 	/**
@@ -355,7 +395,7 @@ class XFtp extends CApplicationComponent
 				return false;
 		}
 		else
-			throw new CDbException('XFtp is inactive and cannot perform any FTP operations.');
+			throw new CException('Ftp is inactive and cannot perform any operations.');
 	}
 
 	/**
@@ -377,7 +417,7 @@ class XFtp extends CApplicationComponent
 				return false;
 		}
 		else
-			throw new CDbException('XFtp is inactive and cannot perform any FTP operations.');
+			throw new CException('Ftp is inactive and cannot perform any operations.');
 	}
 
 	/**
@@ -397,7 +437,7 @@ class XFtp extends CApplicationComponent
 				return false;
 		}
 		else
-			throw new CDbException('XFtp is inactive and cannot perform any FTP operations.');
+			throw new CException('Ftp is inactive and cannot perform any operations.');
 	}
 
 	/**
@@ -417,7 +457,7 @@ class XFtp extends CApplicationComponent
 				return false;
 		}
 		else
-			throw new CDbException('XFtp is inactive and cannot perform any FTP operations.');
+			throw new CException('Ftp is inactive and cannot perform any operations.');
 	}
 
 	/**
@@ -436,7 +476,7 @@ class XFtp extends CApplicationComponent
 				return false;
 		}
 		else
-			throw new CDbException('XFtp is inactive and cannot perform any FTP operations.');
+			throw new CException('Ftp is inactive and cannot perform any operations.');
 	}
 
 	/**
@@ -449,7 +489,7 @@ class XFtp extends CApplicationComponent
 		if($this->getActive())
 			return ftp_pwd($this->_connection);
 		else
-			throw new CDbException('XFtp is inactive and cannot perform any FTP operations.');
+			throw new CException('Ftp is inactive and cannot perform any operations.');
 	}
 
 	/**
@@ -470,7 +510,7 @@ class XFtp extends CApplicationComponent
 				return false;
 		}
 		else
-			throw new CDbException('XFtp is inactive and cannot perform any FTP operations.');
+			throw new CException('Ftp is inactive and cannot perform any operations.');
 	}
 
 	/**
@@ -484,7 +524,7 @@ class XFtp extends CApplicationComponent
 		if($this->getActive())
 			return ftp_nlist($this->_connection,$directory);
 		else
-			throw new CDbException('XFtp is inactive and cannot perform any FTP operations.');
+			throw new CException('Ftp is inactive and cannot perform any operations.');
 	}
 
 	/**
@@ -498,21 +538,23 @@ class XFtp extends CApplicationComponent
 	{
 		if($this->getActive())
 		{
-			if (is_array($children = ftp_rawlist($this->_connection, $directory)))
+			if (is_array($res_files = ftp_rawlist($this->_connection, $directory)))
 			{
-				$items = array();
-				foreach ($children as $child) {
-					$chunks = preg_split("/\s+/", $child);
-					list($item['rights'], $item['number'], $item['user'], $item['group'], $item['size'], $item['month'], $item['day'], $item['time']) = $chunks;
-					$item['type'] = $chunks[0]{0} === 'd' ? 'directory' : 'file';
-					array_splice($chunks, 0, 8);
-					$items[implode(" ", $chunks)] = $item;
+				$files=array();
+
+				foreach ($res_files as $file) {
+					$chunks = preg_split("/\s+/", $file);
+					list($details['rights'], $details['number'], $details['user'], $details['group'], $details['size'], $details['month'], $details['day'], $details['time'], $details['filename']) = $chunks;
+					$details['mtime'] = strtotime(implode(' ', array($details['month'],$details['day'],$details['time'])));
+					$details['type'] = $chunks[0]{0} === 'd' ? 2 : 1; // 2-directory, 1-file
+					$files[] = $details;
+
 				}
-				return $items;
+				return $files;
 			}
 		}
 		else
-			throw new CDbException('XFtp is inactive and cannot perform any FTP operations.');
+			throw new CException('Ftp is inactive and cannot perform any operations.');
 	}
 
 	/**
