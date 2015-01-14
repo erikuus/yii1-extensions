@@ -12,10 +12,9 @@
     margin-left: -60px;
     opacity: 0.8;
     background-color: #CCC;
-    border-radius: 200px;
+    border-radius: 50%;
     display: block;
     text-align: center;
-    padding-top: 80px;
     color:#666;
     display: none;
 }
