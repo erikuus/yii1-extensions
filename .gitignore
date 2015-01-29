@@ -11,3 +11,4 @@ modules/rbam/
 ######################
 Thumbs.db
 log.htm
+vendors/pdf/dompdf/lib/fonts/log.htm

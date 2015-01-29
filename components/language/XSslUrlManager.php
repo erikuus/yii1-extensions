@@ -95,9 +95,11 @@ class XSslUrlManager extends CUrlManager
 		// does not match the expected protocol
 		$secureRoute = $this->isSecureRoute($route);
 		$sslRequest = $request->isSecureConnection;
+
 		if ($secureRoute !== $sslRequest)
 		{
-			$hostInfo = $secureRoute ? $this->secureHostInfo : ($sslRequest?$this->secureHostInfo:$this->hostInfo);
+			$hostInfo = $secureRoute ? $this->secureHostInfo : $this->hostInfo;
+
 			if ((strpos($hostInfo, 'https') === 0) xor $sslRequest)
 				$request->redirect($hostInfo . $request->url, true, 301);
 		}
