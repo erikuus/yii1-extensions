@@ -201,10 +201,10 @@ abstract class XIPizza extends CApplicationComponent
 	}
 
 	/**
-	 * Validate E-Commerce Payment Gateway feedback.
-	 * After a customer has completed their order through E-Commerce Payment Gateway,
-	 * E-Commerce Payment Gateway will contact the script you provided in the "feedBackUrl"
-	 * argument. E-Commerce Payment Gateway will POST the order information to your script
+	 * Validate IPizza payment.
+	 * After a customer has completed their order,
+	 * ipizza bank server will contact the script you provided in the "returnUrl"
+	 * argument. Bank will POST the order information to your script
 	 * and it's up to us to verify that it's a valid order.
 	 * @return boolean whether payment validates
 	 */
