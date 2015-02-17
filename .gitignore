@@ -10,5 +10,4 @@ modules/rbam/
 # OS generated files #
 ######################
 Thumbs.db
-log.htm
-vendors/pdf/dompdf/lib/fonts/log.htm
+*log.htm
