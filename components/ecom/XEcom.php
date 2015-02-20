@@ -12,57 +12,63 @@
  *     'ecom'=> array(
  *         'class'=>'ext.components.ecom.XEcom',
  *         'serviceUrl'=>'https://pos.estcard.ee/test-pos/servlet/iPAYServlet',
- *         'serviceId'=>'318DC77DC8',
+ *         'merchantId'=>'318DC77DC8',
  *         'certificatePath'=>'/path/to/80_ecom.crt',
  *         'privateKeyPath'=>'/path/to/private.key',
  *     ),
  * )
  * </pre>
  *
- * Create ecuno in model:
+ * Create requestId in model:
  * <pre>
- * public function createEcuno()
+ * public function getRequestId()
  * {
  *     do {
- *         $this->ecuno=date("Ym").rand(100000,999999);
- *     } while(self::model()->findByAttributes(array('ecuno'=>$this->ecuno))!==null);
+ *         $requestId=date("Ym").rand(100000,999999);
+ *     } while(self::model()->findByAttributes(array('request_id'=>$requestId))!==null);
  *
- *     $this->save();
- *     return $this->ecuno;
+ *     return $requestId;
  * }
  * </pre>
  *
  * Submit payment in controller:
  * <pre>
- * public function actionSubmitPayment()
+ * public function actionSubmitPayment($productId, $bank)
  * {
- *     $model=$this->loadModel();
+ *     $product=Product::model()->findByPk($id);
  *
- *     $ecom = Yii::app()->ecom;
- *     $ecom->lang = Yii::app()->language;
- *     $ecom->datetime = date("YmdHis");
- *     $ecom->eamount = $model->price * 100;
- *     $ecom->feedBackUrl = Yii::app()->createAbsoluteUrl('validatePayment',array('id'=>$model->id));
- *     $ecom->ecuno = $model->createEcuno();
+ *     $payment=new Payment;
+ *     $payment->user_id=Yii::app()->user->id;
+ *     $payment->product_id=$product->id;
+ *     $payment->status=Payment::STATUS_SUBMITTED;
+ *     $payment->save();
+ *
+ *     $ecom=Yii::app()->ecom;
+ *     $ecom->requestId = Payment::model()->getRequestId();
+ *     $ecom->language = Yii::app()->language;
+ *     $ecom->amount = $product->price*100;
+ *     $ecom->returnUrl = Yii::app()->createAbsoluteUrl('validatePayment', array('id'=>$payment->id,'bank'=>$bank));
  *     $ecom->submitPayment();
  * }
  * </pre>
  *
  * Validate payment in controller:
  * <pre>
- * public function actionValidatePayment()
+ * public function actionValidatePayment($id)
  * {
- *     if(Yii::app()->request->isPostRequest)
- *     {
  *         if(Yii::app()->ecom->validatePayment())
- *             // update database, set success flash message
+ *         {
+ *             $payment=Payment::model()->findByPk($id);
+ *             $payment->status=Payment::STATUS_VALID;
+ *             if($payment->save())
+ *                 Yii::app()->user->setFlash('success', 'Payment was successful!');
+ *             else
+ *                 Yii::app()->user->setFlash('error', 'Transaction was successful, but payment was not recorded.'));
+ *         }
  *         else
- *             // set failure flash message
- *     }
- *     else
- *         throw new CHttpException(400,'Invalid request. Please do not repeat this request again.');
+ *             Yii::app()->user->setFlash('error', Yii::app()->ecom->errorMessage);
  *
- *     // redirect to order list
+ *         $this->redirect('/controller/action');
  * }
  * </pre>
  *
@@ -73,14 +79,62 @@
 class XEcom extends CApplicationComponent
 {
 	/**
+	 * Error codes
+	 */
+	const ERROR_NONE=0;
+	const ERROR_TRANSACTION_FAILED=1;
+	const ERROR_SIGNATURE_INVALID=2;
+	const ERROR_UNKNOWN=3;
+
+	/**
 	 * @var string $serviceUrl iPay payment service request target URL
 	 */
 	public $serviceUrl;
 	/**
-	 * @var string $serviceId your web service id (available through payment service contract)
+	 * @var string $action iPay action name. Defaults to 'gaf'
 	 */
- 	public $serviceId;
+ 	public $action='gaf';
 	/**
+	 * @var integer $version iPay protocol version. Defaults to '004'
+	 */
+ 	public $version='004';
+	/**
+	 * @var string $delivery delivery symbol. Defaults to 'S'
+	 */
+ 	public $delivery='S';
+	/**
+	 * @var string $merchantId the id of merchant that sends payment request (available through payment service contract)
+	 */
+ 	public $merchantId;
+	/**
+	 * @var integer $requestId the unique transaction number as time stamp [YYYYMM] + random number between 100000-999999
+	 */
+	public $requestId;
+	/**
+	 * @var integer $amount Payment amount in cents
+	 */
+ 	public $amount;
+	/**
+	 * @var string $currency Payment currency ISO-4217. Defaults to 'EUR'
+	 */
+ 	public $currency='EUR';
+	/**
+	 * @var string $datetime Timestamp format [YYYYMMDDhhmmss] ISO-8601
+	 */
+ 	public $datetime;
+	/**
+	 * @var string $returnUrl the url that bank server returns respons to
+	 */
+ 	public $returnUrl;
+	/**
+	 * @var string $language interface language ISO 639-1
+	 */
+	public $language;
+	/**
+	 * @var string $charEncoding character encoding. Defaults to 'UTF-8'
+	 */
+ 	public $charEncoding='UTF-8';
+ 	/**
 	 * @var string $certificate the path to https ssl certificate
 	 */
 	public $certificatePath;
@@ -93,45 +147,14 @@ class XEcom extends CApplicationComponent
 	 */
 	public $privateKeyPass;
 	/**
-	 * @var string $action iPay action name. Defaults to 'gaf'
+	 * @var integer the authentication error code. If there is an error, the error code will be non-zero.
+	 * Defaults to 0, meaning no error.
 	 */
- 	public $action='gaf';
+	public $errorCode=self::ERROR_NONE;
 	/**
-	 * @var integer $ver iPay protocol version. Defaults to '004'
+	 * @var string the authentication error message. Defaults to empty.
 	 */
- 	public $ver='004';
-	/**
-	 * @var string $delivery delivery symbol. Defaults to 'S'
-	 */
- 	public $delivery='S';
-	/**
-	 * @var string $charEncoding character encoding. Defaults to 'UTF-8'
-	 */
- 	public $charEncoding='UTF-8';
-	/**
-	 * @var string $cur Payment currency ISO-4217. Defaults to 'EUR'
-	 */
- 	public $cur='EUR';
-	/**
-	 * @var string $lang interface language ISO 639-1
-	 */
-	public $lang;
-	/**
-	 * @var integer $eamount Payment amount in cents
-	 */
- 	public $eamount;
-	/**
-	 * @var string $datetime Timestamp format [YYYYMMDDhhmmss] ISO-8601
-	 */
- 	public $datetime;
-	/**
-	 * @var string $feedBackUrl feedback url
-	 */
- 	public $feedBackUrl;
-	/**
-	 * @var integer $ecuno the unique transaction number as time stamp [YYYYMM] + random number between 100000-999999
-	 */
-	public $ecuno;
+	public $errorMessage;
 
 	/**
 	 * Render form with hidden fields and autosubmit
@@ -142,18 +165,20 @@ class XEcom extends CApplicationComponent
 
 		Yii::app()->controller->renderFile($file, array(
 			'serviceUrl'=>$this->serviceUrl,
-			'serviceId'=>$this->serviceId,
-			'action'=>$this->action,
-			'ver'=>$this->ver,
-			'delivery'=>$this->delivery,
-			'charEncoding'=>$this->charEncoding,
-			'cur'=>$this->cur,
-			'lang'=>$this->lang,
-			'datetime'=>$this->datetime,
-			'feedBackUrl'=>$this->feedBackUrl,
-			'eamount'=>sprintf("%012s", $this->eamount),
-			'ecuno'=>$this->ecuno,
-			'mac'=>$this->getMac(),
+			'params'=>array(
+				'id'=>$this->merchantId,
+				'action'=>$this->action,
+				'ver'=>$this->version,
+				'delivery'=>$this->delivery,
+				'charEncoding'=>$this->charEncoding,
+				'cur'=>$this->currency,
+				'lang'=>$this->language,
+				'datetime'=>$this->datetime,
+				'feedBackUrl'=>$this->returnUrl,
+				'eamount'=>sprintf("%012s", $this->amount),
+				'ecuno'=>$this->requestId,
+				'mac'=>$this->getMacSignature(),
+			)
 		));
 	}
 
@@ -161,48 +186,35 @@ class XEcom extends CApplicationComponent
 	 * Get signed data
 	 * @return signed data in HEX format
 	 */
-	protected function getMac()
+	protected function getMacSignature()
 	{
-		// construct data string
-		$serviceId=sprintf("%-10s", $this->serviceId);
-		$feedbackurl=sprintf("%-128s", $this->feedBackUrl);
-		$ecuno=sprintf("%012s", $this->ecuno);
-		$eamount=sprintf("%012s", $this->eamount);
-
 		$data=
-			$this->ver .
-			$serviceId .
-			$ecuno .
-			$eamount .
-			$this->cur .
+			$this->version .
+			sprintf("%-10s", $this->merchantId) .
+			sprintf("%012s", $this->requestId) .
+			sprintf("%012s", $this->amount) .
+			$this->currency .
 			$this->datetime .
-			$feedbackurl .
+			sprintf("%-128s", $this->returnUrl) .
 			$this->delivery;
 
-		// prepare private key
-		$fp=fopen($this->privateKeyPath,'r');
-		$fs=filesize($this->privateKeyPath);
-		$privateKey=fread($fp,$fs);
-		fclose($fp);
-
-		// sign
-		$signature=sha1($data);
-		$privateKeyId=openssl_get_privatekey($privateKey, $this->privateKeyPass);
-		openssl_sign($data, $signature, $privateKeyId);
-		openssl_free_key($privateKeyId);
+		// sign with private key
+		$privateKey=openssl_pkey_get_private(file_get_contents($this->privateKeyPath), $this->privateKeyPass);
+		openssl_sign($data, $macSignature, $privateKey);
+		openssl_free_key($privateKey);
 
 		// convert to hex
-		$mac=bin2hex($signature);
+		$macSignature=bin2hex($macSignature);
 
-		return $mac;
+		return $macSignature;
 	}
 
 	/**
 	 * Validate E-Commerce Payment Gateway feedback.
 	 * After a customer has completed their order through E-Commerce Payment Gateway,
-	 * E-Commerce Payment Gateway will contact the script you provided in the "feedBackUrl"
+	 * E-Commerce Payment Gateway will contact the script you provided in the "returnUrl"
 	 * argument. E-Commerce Payment Gateway will POST the order information to your script
-	 * and it's up to us to verify that it’s a valid order.
+	 * and it's up to us to verify that it's a valid order.
 	 * @return boolean whether payment validates
 	 */
 	public function validatePayment()
@@ -221,26 +233,42 @@ class XEcom extends CApplicationComponent
 			$this->mb_sprintf("%-40s", $_POST['actiontext']);
 
 		// get mac
-		$mac = $this->hex2str($_POST['mac']);
+		$macSignature = $this->hex2str($_POST['mac']);
 
-		// get key
-		$fp = fopen($this->certificatePath, 'r');
-		$certificate = fread($fp, 8192);
-		fclose($fp);
-		$publicKeyId = openssl_get_publickey($certificate);
+		// verify with public key
+		$publicKey = openssl_pkey_get_public(file_get_contents($this->certificatePath));
+		$signatureOK = openssl_verify($data, $macSignature, $publicKey);
+		openssl_free_key($publicKey);
 
-		// return whether signature is okay or not
-		$ok = openssl_verify($data, $mac, $publicKeyId);
-
-		// free the key from memory
-		openssl_free_key($publicKeyId);
-
-		if ($ok==1) // Signature OK
-			return ($_POST['respcode']==000) ? true : false;
-		elseif ($ok==0)
-			throw new CHttpException(402, Yii::t('XEcom.ecom', 'Payment failed! Invalid signature!'));
+		// set error and return false/true
+		if ($signatureOK==1)
+		{
+			if($_POST['respcode']==000)
+			{
+				$this->errorCode=self::ERROR_NONE;
+				return true;
+			}
+			else
+			{
+				$this->errorCode=self::ERROR_TRANSACTION_FAILED;
+				$this->errorMessage=Yii::t('XEcom.ecom', 'Payment failed! Bank did not authorize the transaction.');
+				return false;
+			}
+		}
 		else
-			throw new CHttpException(402, Yii::t('XEcom.ecom', 'Payment failed! Could not validate signature!'));
+		{
+			if ($signatureOK==0)
+			{
+				$this->errorCode=self::ERROR_SIGNATURE_INVALID;
+				$this->errorMessage=Yii::t('XEcom.ecom', 'Payment failed! Could not authorize the merchant.');
+			}
+			else
+			{
+				$this->errorCode=self::ERROR_UNKNOWN;
+				$this->errorMessage=Yii::t('XEcom.ecom', 'Payment failed!');
+			}
+			return false;
+		}
 	}
 
 	/**

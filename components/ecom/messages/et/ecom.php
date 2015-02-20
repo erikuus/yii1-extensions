@@ -1,5 +1,6 @@
 <?php
 return array(
-  'Payment failed! Invalid signature!' => 'Makse ebaõnnestus! Ebakorrektne signatuur.',
-  'Payment failed! Could not validate signature!' => 'Makse ebaõnnestus! Signatuuri ei õnnestunud kontrollida.',
+  'Payment failed!' => 'Makse ebaõnnestus!',
+  'Payment failed! Could not authorize the merchant.' => 'Makse ebaõnnestus! Viga kaupmehe autoriseerimisel!',
+  'Payment failed! Bank did not authorize the transaction.' => 'Makse ebaõnnestus! Pangal ei õnnestunud makset teostada.',
 );

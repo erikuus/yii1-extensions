@@ -7,26 +7,17 @@
 </head>
 
 <body>
-	<?php echo CHtml::beginForm($serviceUrl, 'post', array('id'=>'ecom-form')); ?>
+	<?php echo CHtml::beginForm($serviceUrl, 'post', array('id'=>'payment-form')); ?>
 
-		<?php echo CHtml::hiddenField('id',  $serviceId) ?>
-		<?php echo CHtml::hiddenField('action', $action) ?>
-		<?php echo CHtml::hiddenField('ver', $ver) ?>
-		<?php echo CHtml::hiddenField('delivery', $delivery) ?>
-		<?php echo CHtml::hiddenField('charEncoding', $charEncoding) ?>
-		<?php echo CHtml::hiddenField('cur', $cur) ?>
-		<?php echo CHtml::hiddenField('lang', $lang) ?>
-		<?php echo CHtml::hiddenField('eamount', $eamount) ?>
-		<?php echo CHtml::hiddenField('datetime', $datetime) ?>
-		<?php echo CHtml::hiddenField('feedBackUrl', $feedBackUrl) ?>
-		<?php echo CHtml::hiddenField('ecuno', $ecuno) ?>
-		<?php echo CHtml::hiddenField('mac', $mac) ?>
+		<?php foreach ($params as $name=>$value): ?>
+			<?php echo CHtml::hiddenField($name,  $value) ?>
+		<?php endforeach; ?>
 
 	<?php echo CHtml::endForm(); ?>
 
 	<script type="text/javascript">
 	/*<![CDATA[*/
-		document.getElementById("ecom-form").submit();
+		document.getElementById("payment-form").submit();
 	/*]]>*/
 	</script>
 
