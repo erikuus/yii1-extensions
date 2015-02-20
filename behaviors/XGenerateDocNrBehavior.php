@@ -11,7 +11,7 @@
  *    {
  *        return array(
  *            'XGenerateDocNrBehavior' => array(
- *                'class' => 'ext.behaviors.XGenerateUidBehavior',
+ *                'class' => 'ext.behaviors.XGenerateDocNrBehavior',
  *                'attributeName'=>'document_no',
  *                'groupByAttribute'=>'user_id',
  *                'yearExpression'=>'year(created)',
@@ -40,8 +40,8 @@ class XGenerateDocNrBehavior extends CActiveRecordBehavior
 	 * @var string the sql expression needed to query documenst items of
 	 * Examples
 	 * MySql: year({attribute})
-	 * PostgreSql: date_trunc('year', {attribute})
-	 * PostgreSql: date_trunc('year', {attribute}::abstime)
+	 * PostgreSql: date_part('year', {attribute})
+	 * PostgreSql (unix timestamp): date_part('year', {attribute}::abstime)
 	 * NOTE! You have to change {attribute} for attribute name
 	 * that contains time of creation of document
 	 */
@@ -53,26 +53,31 @@ class XGenerateDocNrBehavior extends CActiveRecordBehavior
 	/**
 	 * @var string the sprintf format for number used as third part of document no. Defaults to '%05d'
 	 */
-	public $format='%05d';
+	public $format = '%05d';
 	/**
 	 * @var string the separation mark between different parts. Defaults to '-'
 	 */
-	public $separator='-';
+	public $separator = '-';
+	/**
+	 * @var bool whether to set the attribute upon creation.
+	 * Defaults to true.
+	 */
+	public $setOnCreate = true;
 
 	/**
 	 * This is invoked before the record is saved.
 	 */
-	public function beforeValidate($event)
+	public function beforeSave($event)
 	{
 		$owner=$this->getOwner();
-		if($owner->isNewRecord)
+		if($owner->isNewRecord && $this->attributeName!== null && $this->setOnCreate)
 			$owner->setAttribute($this->attributeName, $this->getDocumentNumber());
 	}
 
 	/**
 	 * @return string document number
 	 */
-	protected function getDocumentNumber()
+	public function getDocumentNumber()
 	{
 		$owner=$this->getOwner();
 
