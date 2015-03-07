@@ -275,7 +275,7 @@ abstract class EAuthServiceBase extends CComponent implements IAuthService {
 					'URL: ' . $url . PHP_EOL .
 					'Options: ' . var_export($options, true) . PHP_EOL .
 					'Result: ' . $result,
-				CLogger::LEVEL_ERROR, 'application.extensions.eauth'
+				CLogger::LEVEL_WARNING, 'application.extensions.eauth'
 			);
 			throw new EAuthException(Yii::t('eauth', 'Invalid response http code: {code}.', array('{code}' => $headers['http_code'])), $headers['http_code']);
 		}

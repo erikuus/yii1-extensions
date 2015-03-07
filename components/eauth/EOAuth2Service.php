@@ -102,7 +102,7 @@ abstract class EOAuth2Service extends EAuthServiceBase implements IAuthService {
 		// Redirect to the authorization page
 		else {
 			// Use the URL of the current page as the callback URL.
-			if (isset($_GET['redirect_uri'])) {
+			if (isset($_GET['redirect_uri']) && $_GET['redirect_uri']) { // Erik Uus: && $_GET['redirect_uri']
 				$redirect_uri = $_GET['redirect_uri'];
 			}
 			else {
@@ -110,6 +110,7 @@ abstract class EOAuth2Service extends EAuthServiceBase implements IAuthService {
 				$path = Yii::app()->request->getUrl();
 				$redirect_uri = $server . $path;
 			}
+
 			$url = $this->getCodeUrl($redirect_uri);
 			Yii::app()->request->redirect($url);
 		}
@@ -182,8 +183,8 @@ abstract class EOAuth2Service extends EAuthServiceBase implements IAuthService {
 	 * Returns fields required for signed request.
 	 * By default returns array('access_token' => $this->access_token).
 	 * Used in {@link makeSignedRequest}.
-	 * 
-	 * @return array 
+	 *
+	 * @return array
 	 */
 	protected function getSignedRequestFields()
 	{
@@ -205,14 +206,14 @@ abstract class EOAuth2Service extends EAuthServiceBase implements IAuthService {
 		}
 
 		// Merge query fields with fields required for signed request.
-		$options['query'] = 
+		$options['query'] =
 			array_merge(
-				isset($options['query']) ? $options['query'] : array(), 
+				isset($options['query']) ? $options['query'] : array(),
 				$this->getSignedRequestFields()
 			);
 
-		$result = $this->makeRequest($url, $options);
-		
+		$result = $this->makeRequest($url, $options, $parseJson);
+
 		return $result;
 	}
 }

@@ -43,10 +43,10 @@ class GoogleOAuthService extends EOAuth2Service {
 
 		/*if (!empty($info['gender']))
 			$this->attributes['gender'] = $info['gender'] == 'male' ? 'M' : 'F';
-		
+
 		if (!empty($info['picture']))
 			$this->attributes['photo'] = $info['picture'];
-		
+
 		$info['given_name']; // first name
 		$info['family_name']; // last name
 		$info['birthday']; // format: 0000-00-00
@@ -54,7 +54,8 @@ class GoogleOAuthService extends EOAuth2Service {
 	}
 
 	protected function getCodeUrl($redirect_uri) {
-		$this->setState('redirect_uri', $redirect_uri);
+// Erik Uus: Not needed as parent::getCodeUrl sets this
+//		$this->setState('redirect_uri', $redirect_uri);
 		$url = parent::getCodeUrl($redirect_uri);
 		if (isset($_GET['js'])) {
 			$url .= '&display=popup';

@@ -46,7 +46,8 @@ class FacebookOAuthService extends EOAuth2Service {
 			$redirect_uri = implode('?', $url);
 		}
 
-		$this->setState('redirect_uri', $redirect_uri);
+// Erik Uus: Not needed as parent::getCodeUrl sets this
+//		$this->setState('redirect_uri', $redirect_uri);
 
 		$url = parent::getCodeUrl($redirect_uri);
 		if (isset($_GET['js'])) {
@@ -56,9 +57,12 @@ class FacebookOAuthService extends EOAuth2Service {
 		return $url;
 	}
 
-	protected function getTokenUrl($code) {
-		return parent::getTokenUrl($code) . '&redirect_uri=' . urlencode($this->getState('redirect_uri'));
-	}
+// This method adds the redirect_uri= parameter to the query string and then calls the parent::getTokenUrl,
+// which also adds the same parameter to the query string.
+
+//	protected function getTokenUrl($code) {
+//		return parent::getTokenUrl($code) . '&redirect_uri=' . urlencode($this->getState('redirect_uri'));
+//	}
 
 	protected function getAccessToken($code) {
 		$response = $this->makeRequest($this->getTokenUrl($code), array(), false);
