@@ -41,6 +41,7 @@
 /**
  * IMPORTANT WHEN UPGRADING!!!
  * New Method {@link  getReturnUrlRoute()}
+ * New Method {@link  getReturn2Url()}
  * Updated Method {@link  getReturnUrl()}
  *  by adding '/' to $this->_returnUrl=$this->Owner->createUrl('/'.$route,$params);
  *  so that you can get return url from module to app
@@ -75,6 +76,11 @@ class XReturnableBehavior extends CBehavior
 	 * @var string the URL to go back
 	 */
 	protected $_returnUrl;
+
+	/**
+	 * @var string the URL to go back 2 steps
+	 */
+	protected $_return2Url;
 
 	/**
 	 * Creates a returnable URL with the encoded return stack appended
@@ -131,6 +137,31 @@ class XReturnableBehavior extends CBehavior
 			$this->_returnUrl=$this->Owner->createUrl('/'.$route,$params);
 		}
 		return $this->_returnUrl;
+	}
+
+	/**
+	 * @return string the URL to go back 2 steps if there is returnable url inside returnable url
+	 */
+	public function getReturn2Url()
+	{
+		if ($this->_return2Url===null) {
+			if (!($stack=$this->getReturnStack()))
+				return null;
+
+			$params=array_pop($stack);
+
+			$stack=isset($params[$this->paramName]) && self::urlUncompress($params[$this->paramName]) ?
+				self::urlUncompress($params[$this->paramName]) :
+				array();
+
+			$params=array_pop($stack);
+
+			$route=array_shift($params);
+			if (count($stack))
+				$params[$this->paramName]=self::urlCompress($stack);
+			$this->_return2Url=$this->Owner->createUrl('/'.$route,$params);
+		}
+		return $this->_return2Url;
 	}
 
 	/**
@@ -256,7 +287,7 @@ class XReturnableBehavior extends CBehavior
 	{
 		$this->_returnStack=
 			isset($_GET[$this->paramName]) &&
-			self::urlUncompress($_GET[$this->paramName]) // Fix PHP Warning gzuncompress() by Erik Uus
+			self::urlUncompress($_GET[$this->paramName])
 				? self::urlUncompress($_GET[$this->paramName]) : array();
 	}
 }
