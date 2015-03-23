@@ -156,6 +156,9 @@ class XReturnableBehavior extends CBehavior
 
 			$params=array_pop($stack);
 
+			if(!is_array($params))
+				return $this->getReturnUrl();
+
 			$route=array_shift($params);
 			if (count($stack))
 				$params[$this->paramName]=self::urlCompress($stack);
