@@ -8,10 +8,11 @@
  */
 
 /**
- * Added style options:
+ * Added options:
  *
  * buttonLabel: 'Upload File',
  * buttonClass: null,
+ * dropFiles: 'Drop files here to upload.',
  *
  * Erik Uus <erik.uus@gmail.com>
  */
@@ -261,6 +262,7 @@ qq.FileUploaderBasic = function(o){
     this._options = {
     	// style
     	buttonLabel: 'Upload File',
+    	dropFiles: 'Drop files here to upload.',
     	buttonClass: null,
         // set to true to see the server response
         debug: false,
@@ -497,7 +499,7 @@ qq.FileUploader = function(o){
         listElement: null,
 
         template: '<div class="qq-uploader">' +
-                '<div class="qq-upload-drop-area"><span>Drop files here to upload</span></div>' +
+                '<div class="qq-upload-drop-area"><span>' + this._options.dropFiles + '</span></div>' +
                 '<div class="qq-upload-button ' + this._options.buttonClass + '">' + this._options.buttonLabel + '</div>' +
                 '<ul class="qq-upload-list"></ul>' +
              '</div>',

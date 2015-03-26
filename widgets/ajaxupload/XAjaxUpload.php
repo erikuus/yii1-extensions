@@ -16,6 +16,7 @@
  * Added better comments
  * Added buttonLabel and buttonClass options for fileuploader.js
  * Added saveAsFilename property for class qqFileUploader (qqFileUploader.php)
+ * Added qqFileUploaderBehavior.php
  *
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 2.0
