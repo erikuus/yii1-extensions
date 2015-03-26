@@ -9,7 +9,7 @@
  * <pre>
  * 'components'=>array(
  *     'ftp'=>array(
- *         'class'=>'ext.components.ftp.XSFtp',
+ *         'class'=>'ext.components.sftp.XSFtp',
  *         'host'=>'127.0.0.1',
  *         'port'=>22,
  *         'username'=>'yourusername',
@@ -22,11 +22,10 @@
  * @author	Aruna Attanayake <aruna470@gmail.com>
  * @version 1.2
  *
- * function listFilesDetailed($directory)
+ * New phpseclib library, autoloader, stream etc.
  * @author Erik Uus <erik.uus@gmail.com>
+ * @version 2.0
  */
-
-require_once dirname(__FILE__).'/Net/SFTP.php';
 
 class XSFtp extends CApplicationComponent
 {
@@ -97,6 +96,47 @@ class XSFtp extends CApplicationComponent
 	public function init()
 	{
 		parent::init();
+
+		// autoload phpseclib library
+		set_include_path(dirname(__FILE__).'/phpseclib/'.get_include_path());
+        Yii::registerAutoloader(array("XSFtp","autoload"));
+
+        // register stream for sftp://
+        Net_SFTP_Stream::register();
+	}
+
+	/**
+	 * Initializes the component.
+	 */
+	public static function autoload($class)
+	{
+		$file = dirname(__FILE__).'/phpseclib/'.str_replace("_", DIRECTORY_SEPARATOR, $class) . '.php';
+		if(is_file($file))
+		{
+			require_once($file);
+			return true;
+		}
+		elseif($class === 'File_ASN1_Element')
+		{
+			require_once(dirname(__FILE__).'/phpseclib/File/ASN1.php');
+			return true;
+		}
+		elseif($class === 'System_SSH_Agent')
+		{
+			require_once(dirname(__FILE__).'/phpseclib/System/SSH_Agent.php');
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Return sftp:// protocol handler that can be used with, for example, fopen(), dir(), etc.
+	 * @param string $path the path to file on sftp server
+	 * @return string stream url
+	 */
+	public function stream($path)
+	{
+		return "sftp://".$this->username.':'.$this->password.'@'.$this->host.$path;
 	}
 
 	/**
@@ -170,6 +210,105 @@ class XSFtp extends CApplicationComponent
 	}
 
 	/**
+	 * Renames a file or a directory on the SFTP server
+	 * @param string $oldname
+	 * @param string $newname
+	 * @return bool true if rename success
+	 * @throws CException if rename fails
+	 */
+	public function rename($oldname, $newname)
+	{
+		if($this->objSftp->rename($oldname, $newname))
+			return true;
+		else
+			throw new CException(Yii::t('XSFtp.sftp', 'Rename failed.'));
+	}
+
+	/**
+	 * Create directory on sftp location
+	 * @param string $directory Remote directory path
+	 * @return bool true if directory creation success
+	 * @throws CException if directory creation fails
+	 */
+	function createDirectory($directory)
+	{
+		if($this->objSftp->mkdir($directory))
+			return true;
+		else
+			throw new CException(Yii::t('XSFtp.sftp', 'Directory creation failed.'));
+	}
+
+	/**
+	 * Remove directory on sftp location
+	 * @param string $directory Remote directory path
+	 * @param bool $recursive If true remove directory even it is not empty
+	 * @return bool true if directory removal success
+	 * @throws CException if directory removal fails
+	 */
+	function removeDirectory($directory,$recursive=false)
+	{
+		if($recursive)
+		{
+			if($this->objSftp->delete($directory))
+				return true;
+			else
+				throw new CException(Yii::t('XSFtp.sftp', 'Directory removal failed.'));
+		}
+
+		if($this->objSftp->rmdir($directory))
+			return true;
+		else
+			throw new CException(Yii::t('XSFtp.sftp', 'Directory removal failed as folder is not empty.'));
+	}
+
+	/**
+	 * Remove file on sftp location
+	 * @param string $file Remote file path
+	 * @return bool true if file removal success
+	 * @throws CException if file removal fails
+	 */
+	function removeFile($file)
+	{
+		if($this->objSftp->delete($file))
+			return true;
+		else
+			throw new CException(Yii::t('XSFtp.sftp', 'File removal failed.'));
+	}
+
+	/**
+	 * Put file to a sftp location
+	 * @param string $localFile Local file path
+	 * @param string $remoteFile Remote file path or content
+	 * @param integer $mode (1 - local file, 2 - string)
+	 * @return bool true if file send success
+	 * @throws CException if file transfer fails
+	 */
+	public function sendFile($localFile, $remoteFile, $mode=1)
+	{
+		if($this->objSftp->put($remoteFile, $localFile, $mode))
+			return true;
+		else
+			throw new CException(Yii::t('XSFtp.sftp', 'File send failed.'));
+	}
+
+	/**
+	 * Get file from sftp location
+	 * @param string $remoteFile Remote file path
+	 * @param string $localFile Local file path
+	 * @return a string containing the contents of $remoteFile if $localFile is left undefined or a boolean false if
+	 * the operation was unsuccessful.  If $localFile is defined, returns true or false depending on the success of the
+	 * operation
+	 * @throws CException if file transfer fails
+	 */
+	public function getFile($remoteFile, $localFile = false)
+	{
+		if($return=$this->objSftp->get($remoteFile, $localFile))
+			return $return;
+		else
+			throw new CException(Yii::t('XSFtp.sftp', 'File get failed.'));
+	}
+
+	/**
 	 * Returns the current directory
 	 * @return string Current directory path
 	 */
@@ -200,54 +339,22 @@ class XSFtp extends CApplicationComponent
 	 * @return bool true if directory change success
 	 * @throws CException if directory change fails
 	 */
-	public function chdir($directory)
+	public function changeDirectory($directory)
 	{
 		if($this->objSftp->chdir($directory))
-		{
 			return true;
-		}
 		else
-		{
-			throw new CException('Directory change failed.');
-		}
+			throw new CException(Yii::t('XSFtp.sftp', 'Directory change failed.'));
 	}
 
 	/**
-	 * Put file to a sftp location
-	 * @param string $localFile Local file path
-	 * @param string $remoteFile Remote file path
-	 * @return bool true if file send success
-	 * @throws CException if file transfer fails
+	 * Retreive file size
+	 * @param string $file Remote file path
+	 * @return string File size
 	 */
-	public function sendFile($localFile,$remoteFile)
+	function getSize($file)
 	{
-		if($this->objSftp->put($remoteFile,$localFile))
-		{
-			return true;
-		}
-		else
-		{
-			throw new CException('File send failed.');
-		}
-	}
-
-	/**
-	 * Get file from sftp location
-	 * @param string $remoteFile Remote file path
-	 * @param string $localFile Local file path
-	 * @return bool true if file retreival success
-	 * @throws CException if file transfer fails
-	 */
-	public function getFile($remoteFile,$localFile)
-	{
-		if($this->objSftp->get($remoteFile,$localFile))
-		{
-			return true;
-		}
-		else
-		{
-			throw new CException('File get failed.');
-		}
+		return $this->getFileStat($file,'size');
 	}
 
 	/**
@@ -261,16 +368,6 @@ class XSFtp extends CApplicationComponent
 		$statinfo=$this->objSftp->stat($file);
 
 		return $statinfo[$attribute];
-	}
-
-	/**
-	 * Retreive file size
-	 * @param string $file Remote file path
-	 * @return string File size
-	 */
-	function getSize($file)
-	{
-		return $this->getFileStat($file,'size');
 	}
 
 	/**
@@ -291,126 +388,6 @@ class XSFtp extends CApplicationComponent
 	function getAtime($file)
 	{
 		return $this->getFileStat($file,'atime');
-	}
-
-	/**
-	 * Create directory on sftp location
-	 * @param string $directory Remote directory path
-	 * @return bool true if directory creation success
-	 * @throws CException if directory creation fails
-	 */
-	function createDirectory($directory)
-	{
-		if($this->objSftp->mkdir($directory))
-		{
-			return true;
-		}
-		else
-		{
-			throw new CException('Directory creation failed.');
-		}
-	}
-
-	/**
-	 * Remove directory on sftp location
-	 * @param string $directory Remote directory path
-	 * @param bool $foreceRemove If true remove directory even it is not empty
-	 * @return bool true if directory removal success
-	 * @throws CException if directory removal fails
-	 */
-	function removeDirectory($directory,$foreceRemove=false)
-	{
-		if($foreceRemove)
-		{
-			$this->execCmd("rm -rf {$directory}");
-
-			return true;
-		}
-		else
-		{
-			if($this->objSftp->delete($directory))
-			{
-				return true;
-			}
-			else
-			{
-				throw new CException('Directory removal failed.');
-			}
-		}
-	}
-
-	/**
-	 * Remove file on sftp location
-	 * @param string $file Remote file path
-	 * @return bool true if file removal success
-	 * @throws CException if file removal fails
-	 */
-	function removeFile($file,$foreceRemove=false)
-	{
-		if($foreceRemove)
-		{
-			$this->execCmd("rm -rf {$file}");
-
-			return true;
-		}
-		else
-		{
-			if($this->objSftp->delete($file))
-			{
-				return true;
-			}
-			else
-			{
-				throw new CException('File removal failed.');
-			}
-		}
-	}
-
-	/**
-	 * Change directory ownership
-	 * @param string $path Directory or file path
-	 * @param string $user User
-	 * @param string $group Group
-	 * @param bool $recursive Change ownership to subcontens also
-	 * @return bool true
-	 */
-	function chown($path,$user,$group,$recursive=false)
-	{
-		if($recursive)
-		{
-			$cmd="chown -R {$user}:{$group} {$path}";
-		}
-		else
-		{
-			$cmd="chown {$user}:{$group} {$path}";
-		}
-
-		$this->execCmd($cmd);
-
-		return true;
-	}
-
-	/**
-	 * Change directory permission
-	 * @param string $path Directory or file path
-	 * @param string $permission Permission
-	 * @param bool $recursive Change permission to subcontens also
-	 * @return bool true
-	 */
-	function chmod($path,$permission,$recursive=false)
-	{
-		if($recursive)
-		{
-			$cmd="chmod -R {$permission} {$path}";
-		}
-		else
-		{
-			$cmd="chmod {$permission} {$path}";
-		}
-
-		$this->execCmd($cmd);
-
-		return true;
 	}
 
 	/**
