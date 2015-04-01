@@ -5,12 +5,11 @@
  */
 class qqUploadedFileXhr
 {
-
 	/**
 	 * Save the file to the specified path
 	 * @return boolean TRUE on success
 	 */
-	function save($path)
+	public function save($path)
 	{
 		$input=fopen("php://input","r");
 		$temp=tmpfile();
@@ -47,12 +46,11 @@ class qqUploadedFileXhr
  */
 class qqUploadedFileForm
 {
-
 	/**
 	 * Save the file to the specified path
 	 * @return boolean TRUE on success
 	 */
-	function save($path)
+	public function save($path)
 	{
 		if(!move_uploaded_file($_FILES['qqfile']['tmp_name'],$path))
 			return false;
@@ -60,12 +58,12 @@ class qqUploadedFileForm
 		return true;
 	}
 
-	function getName()
+	public function getName()
 	{
 		return $_FILES['qqfile']['name'];
 	}
 
-	function getSize()
+	public function getSize()
 	{
 		return $_FILES['qqfile']['size'];
 	}
@@ -127,60 +125,10 @@ class qqFileUploader
 	/**
 	 * Returns array('success'=>true) or array('error'=>'error message')
 	 */
-	function handleUpload($uploadDirectory,$replaceOldFile=FALSE)
+	public function handleUpload($uploadDirectory,$replaceOldFile=FALSE)
 	{
 		if(!is_writable($uploadDirectory))
 			return array('error'=>"Server error. Upload directory isn't writable.");
-
-		if(!$this->file)
-			return array('error'=>'No files were uploaded.');
-
-		$size=$this->file->getSize();
-
-		if($size==0)
-			return array('error'=>'File is empty');
-
-		if($size>$this->sizeLimit)
-			return array('error'=>'File is too large');
-
-		$pathinfo=pathinfo($this->file->getName());
-
-		if($this->saveAsFilename)
-			$filename=$this->saveAsFilename;
-		else
-			$filename=preg_replace("/[^\w\x7F-\xFF\s]/i","",$pathinfo['filename']);
-
-		if(!isset($filename) or empty($filename))
-			$filename=uniqid();
-
-		$ext=$pathinfo['extension'];
-
-		if($this->allowedExtensions&&!in_array(strtolower($ext),$this->allowedExtensions))
-		{
-			$these=implode(', ',$this->allowedExtensions);
-			return array('error'=>'File has an invalid extension, it should be one of '.$these.'.');
-		}
-
-		if(!$replaceOldFile)
-		{
-			/// don't overwrite previous files that were uploaded
-			while(file_exists($uploadDirectory.$filename.'.'.$ext))
-			{
-				$filename.=rand(10,99);
-			}
-		}
-
-		if($this->file->save($uploadDirectory.$filename.'.'.$ext))
-			return array('success'=>true,'filename'=>$filename.'.'.$ext);
-		else
-			return array('error'=>'Could not save uploaded file.'.'The upload was cancelled, or server error encountered');
-	}
-
-	function handleSFtpUpload($uploadDirectory,$replaceOldFile=FALSE)
-	{
-
-//		if(!is_writable($uploadDirectory))
-//			return array('error'=>"Server error. Upload directory isn't writable.");
 
 		if(!$this->file)
 			return array('error'=>'No files were uploaded.');
