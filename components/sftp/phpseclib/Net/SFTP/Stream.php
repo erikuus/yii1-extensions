@@ -274,6 +274,13 @@ class Net_SFTP_Stream
         $this->path = $path;
 
         $this->size = $this->sftp->size($path);
+
+        // Callback added by Erik Uus <erik.uus@gmail.com>
+        if (isset($this->notification) && is_callable($this->notification)) {
+            // seems that PHP splits up strings into 8k blocks before calling stream_write
+            call_user_func($this->notification, STREAM_NOTIFY_FILE_SIZE_IS, STREAM_NOTIFY_SEVERITY_INFO, null, 0, 0, $this->size);
+        }
+
         $this->mode = preg_replace('#[bt]$#', '', $mode);
         $this->eof = false;
 
@@ -325,8 +332,10 @@ class Net_SFTP_Stream
                 call_user_func($this->notification, STREAM_NOTIFY_FAILURE, STREAM_NOTIFY_SEVERITY_ERR, $this->sftp->getLastSFTPError(), NET_SFTP_OPEN, 0, 0);
                 return 0;
             }
-            // seems that PHP calls stream_read in 8k chunks
-            call_user_func($this->notification, STREAM_NOTIFY_PROGRESS, STREAM_NOTIFY_SEVERITY_INFO, '', 0, strlen($result), $this->size);
+
+            // Callback changed by Erik Uus <erik.uus@gmail.com>
+            //call_user_func($this->notification, STREAM_NOTIFY_PROGRESS, STREAM_NOTIFY_SEVERITY_INFO, '', 0, strlen($result), $this->size);
+            call_user_func($this->notification, STREAM_NOTIFY_PROGRESS, STREAM_NOTIFY_SEVERITY_INFO, '', 0, $this->pos, 0);
         }
 
         if (empty($result)) { // ie. false or empty string
@@ -359,7 +368,7 @@ class Net_SFTP_Stream
                 return 0;
             }
             // seems that PHP splits up strings into 8k blocks before calling stream_write
-            call_user_func($this->notification, STREAM_NOTIFY_PROGRESS, STREAM_NOTIFY_SEVERITY_INFO, '', 0, strlen($data), strlen($data));
+            call_user_func($this->notification, STREAM_NOTIFY_PROGRESS, STREAM_NOTIFY_SEVERITY_INFO, null, 0, strlen($data), strlen($data));
         }
 
         if ($result === false) {
