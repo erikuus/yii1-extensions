@@ -77,7 +77,7 @@
  * }
  * </pre>
  *
- * @link http://www.nordea.ee/sitemod/upload/root/www.nordea.ee%20-%20default/Teenused%20firmale/E-Payment_v1_1.pdf
+ * @link http://www.nordea.ee/Teenused+%C3%A4rikliendile/Igap%C3%A4evapangandus/Maksete+kogumine/E-makse/1562142.html
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 1.0.0
  */
