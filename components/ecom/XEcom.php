@@ -33,7 +33,7 @@
  *
  * Submit payment in controller:
  * <pre>
- * public function actionSubmitPayment($productId, $bank)
+ * public function actionSubmitPayment($productId)
  * {
  *     $product=Product::model()->findByPk($id);
  *
@@ -47,7 +47,7 @@
  *     $ecom->requestId = Payment::model()->getRequestId();
  *     $ecom->language = Yii::app()->language;
  *     $ecom->amount = $product->price*100;
- *     $ecom->returnUrl = Yii::app()->createAbsoluteUrl('validatePayment', array('id'=>$payment->id,'bank'=>$bank));
+ *     $ecom->returnUrl = Yii::app()->createAbsoluteUrl('validatePayment', array('id'=>$payment->id));
  *     $ecom->submitPayment();
  * }
  * </pre>

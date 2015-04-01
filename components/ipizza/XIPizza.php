@@ -107,7 +107,7 @@ abstract class XIPizza extends CApplicationComponent
 	 */
 	public $serviceId;
 	/**
-	 * @var string $serviceId the iPizza payment service version
+	 * @var string $serviceVersion the iPizza payment service version
 	 * Defaults to '008'
 	 */
 	public $serviceVersion='008';
