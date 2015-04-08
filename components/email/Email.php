@@ -2,31 +2,13 @@
 /**
  * Email class file.
  *
- * @author Jonah Turnquist <poppitypop@gmail.com>
- * @link http://php-thoughts.cubedwater.com/
- * @version 1.0
- */
-
-/**
- * CHANGELOG:
- *
- * - Added property viewPath
- * - Added property layoutPath
- * - Property "type" is also sent to debug view.
- * - In view, if type is 'text/plain', nl2br function is applied to message
- * - Function mail returns true in debug mode
- * - Replaced Yii::app()->user->setFlash('email', $debug) with Yii::app()->user->setFlash('debug.email'.$uniqid, $debug)
- * to support dumping info for multiple e-mails in debug mode
- *
- * @author Erik Uus <erik.uus@gmail.com>
- *
  * You can configure the extension as follows:
  *
  * 'components'=>array(
  *     'email'=>array(
  *         'class'=>'application.extensions.email.Email',
  *         'delivery'=>'php', //Will use the php mailing function.
- *         //May also be set to 'debug' to instead dump the contents of the email into the view
+ *         // May also be set to 'debug' to instead dump the contents of the email into the view
  *     ),
  *
  * You need to put the debug widget somewhere in the view or layout, if you wish to use debug mode
@@ -63,101 +45,95 @@
  * Var1:<?php echo $var1 ?>
  * <br>
  * Var2:<?php echo $var2 ?>
+ *
+ * @author Jonah Turnquist <poppitypop@gmail.com>
+ * @link http://php-thoughts.cubedwater.com/
+ * @version 1.0
+ *
+ * @author Erik Uus <erik.uus@gmail.com>
+ * @version 1.1
  */
 class Email extends CApplicationComponent {
 	/**
-	 * @var string Type of email.  Options include "text/html" and "text/plain"
+	 * @var string Type of email.  Options include "text/html" and "text/plain".
 	 */
 	public $type = 'text/html';
 	/**
-	 * @var string Receiver, or receivers of the mail.
+	 * @var string the receiver or receivers of the mail
 	 */
-	public $to = null;
+	public $to;
+	/**
+	 * @var string the email subject
+	 */
+	public $subject;
+	/**
+	 * @var string the sender address
+	 */
+	public $from;
+	/**
+	 * @var string the reply-to address
+	 */
+	public $replyTo;
+	/**
+	 * @var string the return-path address
+	 */
+	public $returnPath;
 
 	/**
-	 * @var string Email subject
+	 * @var string MTA command line parameter. It is useful when setting the correct Return-Path header when using sendmail.
 	 */
-	public $subject = '';
-
+	public $additionalParams='-fadmin.vau@ra.ee';
 	/**
-	 * @var string from address
+	 * @var string the Carbon Copy - list of email's that should receive a copy of the email
+	 * The Recipient WILL be able to see this list.
 	 */
-	public $from = null;
-
+	public $cc;
 	/**
-	 * @var string Reply-to address
+	 * @var string the Blind Carbon Copy - list of email's that should receive a copy of the email
+	 * The Recipient WILL NOT be able to see this list.
 	 */
-	public $replyTo = null;
-
+	public $bcc;
 	/**
-	 * @var string Return-path address
+	 * @var string the mail body content
 	 */
-	public $returnPath = null;
-
+	public $message;
 	/**
-	 * @var string Carbon Copy
-	 *
-	 * List of email's that should receive a copy of the email.
-	 * The Recipient WILL be able to see this list
-	 */
-	public $cc = null;
-
-	/**
-	 * @var string Blind Carbon Copy
-	 *
-	 * List of email's that should receive a copy of the email.
-	 * The Recipient WILL NOT be able to see this list
-	 */
-	public $bcc = null;
-
-	/**
-	 * @var string Main content
-	 */
-	public $message = '';
-
-	/**
-	 * @var string Delivery type.  If set to 'php' it will use php's mail() function, and if set to 'debug'
-	 * it will not actually send it but output it to the screen
+	 * @var string the delivery type
+	 * If set to 'php' it will use php's mail() function.
+	 * If set to 'debug' it will not actually send it but output it to the screen.
 	 */
 	public $delivery = 'php';
-
 	/**
-	 * @var string language to encode the message in (eg "Japanese", "ja", "English", "en" and "uni" (UTF-8))
+	 * @var string the language to encode the message in (eg "Japanese", "ja", "English", "en" and "uni" (UTF-8))
 	 */
 	public $language = 'uni';
-
 	/**
 	 * @var string the content-type of the email
 	 */
 	public $contentType = 'utf-8';
-
 	/**
-	 * @var string path to the email view directory. Defaults to 'application.views.email'.
+	 * @var string the path to the email view directory. Defaults to 'application.views.email'.
 	 */
 	public $viewPath = 'application.views.email';
-
 	/**
-	 * @var string The view to use as the content of the email, as an alternative to setting $this->message.
+	 * @var string the view to use as the content of the email, as an alternative to setting $this->message.
 	 * This email object is availiable within the view through $email, thus letting you define things such
 	 * as the subject within the view (helps maintain seperation of logic and output).
 	 */
-	public $view = null;
-
+	public $view;
 	/**
-	 * @var array Variable to be sent to the view.
+	 * @var array the variables to be sent to the view.
 	 */
-	public $viewVars = null;
-
+	public $viewVars = array();
 	/**
 	 * @var string path to the email layout directory. Defaults to 'application.views.email.layouts'.
 	 */
 	public $layoutPath = 'application.views.email.layouts';
-
 	/**
 	 * @var string The layout for the view to be imbedded in. Must be located in
 	 * application.views.email.layouts directory.  Not required even if you are using a view
 	 */
-	public $layout = null;
+	public $layout;
 
 	/**
 	 * @var integer line length of email as per RFC2822 Section 2.1.1
@@ -210,7 +186,7 @@ class Email extends CApplicationComponent {
 			case 'php':
 				$message = wordwrap($message, $this->lineLength);
 				mb_language($this->language);
-				return mb_send_mail($to, $subject, $message, implode("\r\n", $this->createHeaders()),'-fadmin.vau@ra.ee');
+				return mb_send_mail($to, $subject, $message, implode("\r\n", $this->createHeaders()), $additionalParams);
 			case 'debug':
 				$debug = Yii::app()->controller->renderPartial('email.debug', array_merge(
 					compact('to', 'subject', 'message'),
