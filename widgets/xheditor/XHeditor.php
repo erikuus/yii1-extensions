@@ -14,6 +14,7 @@
 /**
  * Changed list of configurable attributes
  * Added upLinkUrl,upLinkExt,upImgUrl,upImgExt,upFlashUrl,upFlashExt,upMediaUrl,upMediaExt,plugins
+ * Hacked xheditor-1.1.12-en.min.js to enable AltGr chars (replaced 49<=b&&57>=b with 490<=b&&570>=b)
  * @author Erik Uus <erik.uus@gmail.com>
  */
 
