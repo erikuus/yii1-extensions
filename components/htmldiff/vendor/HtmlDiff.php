@@ -44,13 +44,13 @@
 		}
 
 		private function purifyHtml( $html, $tags = null ) {
-			if( class_exists( 'Tidy' ) && false ) {
-				$config = array( 'output-xhtml'   => true, 'indent' => false );
-				$tidy = new tidy;
-				$tidy->parseString( $html, $config, 'utf8' );
-				$html = ( string )$tidy;
-				return $this->getStringBetween( $html, '<body>' );
-			}
+//			if( class_exists( 'Tidy' ) && false ) {
+//				$config = array( 'output-xhtml'   => true, 'indent' => false );
+//				$tidy = new tidy;
+//				$tidy->parseString( $html, $config, 'utf8' );
+//				$html = ( string )$tidy;
+//				return $this->getStringBetween( $html, '<body>' );
+//			}
 			return $html;
 		}
 
