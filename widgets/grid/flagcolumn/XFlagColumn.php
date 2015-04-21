@@ -30,18 +30,30 @@
  *
  * @author Alexander Makarov
  * @version 1.1
+ *
+ * Added icons
+ * @author Erik Uus <erik.uus@gmail.com>
+ * @version 1.2
  */
 
 class XFlagColumn extends CGridColumn
 {
 	public $name;
+	public $icons=false;
 	public $sortable=true;
 	public $callbackUrl = array('flag');
+	public $htmlOptions = array('class'=>'flag-column');
+
 	private $_flagClass = "flag-link";
+	private $_assets;
 
 	public function init()
 	{
 		parent::init();
+
+		if($this->icons)
+			$this->_assets=Yii::app()->assetManager->publish(dirname(__FILE__).DIRECTORY_SEPARATOR.'assets');
+
 		$cs=Yii::app()->getClientScript();
 		$gridId = $this->grid->getId();
 		$script = <<<SCRIPT
@@ -71,7 +83,10 @@ SCRIPT;
 
 		$link = CHtml::normalizeUrl($this->callbackUrl);
 
-		echo CHtml::link(!empty($value) ? 'Y' : 'N', $link, array(
+		$yes = $this->icons ? CHtml::image($this->_assets . '/checkbox-checked.png') : '+';
+		$no = $this->icons ? CHtml::image($this->_assets . '/checkbox-unchecked.png') : '-';
+
+		echo CHtml::link(!empty($value) ? $yes : $no, $link, array(
 			'class' => $this->_flagClass,
 		));
 	}
