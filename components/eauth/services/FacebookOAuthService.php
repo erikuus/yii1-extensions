@@ -27,7 +27,7 @@ class FacebookOAuthService extends EOAuth2Service {
 	protected $client_secret = '';
 	protected $scope = '';
 	protected $providerOptions = array(
-		'authorize' => 'https://www.facebook.com/dialog/oauth',
+		'authorize' => 'https://www.facebook.com/v2.0/dialog/oauth',
 		'access_token' => 'https://graph.facebook.com/oauth/access_token',
 	);
 

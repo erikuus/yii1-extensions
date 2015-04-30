@@ -579,7 +579,7 @@ abstract class BaseFacebook
 
     return $this->getUrl(
       'www',
-      'dialog/oauth',
+      'v2.0/dialog/oauth',
       array_merge(array(
                     'client_id' => $this->getAppId(),
                     'redirect_uri' => $currentUrl, // possibly overwritten
