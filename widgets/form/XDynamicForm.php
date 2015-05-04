@@ -152,7 +152,7 @@ SCRIPT;
 		if(Yii::app()->request->isAjaxRequest)
 			echo CHtml::script($script);
 		else
-			Yii::app()->clientScript->registerScript(__CLASS__.'#dropdown#'.$this->id, $script, CClientScript::POS_READY);
+			Yii::app()->clientScript->registerScript(__CLASS__.'#dropdown#'.$id, $script, CClientScript::POS_READY);
 
 		return CHtml::activeDropDownList($model, $attribute, $data, $htmlOptions);
 	}
