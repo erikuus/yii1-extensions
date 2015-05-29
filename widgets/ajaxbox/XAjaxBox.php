@@ -8,7 +8,7 @@
  * The following example shows how to use XAjaxBox:
  * <pre>
  * $this->widget('ext.widgets.ajaxbox.XAjaxBox', array(
- *     'url'=>$this->createUrl('/some/action')
+ *     'url'=>$this->createUrl('/some/action'),
  *     'htmlOptions'=>array(
  *         'style'=>'width:400px',
  *     ),
