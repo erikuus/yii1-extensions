@@ -116,10 +116,12 @@ class XHtml extends CHtml
 	 * Format date
 	 * @param string date
 	 * @param string time format
+	 * @param string date only format
 	 * @return string formatted datetime
 	 */
-	public static function formatDate($date,$format='d.m.Y')
+	public static function formatDate($date,$format='d.m.Y',$dateOnlyFormat=null)
 	{
+		$format = $dateOnlyFormat && strstr($date, '00:00:00') ? $dateOnlyFormat : $format;
 		return $date ? date_format(date_create($date),$format) : null;
 	}
 
