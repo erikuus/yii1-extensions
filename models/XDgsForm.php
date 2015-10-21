@@ -2,7 +2,7 @@
 /**
  * XDgsForm class file.
  *
- * This class contains methods that make sql queries to KMOODUL database using Yii DAO
+ * This class contains methods that make sql queries to kmoodul database (dgs. schema) using Yii DAO
  *
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 2.0.0
@@ -189,10 +189,10 @@ class XDgsForm extends CFormModel
 	protected function getStatusOptions()
 	{
 		return array(
-			self::STATUS_PUBLIC=>Yii::t('DgsModule.md', 'Public'),
-			self::STATUS_DISCONNECTED=>Yii::t('DgsModule.md', 'Disconnected'),
-			self::STATUS_INVISIBLE=>Yii::t('DgsModule.md', 'Invisible'),
-			self::STATUS_FORBIDDEN=>Yii::t('DgsModule.md', 'Forbidden'),
+			self::STATUS_PUBLIC=>'Public',
+			self::STATUS_DISCONNECTED=>'Disconnected',
+			self::STATUS_INVISIBLE=>'Invisible',
+			self::STATUS_FORBIDDEN=>'Forbidden',
 		);
 	}
 
@@ -212,11 +212,11 @@ class XDgsForm extends CFormModel
 	protected function getAppOptions()
 	{
 		return array(
-			self::APP_SAAGA=>Yii::t('DgsModule.md', 'Saaga'),
-			self::APP_KAART=>Yii::t('DgsModule.md', 'Maps'),
-			self::APP_PARGAMENT=>Yii::t('DgsModule.md', 'Parchments'),
-			self::APP_PITSER=>Yii::t('DgsModule.md', 'Seals'),
-			self::APP_FOTIS=>Yii::t('DgsModule.md', 'Fotis'),
+			self::APP_SAAGA=>'http://www.ra.ee/dgs',
+			self::APP_KAART=>'http://www.ra.ee/kaardid',
+			self::APP_PARGAMENT=>'http://www.ra.ee/pargamendid',
+			self::APP_PITSER=>'http://www.ra.ee/pitserid',
+			self::APP_FOTIS=>'http://www.ra.ee/fotis',
 		);
 	}
 
