@@ -24,34 +24,41 @@ class XVauForm extends CFormModel
 
 	/**
 	 * @param string item reference code
-	 * @return array item data
+	 * @return array item location data
 	 *
 	 * Example:
 	 * Array
 	 * (
-	 *   [0]=>Array
-	 *   (
-	 *     ["refcode"]=>eaa.1.2.357
-	 *     ["appcode"]=>Saaga
-	 *     ["status"]=>Public
-	 *   )
-	 *   [1]=>Array
-	 *   (
-	 *     ["refcode"]=>eaa.1.2.357
-	 *     ["appcode"]=>Maps
-	 *     ["status"]=>Public
-	 *   )
+	 *     [place_code] => KL<>US
+	 *     [current_room] => Ajalooarhiivi uurimissaal
+	 *     [current_room_address] => J. Liivi 4, Tartu
+	 *     [current_room_unit] => Ajalooarhiiv
+	 *     [original_repository] => ERA.M7
+	 *     [original_repository_address] => Madara 24, Tallinn
+	 *     [original_repository_unit] => Riigiarhiiv
 	 * )
 	 *
 	 */
-	public function getItemRoomPlace($reference)
+	public function getItemLocation($reference)
 	{
 		$reference=$this->quote($reference);
 		$data = Yii::app()->kmooduldb->createCommand("
-			SELECT t.place_code, r.name_et
-			FROM tbl_item t
-			INNER JOIN tbl_room r ON (t.room_id=r.id)
-			WHERE refcode=$reference
+			SELECT
+				i.place_code,
+				r.name_et AS current_room,
+				b.address AS current_room_address,
+				u.title_et AS current_room_unit,
+				r2.name_et AS original_repository,
+				b2.address AS original_repository_address,
+				u2.title_et AS original_repository_unit
+			FROM tbl_item i
+			INNER JOIN tbl_room r ON (i.room_id=r.id)
+			INNER JOIN tbl_building b ON (r.building_id=b.id)
+			INNER JOIN tbl_unit u ON (b.unit_id=u.id)
+			INNER JOIN tbl_room r2 ON (i.repository_id=r2.id)
+			INNER JOIN tbl_building b2 ON (r2.building_id=b2.id)
+			INNER JOIN tbl_unit u2 ON (b2.unit_id=u2.id)
+			WHERE LOWER(i.refcode)=$reference
 		")->queryRow();
 		array_walk_recursive($data, array($this, 'walkFormat'));
 		return $data;
@@ -106,6 +113,4 @@ class XVauForm extends CFormModel
 		$options=$this->placeOptions;
 		return isset($options[$place_code]) ? $options[$place_code] : "unknown ({$place_code})";
 	}
-
-
 }
