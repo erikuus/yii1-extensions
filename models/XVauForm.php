@@ -60,7 +60,8 @@ class XVauForm extends CFormModel
 			INNER JOIN tbl_unit u2 ON (b2.unit_id=u2.id)
 			WHERE LOWER(i.refcode)=$reference
 		")->queryRow();
-		array_walk_recursive($data, array($this, 'walkFormat'));
+		if($data)
+			array_walk_recursive($data, array($this, 'walkFormat'));
 		return $data;
 	}
 
@@ -81,7 +82,6 @@ class XVauForm extends CFormModel
 		if($key=='place_code')
 			$value=$this->getPlaceLabel($value);
 	}
-
 
 	/**
 	 * @return array place options
