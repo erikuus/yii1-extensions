@@ -11,7 +11,7 @@
  * @version 1.0
  *
  * @author Erik Uus <erik.uus@gmail.com>
- * @version 1.1
+ * @version 1.0.0
  */
 class XPaypal extends CComponent
 {
@@ -53,9 +53,33 @@ class XPaypal extends CComponent
 	 */
 	public $description;
 	/**
-	 * @var integer $quantity the payment quantity
+	 * @var string the date when billing for profile begins.
 	 */
-	public $quantity=1;
+	public $profileStartDate;
+	/**
+	 * @var string the unit for billing during this subscription period.
+	 * It is one of the following values: Day|Week|SemiMonth|Month|Year
+	 * For SemiMonth, billing is done on the 1st and 15th of each month.
+	 * Note! The combination of billingPeriod and billingFrequency cannot exceed one year.
+	 */
+	public $billingPeriod;
+	/**
+	 * @var integer the number of billing periods that make up one billing cycle.
+	 * The combination of billing frequency and billing period must be less than or equal to one year.
+	 * For example, if the billing cycle is Month, the maximum value for billing frequency is 12. Similarly,
+	 * if the billing cycle is Week, the maximum value for billing frequency is 52.
+	 * Note! If the billing period is SemiMonth, the billing frequency must be 1.
+	 */
+	public $billingFrequency;
+	/**
+	 * @var integer the Recurring payments profile ID returned in the CreateRecurringPaymentsProfile response
+	 */
+	public $profileId;
+	/**
+	 * @var string the action to be performed to the recurring payments profile. Must be one of the following:
+	 * [Cancel|Suspend|Reactivate]
+	 */
+	public $profileAction;
 	/**
 	 * @var string $endPoint the server URL which you have to connect for submitting your API request.
 	 */
@@ -78,106 +102,99 @@ class XPaypal extends CComponent
 	 * @var string $version this is the API version in the request.
 	 * It is a mandatory parameter for each API request.
 	 */
-	public $version='3.0';
+	public $version='98.0';
 
 	public function init()
 	{
-		//Whether we are in sandbox or in live environment
+		// Whether we are in sandbox or in live environment
 		if((bool)$this->apiLive===true)
 		{
-			//live
 			$this->paypalUrl='https://www.paypal.com/webscr&cmd=_express-checkout&useraction=commit&token=';
 			$this->endPoint='https://api-3t.paypal.com/nvp';
 		}
 		else
 		{
-			//sandbox
 			$this->paypalUrl='https://www.sandbox.paypal.com/webscr&cmd=_express-checkout&useraction=commit&token=';
 			$this->endPoint='https://api-3t.sandbox.paypal.com/nvp';
 		}
 
-		//set return and cancel urls
+		// set return and cancel urls
 		$this->returnUrl=Yii::app()->createAbsoluteUrl($this->returnUrl);
 		$this->cancelUrl=Yii::app()->createAbsoluteUrl($this->cancelUrl);
 	}
 
-	public function __construct()
+	public function setExpressCheckout()
 	{
+		$nvpstr=
+			'&PAYMENTREQUEST_0_PAYMENTACTION=Sale'.
+			'&PAYMENTREQUEST_0_AMT='.urlencode($this->amount).
+			'&PAYMENTREQUEST_0_CURRENCYCODE='.urlencode($this->currency).
+			'&PAYMENTREQUEST_0_DESC='.urlencode($this->description).
+			'&RETURNURL='.urlencode($this->returnUrl).
+			'&CANCELURL='.urlencode($this->cancelUrl);
 
-	}
-
-	public function DoDirectPayment($paymentInfo=array())
-	{
-		// Get required parameters from the web form for the request
-		$paymentType=urlencode('Sale');
-		$firstName=urlencode($paymentInfo['Member']['first_name']);
-		$lastName=urlencode($paymentInfo['Member']['last_name']);
-		$creditCardType=urlencode($paymentInfo['CreditCard']['credit_type']);
-		$creditCardNumber=urlencode($paymentInfo['CreditCard']['card_number']);
-		$expDateMonth=urlencode($paymentInfo['CreditCard']['expiration_month']);
-		$padDateMonth=str_pad($expDateMonth,2,'0',STR_PAD_LEFT);
-		$expDateYear=urlencode($paymentInfo['CreditCard']['expiration_year']);
-		$cvv2Number=urlencode($paymentInfo['CreditCard']['cv_code']);
-		$address1=urlencode($paymentInfo['Member']['billing_address']);
-		$address2=urlencode($paymentInfo['Member']['billing_address2']);
-		$country=urlencode($paymentInfo['Member']['billing_country']);
-		$city=urlencode($paymentInfo['Member']['billing_city']);
-		$state=urlencode($paymentInfo['Member']['billing_state']);
-		$zip=urlencode($paymentInfo['Member']['billing_zip']);
-
-		$amount=urlencode($paymentInfo['Order']['theTotal']);
-		$currencyCode=$this->currency;
-		$paymentType=urlencode('Sale');
-
-		$ip=$_SERVER['REMOTE_ADDR'];
-
-		// Construct the request string that will be sent to PayPal.
-		// The variable $nvpstr contains all the variables and is a
-		// name value pair string with & as a delimiter
-		$nvpstr="&PAYMENTACTION=Sale&IPADDRESS=$ip&AMT=$amount&CREDITCARDTYPE=$creditCardType&ACCT=$creditCardNumber&EXPDATE=".$padDateMonth.$expDateYear."&CVV2=$cvv2Number&FIRSTNAME=$firstName&LASTNAME=$lastName&STREET=$address1&STREET2=$address2&CITY=$city&STATE=$state"."&ZIP=$zip&COUNTRYCODE=$country&CURRENCYCODE=$currencyCode";
-
-		// Make the API call to PayPal, using API signature.
-		// The API response is stored in an associative array called $resArray */
-		$resArray=$this->hash_call("doDirectPayment",$nvpstr);
-
-		// Display the API response back to the browser.
-		// If the response from PayPal was a success, display the response parameters'
-		// If the response was an error, display the errors received using APIError.php.
-
-		return $resArray;
-		//Contains 'TRANSACTIONID,AMT,AVSCODE,CVV2MATCH, Or Error Codes'
-	}
-
-	public function SetExpressCheckout($paymentInfo=array())
-	{
-		$amount=urlencode($this->amount);
-		$desc=urlencode($this->description);
-		$quantity=$this->quantity;
-		$paymentType=urlencode('Sale');
-		$currencyCode=urlencode($this->currency);
-		$number=time();
-		$returnURL=urlencode($this->returnUrl);
-		$cancelURL=urlencode($this->cancelUrl);
-
-		$nvpstr='&AMT='.$amount.'&PAYMENTACTION='.$paymentType.'&CURRENCYCODE='.$currencyCode.'&RETURNURL='.$returnURL.'&CANCELURL='.$cancelURL.'&DESC='.$desc.'&QTY='.$quantity;
 		$resArray=$this->hash_call("SetExpressCheckout",$nvpstr);
 		return $resArray;
 	}
 
-	public function GetExpressCheckoutDetails($token)
+	public function setExpressCheckoutForRecurringPaymentsProfile()
+	{
+		$nvpstr=
+			'&L_BILLINGTYPE0=RecurringPayments'.
+			'&L_BILLINGAGREEMENTDESCRIPTION0='.urlencode($this->description).
+			'&RETURNURL='.urlencode($this->returnUrl).
+			'&CANCELURL='.urlencode($this->cancelUrl);
+
+		$resArray=$this->hash_call("SetExpressCheckout",$nvpstr);
+		return $resArray;
+	}
+
+	public function getExpressCheckoutDetails($token)
 	{
 		$nvpstr='&TOKEN='.$token;
 		$resArray=$this->hash_call("GetExpressCheckoutDetails",$nvpstr);
 		return $resArray;
 	}
 
-	public function DoExpressCheckoutPayment($paymentInfo=array())
+	public function doExpressCheckoutPayment($paymentInfo=array())
 	{
-		$paymentType='Sale';
-		$currencyCode=$this->currency;
-		$serverName=$_SERVER['SERVER_NAME'];
-		$nvpstr='&TOKEN='.urlencode($paymentInfo['TOKEN']).'&PAYERID='.urlencode($paymentInfo['PAYERID']).'&PAYMENTACTION='.urlencode($paymentType).'&AMT='.urlencode($paymentInfo['ORDERTOTAL']).'&CURRENCYCODE='.urlencode($currencyCode).'&IPADDRESS='.urlencode($serverName);
+		$nvpstr=
+			'&PAYMENTREQUEST_0_PAYMENTACTION=Sale'.
+			'&PAYMENTREQUEST_0_AMT='.urlencode($this->amount).
+			'&PAYMENTREQUEST_0_CURRENCYCODE='.urlencode($this->currency).
+			'&TOKEN='.urlencode($paymentInfo['TOKEN']).
+			'&PAYERID='.urlencode($paymentInfo['PAYERID']);
+
 		$resArray=$this->hash_call("DoExpressCheckoutPayment",$nvpstr);
+		return $resArray;
+	}
+
+	public function createRecurringPaymentsProfile($paymentInfo=array())
+	{
+		$nvpstr=
+			'&AMT='.urlencode($this->amount).
+			// Note! You must ensure that this field matches the corresponding
+			// billing agreement description included in the SetExpressCheckout request.
+			'&DESC='.urlencode($this->description).
+			'&CURRENCYCODE='.urlencode($this->currency).
+			'&PROFILESTARTDATE='.urlencode($this->profileStartDate).
+			'&BILLINGPERIOD='.urlencode($this->billingPeriod).
+			'&BILLINGFREQUENCY='.urlencode($this->billingFrequency).
+			'&TOKEN='.urlencode($paymentInfo['TOKEN']).
+			'&PAYERID='.urlencode($paymentInfo['PAYERID']);
+
+		$resArray=$this->hash_call("CreateRecurringPaymentsProfile",$nvpstr);
+		return $resArray;
+	}
+
+	public function manageRecurringPaymentsProfileStatus()
+	{
+		$nvpstr=
+			'&PROFILEID='.urlencode($this->profileId).
+			'&ACTION='.urlencode($this->profileAction).
+			'&NOTE='.urlencode($this->description);
+
+		$resArray=$this->hash_call("ManageRecurringPaymentsProfileStatus",$nvpstr);
 		return $resArray;
 	}
 
@@ -190,64 +207,61 @@ class XPaypal extends CComponent
 
 	public function isCallSucceeded($resArray)
 	{
-		$ack=strtoupper($resArray["ACK"]);
-		//Detect Errors
-		if($ack!="SUCCESS"&&$ack!='SUCCESSWITHWARNING')
-			return false;
+		if (isset($resArray['ACK']))
+		{
+			$ack=strtoupper($resArray["ACK"]);
+
+			if($ack!="SUCCESS" && $ack!='SUCCESSWITHWARNING')
+				return false;
+			else
+				return true;
+		}
 		else
-			return true;
+			return false;
 	}
 
 	public function hash_call($methodName,$nvpStr)
 	{
-
 		$API_UserName=$this->apiUsername;
 		$API_Password=$this->apiPassword;
 		$API_Signature=$this->apiSignature;
 		$API_Endpoint=$this->endPoint;
 		$version=$this->version;
 
-		//setting the curl parameters.
+		// setting the curl parameters.
 		$ch=curl_init();
 		curl_setopt($ch,CURLOPT_URL,$API_Endpoint);
 		curl_setopt($ch,CURLOPT_VERBOSE,1);
 
-		//turning off the server and peer verification(TrustManager Concept).
+		// turning off the server and peer verification(TrustManager Concept).
 		curl_setopt($ch,CURLOPT_SSL_VERIFYPEER,FALSE);
 		curl_setopt($ch,CURLOPT_SSL_VERIFYHOST,FALSE);
 
 		curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
 		curl_setopt($ch,CURLOPT_POST,1);
 
-		//if USE_PROXY constant set to TRUE in Constants.php, then only proxy will be enabled.
-		//Set proxy name to PROXY_HOST and port number to PROXY_PORT in constants.php
-
+		// if USE_PROXY constant set to TRUE in Constants.php, then only proxy will be enabled.
+		// Set proxy name to PROXY_HOST and port number to PROXY_PORT in constants.php
 		if($this->useProxy)
-		{
 			curl_setopt($ch,CURLOPT_PROXY,$this->proxyHost.":".$this->proxyPort);
-		}
 
-		//NVPRequest for submitting to server
+		// NVPRequest for submitting to server
 		$nvpreq="METHOD=".urlencode($methodName)."&VERSION=".urlencode($version)."&PWD=".urlencode($API_Password)."&USER=".urlencode($API_UserName)."&SIGNATURE=".urlencode($API_Signature).$nvpStr;
 
-		//setting the nvpreq as POST FIELD to curl
+		// setting the nvpreq as POST FIELD to curl
 		curl_setopt($ch,CURLOPT_POSTFIELDS,$nvpreq);
 
-		//getting response from server
+		// getting response from server
 		$response=curl_exec($ch);
 
-		//convrting NVPResponse to an Associative Array
+		// converting NVP Response to an Associative Array
 		$nvpResArray=$this->deformatNVP($response);
 		$nvpReqArray=$this->deformatNVP($nvpreq);
 
 		if(curl_errno($ch))
-		{
 			$nvpResArray=$this->APIError(curl_errno($ch),curl_error($ch),$nvpResArray);
-		}
 		else
-		{
 			curl_close($ch);
-		}
 
 		return $nvpResArray;
 	}
