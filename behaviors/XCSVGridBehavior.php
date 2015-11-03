@@ -1,15 +1,18 @@
 <?php
 
 /**
- * GridView Export Behavior
+ * XCSVGridBehavior
  *
  * This behaviour allows you to add an 'Export' button near your gridview, that will download the grid filtered data as CSV.
  *
  * @version 2.0
  * @author Geronimo Oñativia / http://www.estudiokroma.com
  * @link http://www.yiiframework.com/extension/exportablegridbehavior
+ *
+ * @version 2.0.1
+ * @author Erik Uus <erik.uus@gmail.com>
  */
-class ExportableGridBehavior extends CBehavior
+class XCSVGridBehavior extends CBehavior
 {
 	public $buttonId = 'export-button';
 	public $exportParam = 'exportCSV';
@@ -54,7 +57,17 @@ class ExportableGridBehavior extends CBehavior
 	private function csvRowHeaders($fileHandle, $attributes, CModel $model) {
 		$row = array();
 		foreach ($attributes as $attr) {
-			$row[] = $model->getAttributeLabel($attr);
+			if (is_array($attr)) {
+				if (isset($attr['name'])) {
+					$row[] = $model->getAttributeLabel($attr['name']);
+				} elseif (isset($attr['label'])) {
+					$row[] = $attr['label'];
+				} else {
+					$row[] = '';
+				}
+			} else {
+				$row[] = $model->getAttributeLabel($attr);
+			}
 		}
 		fputcsv($fileHandle, $row, $this->csvDelimiter, $this->csvEnclosure);
 	}
@@ -63,7 +76,17 @@ class ExportableGridBehavior extends CBehavior
 		foreach ($cModels as $cModel) {
 			$row = array();
 			foreach ($attributes as $attr) {
-				$row[] = CHtml::value($cModel, $attr);
+				if (is_array($attr)) {
+					if (isset($attr['value'])) {
+						$row[] = $this->evaluateExpression($attr['value'], array('data'=>$cModel));
+					} elseif (isset($attr['name'])) {
+						$row[] = CHtml::value($cModel, $attr['name']);
+					} else {
+						$row[] = '';
+					}
+				} else {
+					$row[] = CHtml::value($cModel, $attr);
+				}
 			}
 			fputcsv($fileHandle, $row, $this->csvDelimiter, $this->csvEnclosure);
 		}
@@ -102,16 +125,16 @@ class ExportableGridBehavior extends CBehavior
 		return Yii::app()->request->getParam($this->exportParam, false);
 	}
 
-	public function renderExportGridButton(CGridView $grid, $label='Export', $htmlOptions = array()) {
+	public function renderExportGridButton($gridId, $label='Export', $htmlOptions = array()) {
 		if (!isset($htmlOptions['id'])) {
 			$htmlOptions['id'] = $this->buttonId;
 		}
-		echo CHtml::link($label, '#', $htmlOptions);
-		Yii::app()->clientScript->registerScript('exportgrid'.$htmlOptions['id'], "$('#" . $htmlOptions['id'] . "').on('click',function() {
-			var downloadUrl=$('#" . $grid->id . "').yiiGridView('getUrl');
+		Yii::app()->getClientScript()->registerScript('exportgrid'.$htmlOptions['id'], "$('#" . $htmlOptions['id'] . "').live('click',function() {
+			var downloadUrl=$.fn.yiiGridView.getUrl('" . $gridId . "');
 			downloadUrl+=((downloadUrl.indexOf('?')==-1)?'?':'&');
 			downloadUrl+='{$this->exportParam}=1';
 			window.open( downloadUrl ,'_blank');
 		});");
+		echo CHtml::link($label, '#', $htmlOptions);
 	}
 }
