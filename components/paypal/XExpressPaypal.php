@@ -115,23 +115,34 @@
  * public function actionValidate($id)
  * {
  *     $subscription=$this->loadModel($id);
+ *     $subscription->profile_start_date=gmdate("Y-m-d\TH:i:s\Z");
  *
  *     $paypal=Yii::app()->paypal;
  *     $paypal->recurringPaymentsProfile=true;
- *     $paypal->profileStartDate=gmdate("Y-m-d\TH:i:s\Z");
+ *     $paypal->profileStartDate=$subscription->profile_start_date;
  *     $paypal->description=$subscription->description;
  *     $paypal->amount=$subscription->total;
  *     $paypal->currency=$subscription->currency;
  *     $paypal->billingPeriod=$subscription->billing_period;
  *     $paypal->billingFrequency=$subscription->billing_frequency;
+ *     $paypal->initAmount=$subscription->total;
+ *     $paypal->maxFailedPayments=1;
  *
  *     if($paypal->validatePayment())
  *     {
- *         $subscription->status=Subscription::STATUS_VALIDATED;
+ *         $subscription->status=$paypal->paymentResult['PROFILESTATUS'];
  *         $subscription->paypal_profile_id=$paypal->paymentResult['PROFILEID'];
  *
  *         if($subscription->save())
- *             Yii::app()->user->setFlash('success', 'Create recurring payment profile was successful!');
+ *         {
+ *             if($subscription->status=='ActiveProfile')
+ *             {
+ *                 // process initial payment and set flash
+ *                 Yii::app()->user->setFlash('success', 'Create recurring payment profile was successful!');
+ *             }
+ *             else
+ *                 Yii::app()->user->setFlash('error', 'Initial payment of subscription failed! Check your PayPal account.');
+ *         }
  *         else
  *             Yii::app()->user->setFlash('error', 'Transaction was successful, but recurring payment profile was not recorded.'));
  *     }
@@ -156,121 +167,116 @@
  *     if($paypal->validateIPN())
  *     {
  *         $txnType=Yii::app()->request->getPost('txn_type');
+ *         $txnId=Yii::app()->request->getPost('txn_id');
+ *         $paymentStatus=Yii::app()->request->getPost('payment_status');
+ *         $amount=Yii::app()->request->getPost('amount');
+ *         $currencyCode=Yii::app()->request->getPost('currency_code');
+ *         $nextPaymentDate=Yii::app()->request->getPost('next_payment_date');
+ *         $recurringPaymentId=Yii::app()->request->getPost('recurring_payment_id',0);
+ *         $initialPaymentStatus=Yii::app()->request->getPost('initial_payment_status');
+ *         $initialPaymentTxnId=Yii::app()->request->getPost('initial_payment_txn_id');
+ *         $initialPaymentAmount=Yii::app()->request->getPost('initial_payment_amount');
+ *         $txnType=Yii::app()->request->getPost('txn_type');
+ *
  *         switch ($txnType)
  *         {
  *             case 'recurring_payment':
- *                 if(Yii::app()->request->getPost('payment_status')!='Completed')
- *                 {
- *                     Yii::log(
- *                         'PayPal recurring payment status not completed'.PHP_EOL.
- *                         'POST: '.var_export($_POST, true),
- *                         CLogger::LEVEL_ERROR
- *                     );
- *                 }
- *                 elseif(Yii::app()->request->getPost('receiver_email')!=$paypal->receiverEmail)
- *                 {
- *                     Yii::log(
- *                         'PayPal recurring payment receiver email mismatch'.PHP_EOL.
- *                         '$paypal->receiverEmail '.$paypal->receiverEmail.PHP_EOL.
- *                         'POST: '.var_export($_POST, true),
- *                         CLogger::LEVEL_ERROR
- *                     );
- *                 }
- *                 else
- *                 {
- *                     $subscription=UserSubscription::model()->findByAttributes(array(
- *                         'paypal_profile_id'=>Yii::app()->request->getPost('recurring_payment_id',0)
- *                     ));
- *                     if($subscription)
- *                     {
- *                         if(Yii::app()->request->getPost('mc_gross')==$subscription->total &&
- *                         Yii::app()->request->getPost('mc_currency')==$subscription->currency)
- *                         {
- *                             $txnId=Yii::app()->request->getPost('txn_id');
- *                             $this->handleRecurringPayment($subscription, $txnId);
- *                         }
- *                         else
- *                         {
- *                             Yii::log(
- *                                 'PayPal recurring payment amount/currency mismatch'.PHP_EOL.
- *                                 'Subscription attributes: '.var_export($subscription->getAttributes(), true).PHP_EOL.
- *                                 'POST: '.var_export($_POST, true),
- *                                 CLogger::LEVEL_ERROR
- *                             );
- *                         }
- *                     }
- *                     else
- *                     {
- *                         Yii::log(
- *                             'PayPal recurring payment subscription not found'.PHP_EOL.
- *                             'POST: '.var_export($_POST, true),
- *                             CLogger::LEVEL_ERROR
- *                         );
- *                     }
- *                 }
+ *                  if($paymentStatus=='Completed')
+ *                  {
+ *                      $subscription=Subscription::model()->findByAttributes(array('paypal_profile_id'=>$recurringPaymentId));
+ *                      if($subscription)
+ *                      {
+ *                          if($amount==$subscription->total && $currencyCode==$subscription->currency)
+ *                          {
+ *                              $subscription->status='ActiveProfile';
+ *                              $subscription->save(false);
+ *                              // handle recurring payment
+ *                          }
+ *                          else
+ *                          {
+ *                              Yii::log(
+ *                                  'PayPal recurring payment amount/currency mismatch'.PHP_EOL.
+ *                                  'Subscription attributes: '.var_export($subscription->getAttributes(), true).PHP_EOL.
+ *                                  'POST: '.var_export($_POST, true),
+ *                                  CLogger::LEVEL_ERROR
+ *                              );
+ *                          }
+ *                      }
+ *                      else
+ *                      {
+ *                          Yii::log(
+ *                              'PayPal recurring payment subscription not found'.PHP_EOL.
+ *                              'POST: '.var_export($_POST, true),
+ *                              CLogger::LEVEL_ERROR
+ *                          );
+ *                      }
+ *                  }
+ *                  else
+ *                  {
+ *                      Yii::log(
+ *                          'PayPal recurring payment status not completed'.PHP_EOL.
+ *                          'POST: '.var_export($_POST, true),
+ *                          CLogger::LEVEL_ERROR
+ *                      );
+ *                  }
  *                 break;
  *             case 'recurring_payment_profile_created':
- *                 $subscription=Subscription::model()->findByAttributes(array(
- *                     'paypal_profile_id'=>Yii::app()->request->getPost('recurring_payment_id',0)
- *                 ));
- *                 if($subscription && $subscription->status!=Subscription::STATUS_VALIDATED)
- *                 {
- *                     $subscription->status=Subscription::STATUS_VALIDATED;
- *                     $subscription->save(false);
- *                 }
+ *                 if($initialPaymentStatus=='Completed')
+ *                  {
+ *                      $subscription=Subscription::model()->findByAttributes(array('paypal_profile_id'=>$recurringPaymentId));
+ *                      if($subscription)
+ *                      {
+ *                          if($initialPaymentAmount==$subscription->total && $currencyCode==$subscription->currency)
+ *                          {
+ *                              $subscription->status='ActiveProfile';
+ *                              $subscription->save(false);
+ *                              // handle initial payment
+ *                          }
+ *                          else
+ *                          {
+ *                              Yii::log(
+ *                                  'PayPal recurring payment amount/currency mismatch'.PHP_EOL.
+ *                                  'Subscription attributes: '.var_export($subscription->getAttributes(), true).PHP_EOL.
+ *                                  'POST: '.var_export($_POST, true),
+ *                                  CLogger::LEVEL_ERROR
+ *                              );
+ *                          }
+ *                      }
+ *                      else
+ *                      {
+ *                          Yii::log(
+ *                              'PayPal recurring payment subscription not found'.PHP_EOL.
+ *                              'POST: '.var_export($_POST, true),
+ *                              CLogger::LEVEL_ERROR
+ *                          );
+ *                      }
+ *                  }
+ *                  else
+ *                  {
+ *                      Yii::log(
+ *                          'PayPal recurring (initial) payment status not completed'.PHP_EOL.
+ *                          'POST: '.var_export($_POST, true),
+ *                          CLogger::LEVEL_ERROR
+ *                      );
+ *                  }
  *                 break;
  *             case 'recurring_payment_profile_cancel':
- *                 $subscription=Subscription::model()->findByAttributes(array(
- *                     'paypal_profile_id'=>Yii::app()->request->getPost('recurring_payment_id',0)
- *                 ));
- *                 if($subscription && $subscription->status!=Subscription::STATUS_CANCELED)
- *                 {
- *                     $subscription->status=Subscription::STATUS_CANCELED;
- *                     $subscription->save(false);
- *                 }
+ *                 // set subscription status to cancel
  *                 break;
  *             case 'recurring_payment_suspended_due_to_max_failed_payment':
- *                 $subscription=UserSubscription::model()->findByAttributes(array(
- *                     'paypal_profile_id'=>Yii::app()->request->getPost('recurring_payment_id',0)
- *                 ));
- *                 if($subscription && $subscription->status!=UserSubscription::STATUS_SUSPENDED)
- *                 {
- *                     $subscription->status=UserSubscription::STATUS_SUSPENDED;
- *                     $subscription->save(false);
- *                 }
- *                 Yii::log(
- *                     'Recurring payment failed and the related recurring payment profile has been suspended'.PHP_EOL.
- *                     'POST: '.var_export($_POST, true),
- *                     CLogger::LEVEL_ERROR
- *                 );
- *                 break;
- *             case 'recurring_payment_expired':
- *                 Yii::log(
- *                     'PayPal recurring payment expired'.PHP_EOL.
- *                     'POST: '.var_export($_POST, true),
- *                     CLogger::LEVEL_ERROR
- *                 );
- *                 break;
- *             case 'recurring_payment_failed':
- *                 Yii::log(
- *                     'PayPal recurring payment failed'.PHP_EOL.
- *                     'POST: '.var_export($_POST, true),
- *                     CLogger::LEVEL_ERROR
- *                 );
- *                 break;
- *             case 'recurring_payment_skipped':
- *                 Yii::log(
- *                     'PayPal recurring payment skipped'.PHP_EOL.
- *                     'POST: '.var_export($_POST, true),
- *                     CLogger::LEVEL_ERROR
- *                 );
+ *                 // set subscription status to suspended
  *                 break;
  *             case 'recurring_payment_suspended':
- *                 Yii::log(
- *                     'PayPal recurring payment suspended'.PHP_EOL.
- *                     'POST: '.var_export($_POST, true),
- *                     CLogger::LEVEL_ERROR
- *                 );
+ *                 // set subscription status to suspended
+ *                 break;
+ *             case 'recurring_payment_expired':
+ *                 // do something
+ *                 break;
+ *             case 'recurring_payment_failed':
+ *                 // do something
+ *                 break;
+ *             case 'recurring_payment_skipped':
+ *                 // do something
  *                 break;
  *         }
  *     }
@@ -305,6 +311,7 @@ class XExpressPaypal extends XPaypal
 	const ERROR_CREATE_RECCURRING=4;
 	const ERROR_MANAGE_RECCURRING=5;
 	const ERROR_VERIFY_IPN=6;
+	const ERROR_PROCESS_IPN=7;
 
 	/**
 	 * @var boolean $recurringPaymentsProfile whether to create recurring payments profile instead of single payment
@@ -456,7 +463,14 @@ class XExpressPaypal extends XPaypal
 
 		if ($listener->processIpn()) // Valid IPN
 		{
-			return true;
+			if(Yii::app()->request->getPost('receiver_email')!=$this->receiverEmail)
+			{
+				$this->errorCode=self::ERROR_PROCESS_IPN;
+				$this->errorMessage='PayPal recurring payment receiver email mismatch';
+				return false;
+			}
+			else
+				return true;
 		}
 		else // Invalid IPN
 		{

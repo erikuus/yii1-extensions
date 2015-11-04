@@ -53,18 +53,18 @@ class XPaypal extends CComponent
 	 */
 	public $description;
 	/**
-	 * @var string the date when billing for profile begins.
+	 * @var string $profileStartDate the date when billing for profile begins.
 	 */
 	public $profileStartDate;
 	/**
-	 * @var string the unit for billing during this subscription period.
+	 * @var string $billingPeriod the unit for billing during this subscription period.
 	 * It is one of the following values: Day|Week|SemiMonth|Month|Year
 	 * For SemiMonth, billing is done on the 1st and 15th of each month.
 	 * Note! The combination of billingPeriod and billingFrequency cannot exceed one year.
 	 */
 	public $billingPeriod;
 	/**
-	 * @var integer the number of billing periods that make up one billing cycle.
+	 * @var integer $billingFrequency the number of billing periods that make up one billing cycle.
 	 * The combination of billing frequency and billing period must be less than or equal to one year.
 	 * For example, if the billing cycle is Month, the maximum value for billing frequency is 12. Similarly,
 	 * if the billing cycle is Week, the maximum value for billing frequency is 52.
@@ -72,11 +72,33 @@ class XPaypal extends CComponent
 	 */
 	public $billingFrequency;
 	/**
-	 * @var integer the Recurring payments profile ID returned in the CreateRecurringPaymentsProfile response
+	 * @var float $initAmount the initial non-recurring payment when the recurring payments profile is created
+	 */
+	public $initAmount;
+	/**
+	 * @var string $failedInitAmountAction the action to be performed when initial payment fails.
+	 * By default, PayPal does not activate the profile if the initial payment amount fails.
+	 * To override this default behavior, set the this to ContinueOnFailure. If the initial payment amount fails,
+	 * ContinueOnFailure instructs PayPal to add the failed payment amount to the outstanding balance due on this
+	 * recurring payment profile. If you do not set it or set it to CancelOnFailure, PayPal creates the recurring
+	 * payment profile. However, PayPal places the profile into a pending status until the initial payment completes.
+	 * If the initial payment clears, PayPal notifies you by Instant Payment Notification (IPN) that it has activated
+	 * the pending profile. If the payment fails, PayPal notifies you by IPN that it has canceled the pending profile.
+	 * If you created the profile using Express Checkout, the buyer receives an email stating that PayPal cleared the
+	 * initial payment or canceled the pending profile.
+	 */
+	public $failedInitAmountAction;
+	/**
+	 * @var string $maxFailedPayments the number of scheduled payments that can fail before the profile is automatically suspended.
+	 * An IPN message is sent to the merchant when the specified number of failed payments is reached.
+	 */
+	public $maxFailedPayments;
+	/**
+	 * @var string $profileId the Recurring payments profile ID returned in the CreateRecurringPaymentsProfile response
 	 */
 	public $profileId;
 	/**
-	 * @var string the action to be performed to the recurring payments profile. Must be one of the following:
+	 * @var string $profileAction the action to be performed to the recurring payments profile. Must be one of the following:
 	 * [Cancel|Suspend|Reactivate]
 	 */
 	public $profileAction;
@@ -182,6 +204,15 @@ class XPaypal extends CComponent
 			'&BILLINGFREQUENCY='.urlencode($this->billingFrequency).
 			'&TOKEN='.urlencode($paymentInfo['TOKEN']).
 			'&PAYERID='.urlencode($paymentInfo['PAYERID']);
+
+		if($this->maxFailedPayments)
+			$nvpstr.='&MAXFAILEDPAYMENTS='.urlencode($this->maxFailedPayments);
+
+		if($this->initAmount)
+			$nvpstr.='&INITAMT='.urlencode($this->initAmount);
+
+		if($this->failedInitAmountAction)
+			$nvpstr.='&FAILEDINITAMTACTION='.urlencode($this->failedInitAmountAction);
 
 		$resArray=$this->hash_call("CreateRecurringPaymentsProfile",$nvpstr);
 		return $resArray;
