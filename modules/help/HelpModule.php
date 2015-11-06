@@ -80,7 +80,8 @@ class HelpModule extends CWebModule
 	public $rbac=false;
 
 	private $publicPages=array(
-		'default/view'
+		'default/view',
+		'default/sview',
 	);
 
 	private $adminPages=array(

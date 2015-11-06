@@ -28,9 +28,24 @@ class DefaultController extends Controller
 	}
 
 	/**
-	 * Displays content for help dialog with Ajax load
-	*/
+	 * Displays content for help dialog with Ajax load.
+	 */
 	public function actionView()
+	{
+		$this->renderPartial('_view', array(
+			'model'=>$this->loadModel()
+		), false, true);
+	}
+
+	/**
+	 * Displays content for help dialog with Ajax load.
+	 * This duplicate of view action is ment to be used
+	 * with secure connection. Loading http content from
+	 * https page is blocked by many browsers. So, if we
+	 * need to use help dialog within secure page, we can
+	 * define route to this action as secure.
+	 */
+	public function actionSView()
 	{
 		$this->renderPartial('_view', array(
 			'model'=>$this->loadModel()
