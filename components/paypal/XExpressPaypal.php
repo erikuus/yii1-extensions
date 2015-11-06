@@ -135,13 +135,8 @@
  *
  *         if($subscription->save())
  *         {
- *             if($subscription->status=='ActiveProfile')
- *             {
- *                 // process initial payment and set flash
- *                 Yii::app()->user->setFlash('success', 'Create recurring payment profile was successful!');
- *             }
- *             else
- *                 Yii::app()->user->setFlash('error', 'Initial payment of subscription failed! Check your PayPal account.');
+ *             // process initial payment and set flash
+ *             Yii::app()->user->setFlash('success', 'Create recurring payment profile was successful!');
  *         }
  *         else
  *             Yii::app()->user->setFlash('error', 'Transaction was successful, but recurring payment profile was not recorded.'));
