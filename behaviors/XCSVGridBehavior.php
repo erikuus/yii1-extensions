@@ -58,10 +58,10 @@ class XCSVGridBehavior extends CBehavior
 		$row = array();
 		foreach ($attributes as $attr) {
 			if (is_array($attr)) {
-				if (isset($attr['name'])) {
+				if (isset($attr['header'])) {
+					$row[] = $attr['header'];
+				} elseif (isset($attr['name'])) {
 					$row[] = $model->getAttributeLabel($attr['name']);
-				} elseif (isset($attr['label'])) {
-					$row[] = $attr['label'];
 				} else {
 					$row[] = '';
 				}
