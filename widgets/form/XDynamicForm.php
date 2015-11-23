@@ -41,7 +41,7 @@
  *
  *     <?php echo $form->DynamicDropDownList($model,'martial_status',Person::model()->martialStatusOptions);?>
  *
- *     <?php $form->beginDynamicAreaDDL($model, 'martial_status', Person::MARITAL_STATUS_SINGLE]); ?>
+ *     <?php $form->beginDynamicAreaDDL($model, 'martial_status', Person::MARITAL_STATUS_SINGLE); ?>
  *         <!-- This content is displayed only when 'single' option is selected from dropdown.
  *         We can put here form elements that make sense to single people only. -->
  *     <?php $form->endDynamicAreaDDL(); ?>
@@ -141,11 +141,14 @@ class XDynamicForm extends CActiveForm
 <<<SCRIPT
 		var selected=$('#{$id}').val();
 		$('.{$id}').hide();
+		$('.{$id} :input').prop('disabled',true);
 		$('.{$id}.selected_'+selected).show();
+		$('.{$id}.selected_'+selected+' :input').prop('disabled',false);
 		$('#{$id}').live('change', function(){
 			var selected=$(this).val();
 			$('.{$id}').hide();
 			$('.{$id}.selected_'+selected).show();
+			$('.{$id}.selected_'+selected+' :input').prop('disabled',false);
 		});
 SCRIPT;
 
