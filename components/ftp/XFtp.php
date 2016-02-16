@@ -329,10 +329,39 @@ class XFtp extends CApplicationComponent
 	 */
 	public function createDirectory($directory)
 	{
+		// if directory already exists or can be immediately created return true
+		if($this->checkDirectory($directory) || @ftp_mkdir($this->_connection, $directory))
+			return true;
+
+		// otherwise recursively try to make the directory
+		if(!$this->createDirectory(dirname($directory)))
+			return false;
+
 		if(@ftp_mkdir($this->_connection, $directory))
 			return true;
 		else
 			throw new CException(Yii::t('XFtp.ftp', 'Directory creation failed.'));
+	}
+
+	/**
+	 * Check whether directory already exists
+	 * @param string $dir ftp dir name
+	 * @return boolean whether exists
+	 */
+	protected function checkDirectory($directory)
+	{
+		// get current directory
+		$currentDir=$this->currentDir();
+
+		// test if you can change directory to $directory
+		if($this->changeDirectory($directory))
+		{
+			// If it is a directory, then change the directory back to the original directory
+			$this->changeDirectory($currentDir);
+			return true;
+		}
+		else
+			return false;
 	}
 
 	/**
@@ -477,7 +506,7 @@ class XFtp extends CApplicationComponent
 		if(@ftp_chdir($this->_connection, $directory))
 			return true;
 		else
-			throw new CException(Yii::t('XFtp.ftp', 'Directory change failed.'));
+			return false;
 	}
 
 	/**
