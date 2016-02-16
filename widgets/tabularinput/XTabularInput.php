@@ -120,6 +120,10 @@ class XTabularInput extends CWidget
 	 */
 	public $inputView;
 	/**
+	 * @var array additional data to be passed to {@link inputView} when rendering each data item.
+	 */
+	public $viewData=array();
+	/**
 	 * @var string the url to action that (partial)renders tabular input.
 	 *
 	 * Example:
@@ -329,6 +333,9 @@ class XTabularInput extends CWidget
 		$openInputTag=CHtml::openTag($this->inputTagName, $this->inputHtmlOptions);
 		$closeInputTag=CHtml::closeTag($this->inputTagName);
 
+		// json encode view data
+		$data=$this->viewData ? CJSON::encode($this->viewData) : '{}';
+
 		// register inline javascript
 		$script =
 <<<SCRIPT
@@ -337,7 +344,9 @@ class XTabularInput extends CWidget
 		event.preventDefault();
 		var input = $("#{$this->id} .{$this->inputContainerCssClass}");
 		var count = input.find(".{$this->inputCssClass}").length;
+		var data = $data;
 		var index = count>0 ? input.find(".{$this->indexCssClass}").max()+1 : 0;
+		data['index']=index;
 		$.ajax({
 			success: function(html){
 				input.append('{$openInputTag}'+html+'{$this->getRemoveLinkAndIndexInput("'+index+'")}{$closeInputTag}');
@@ -348,9 +357,7 @@ class XTabularInput extends CWidget
 			},
 			type: 'get',
 			url: this.href,
-			data: {
-				index: index
-			},
+			data: data,
 			cache: false,
 			dataType: 'html'
 		});
@@ -364,7 +371,11 @@ class XTabularInput extends CWidget
 		$this->afterRemoveInput
 	});
 SCRIPT;
-		$cs->registerScript(__CLASS__.'#'.$this->id, $script, CClientScript::POS_READY);
+
+		if(Yii::app()->request->isAjaxRequest)
+			echo CHtml::script($script);
+		else
+			$cs->registerScript(__CLASS__.'#'.$this->id, $script, CClientScript::POS_READY);
 	}
 
 	/**
@@ -372,13 +383,18 @@ SCRIPT;
 	 */
 	protected function renderContent()
 	{
+		$data=$this->viewData;
+
 		foreach($this->models as $index=>$model)
 		{
+			$data['model']=$model;
+			$data['index']=$index;
+
 			if($this->inputLimit && $index==$this->inputLimit)
 				break;
 
 			echo CHtml::openTag($this->inputTagName, $this->inputHtmlOptions);
-			$this->controller->renderPartial($this->inputView, array('model'=>$model, 'index'=>$index));
+			$this->controller->renderPartial($this->inputView, $data);
 			echo $this->getRemoveLinkAndIndexInput($index);
 			echo CHtml::closeTag($this->inputTagName);
 		}
