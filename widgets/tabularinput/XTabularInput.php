@@ -145,6 +145,11 @@ class XTabularInput extends CWidget
 	 */
 	public $header;
 	/**
+	 * @var string the confirmation message to be displayed when remove link is clicked.
+	 * If not set, confirmation message will not be displayed.
+	 */
+	public $removeConfirmation;
+	/**
 	 * @var string the template used to render remove link. In this template,
 	 * the token "{link}" will be replaced with the corresponding link.
 	 */
@@ -336,6 +341,12 @@ class XTabularInput extends CWidget
 		// json encode view data
 		$data=$this->viewData ? CJSON::encode($this->viewData) : '{}';
 
+		// prepare remove confirmation
+		if(is_string($this->removeConfirmation))
+			$confirmation="if(!confirm(".CJavaScript::encode($this->removeConfirmation).")) return false;";
+		else
+			$confirmation='';
+
 		// register inline javascript
 		$script =
 <<<SCRIPT
@@ -364,6 +375,7 @@ class XTabularInput extends CWidget
 	});
 	$("#{$this->id} .{$this->removeCssClass}").live("click", function(event) {
 		event.preventDefault();
+		$confirmation
 		$(this).parents(".{$this->inputCssClass}:first").remove();
 		$("#{$this->id} .{$this->addCssClass}").toggle($("#{$this->id} .{$this->inputCssClass}").length<{$this->_jsInputLimit});
 		$("#{$this->id} .{$this->hideOnSingleCssClass}").toggle($("#{$this->id} .{$this->inputCssClass}").length>1);
