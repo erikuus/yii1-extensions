@@ -134,7 +134,7 @@ class XTokenBehavior extends CBehavior
 		if(method_exists(Yii::app()->securityManager,'generateRandomString'))
 			return strtr(Yii::app()->securityManager->generateRandomString($this->length), array('~'=>'-'));
 		elseif(($randomBytes=openssl_random_pseudo_bytes($this->length+2))!==false)
-			return $this->strtr(substr(base64_encode($randomBytes),0,$this->length), array('+'=>'_','/'=>'-'));
+			return strtr($this->substr(base64_encode($randomBytes),0,$this->length), array('+'=>'_','/'=>'-'));
 		else
 			return false;
 	}
