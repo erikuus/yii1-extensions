@@ -64,14 +64,52 @@ class XGenerateDocNrBehavior extends CActiveRecordBehavior
 	 */
 	public $setOnCreate = true;
 
-	/**
-	 * This is invoked before the record is saved.
-	 */
-	public function beforeSave($event)
+	public function events()
 	{
-		$owner=$this->getOwner();
-		if($owner->isNewRecord && $this->attributeName!== null && $this->setOnCreate)
-			$owner->setAttribute($this->attributeName, $this->getDocumentNumber());
+		return array(
+			'onBeforeValidate' => 'addDocNrValidators',
+		);
+	}
+
+	/**
+	 * Add token validators to owner model
+	 */
+	public function addDocNrValidators()
+	{
+		$owner = $this->getOwner();
+		if ($owner->isNewRecord && $this->setOnCreate)
+		{
+			$list = $owner->getValidatorList();
+			$list->add(CValidator::createValidator(
+					'setDocNrAttribute',
+					$this,
+					$this->attributeName
+				));
+			$list->add(CValidator::createValidator(
+					'validateUniqueDocNr',
+					$this,
+					$this->attributeName
+				));
+		}
+	}
+
+	/**
+	 * Set token attribute to random ASCII string
+	 */
+	public function setDocNrAttribute()
+	{
+		$owner = $this->getOwner();
+		$owner->setAttribute($this->attributeName, $this->getDocumentNumber());
+	}
+
+	/**
+	 * Validate token uniqueness
+	 */
+	public function validateUniqueDocNr()
+	{
+		$owner = $this->getOwner();
+		CValidator::createValidator('unique', $owner, $this->attributeName)
+			->validate($owner, $this->attributeName);
 	}
 
 	/**
@@ -93,17 +131,20 @@ class XGenerateDocNrBehavior extends CActiveRecordBehavior
 	/**
 	 * @return integer document number last part
 	 */
-	protected function getNumber()
+	public function getNumber()
 	{
 		$owner=$this->getOwner();
 
 		$criteria=new CDbCriteria();
+		$criteria->select="MAX($this->attributeName) as $this->attributeName";
 		$criteria->compare($this->yearExpression, date('Y'));
 		if($this->groupByAttribute)
 			$criteria->compare($this->groupByAttribute, $owner->{$this->groupByAttribute});
 
-		$count=$owner->count($criteria);
-
-		return $count+1;
+		$max=$owner->find($criteria);
+		if($max!==null)
+			return (int)substr(strrchr($max->{$this->attributeName}, $this->separator), 1) + 1;
+		else
+			return 1;
 	}
 }
