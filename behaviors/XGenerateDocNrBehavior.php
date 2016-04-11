@@ -136,14 +136,15 @@ class XGenerateDocNrBehavior extends CActiveRecordBehavior
 		$owner=$this->getOwner();
 
 		$criteria=new CDbCriteria();
-		$criteria->select="MAX($this->attributeName) as $this->attributeName";
+		$criteria->select="MAX($this->attributeName)";
 		$criteria->compare($this->yearExpression, date('Y'));
 		if($this->groupByAttribute)
 			$criteria->compare($this->groupByAttribute, $owner->{$this->groupByAttribute});
 
-		$max=$owner->find($criteria);
-		if($max!==null)
-			return (int)substr(strrchr($max->{$this->attributeName}, $this->separator), 1) + 1;
+		$builder=$owner->getCommandBuilder();
+		$max=$builder->createFindCommand($owner->tableName(), $criteria)->queryScalar();
+		if($max)
+			return (int)substr(strrchr($max, $this->separator), 1) + 1;
 		else
 			return 1;
 	}
