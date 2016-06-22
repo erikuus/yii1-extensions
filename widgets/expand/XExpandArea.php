@@ -34,21 +34,25 @@ class XExpandArea extends CWidget
 	 */
 	public $trigger;
 	/**
-	 * @var string the CSS class for the widget container. Defaults to 'hover'.
+	 * @var string the CSS class for the widget container. Defaults to 'expand'.
 	 */
 	public $cssClass='expand';
 	/**
-	 * @var string the CSS class for the widget trigger. Defaults to 'hoverTrigger'.
+	 * @var string the CSS class for the widget trigger. Defaults to 'expandTrigger'.
 	 */
 	public $triggerCssClass='expandTrigger';
 	/**
-	 * @var string the CSS class for the widget content. Defaults to 'hoverContent'.
+	 * @var string the CSS class for the widget content. Defaults to 'expandContent'.
 	 */
 	public $contentCssClass='expandContent';
 	/**
 	 * @var boolean whether to hide the portlet when the body content is empty. Defaults to true.
 	 */
 	public $hideOnEmpty=true;
+	/**
+	 * @var boolean whether to expand content when widget is loaded. Defaults to false.
+	 */
+	public $expandOnLoad=false;
 
 	private $_openTag;
 
@@ -60,13 +64,17 @@ class XExpandArea extends CWidget
 	{
 		if($this->visible)
 		{
+			$class=$this->expandOnLoad ? 'expandTrigger-expanded' : 'expandTrigger-collapsed';
+			$style=$this->expandOnLoad ? null: 'style="display: none"';
+
 			ob_start();
 			ob_implicit_flush(false);
 
 			$this->registerClientScript();
+
 			echo "<div class=\"{$this->cssClass}\">\n";
-			echo "<div class=\"{$this->triggerCssClass} expandTrigger-collapsed\">".$this->trigger."</div>\n";
-			echo "<div class=\"{$this->contentCssClass}\" style=\"display: none\">\n";
+			echo "<div class=\"{$this->triggerCssClass} {$class}\">".$this->trigger."</div>\n";
+			echo "<div class=\"{$this->contentCssClass}\" {$style}>\n";
 
 			$this->_openTag=ob_get_contents();
 			ob_clean();
