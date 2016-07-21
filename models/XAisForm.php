@@ -170,7 +170,7 @@ class XAisForm extends CFormModel
 		$archiveIds=$this->getArchiveIds($arrReference['a']);
 		$sql = "
 			SELECT h.nimetus AS hoidla, r.tahis AS riiul, k.tahis AS kapp, l.tahis AS laudi, s.yksus AS yksus
-			FROM ra.sailik s,
+			FROM ra.sailik s
 			LEFT OUTER JOIN ra.hoidla h ON s.hoidla=h.kood
 			LEFT OUTER JOIN ra.riiul r ON s.riiul=r.kood
 			LEFT OUTER JOIN ra.kapp k ON s.kapp=k.kood
@@ -279,7 +279,8 @@ class XAisForm extends CFormModel
 					h.nimetus AS hoidla,
 					r.tahis AS riiul,
 					k.tahis AS kapp,
-					l.tahis AS laudi
+					l.tahis AS laudi,
+					s.yksus AS yksus
 				FROM ra.kirjeldusyksus ky
 				KEY INNER JOIN ra.ky_sailik
 				KEY INNER JOIN ra.sailik s
