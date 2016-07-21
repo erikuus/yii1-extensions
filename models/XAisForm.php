@@ -170,18 +170,20 @@ class XAisForm extends CFormModel
 		$archiveIds=$this->getArchiveIds($arrReference['a']);
 		$sql = "
 			SELECT h.nimetus AS hoidla, r.tahis AS riiul, k.tahis AS kapp, l.tahis AS laudi, s.yksus AS yksus
-			FROM ra.sailik s, ra.hoidla h, ra.riiul r, ra.kapp k, ra.laudi l
-			WHERE s.hoidla=h.kood
-			AND s.riiul=r.kood
-			AND s.kapp=k.kood
-			AND s.laudi=l.kood
-			AND fondi_nr=".$this->quote($arrReference['f'])."
+			FROM ra.sailik s,
+			LEFT OUTER JOIN ra.hoidla h ON s.hoidla=h.kood
+			LEFT OUTER JOIN ra.riiul r ON s.riiul=r.kood
+			LEFT OUTER JOIN ra.kapp k ON s.kapp=k.kood
+			LEFT OUTER JOIN ra.laudi l ON s.laudi=l.kood
+			WHERE fondi_nr=".$this->quote($arrReference['f'])."
 			AND nimistu_nr=".$this->quote($arrReference['n'])."
 			AND sailiku_nr=".$this->quote($arrReference['s'])."
 			AND s.yksus in ($archiveIds)
 		";
 		return Yii::app()->aisdb->cache(self::CACHE_DURATION)->createCommand($sql)->queryRow();
 	}
+
+
 
 	/**
 	 * Find item data alongside with storage info
@@ -208,7 +210,8 @@ class XAisForm extends CFormModel
 				h.nimetus AS hoidla,
 				r.tahis AS riiul,
 				k.tahis AS kapp,
-				l.tahis AS laudi
+				l.tahis AS laudi,
+				s.yksus AS yksus
 			FROM ra.kirjeldusyksus ky
 			KEY INNER JOIN ra.ky_sailik
 			KEY INNER JOIN ra.sailik s
