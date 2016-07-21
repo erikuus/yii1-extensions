@@ -169,7 +169,7 @@ class XAisForm extends CFormModel
 		$arrReference=$this->getReferenceArray($reference);
 		$archiveIds=$this->getArchiveIds($arrReference['a']);
 		$sql = "
-			SELECT h.nimetus AS hoidla, r.tahis AS riiul, k.tahis AS kapp, l.tahis AS laudi
+			SELECT h.nimetus AS hoidla, r.tahis AS riiul, k.tahis AS kapp, l.tahis AS laudi, s.yksus AS yksus
 			FROM ra.sailik s, ra.hoidla h, ra.riiul r, ra.kapp k, ra.laudi l
 			WHERE s.hoidla=h.kood
 			AND s.riiul=r.kood
@@ -372,8 +372,8 @@ class XAisForm extends CFormModel
 	{
 		return array(
 			'EAA'=>'200,201',
-			'ERA'=>'100,101,110,121',
-			'ERAF'=>'111',
+			'ERA'=>'100,101,110,121,215,217,219',
+			'ERAF'=>'111,216,218',
 			'HAMA'=>'112',
 			'LAMA'=>'115',
 			'LVMA'=>'117',
