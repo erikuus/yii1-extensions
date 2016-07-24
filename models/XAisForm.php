@@ -153,7 +153,7 @@ class XAisForm extends CFormModel
 	}
 
 	/**
-	 * Find fond storage info
+	 * Find fond archive id
 	 * @param string fond reference code
 	 * @return array storage data of given fond (false if no result).
 	 * Example:
