@@ -153,6 +153,29 @@ class XAisForm extends CFormModel
 	}
 
 	/**
+	 * Find fond storage info
+	 * @param string fond reference code
+	 * @return array storage data of given fond (false if no result).
+	 * Example:
+	 * array (
+	 * 	200
+	 * )
+	 */
+	public function findFondArchiveId($reference)
+	{
+		$arrReference=$this->getReferenceArray($reference);
+		$archiveIds=$this->getArchiveIds($arrReference['a']);
+		$sql = "
+			SELECT yksus
+			FROM ra.sailik
+			AND fondi_nr=".$this->quote($arrReference['f'])."
+			AND yksus in ($archiveIds)
+			GROUP BY yksus
+		";
+		return Yii::app()->aisdb->cache(self::CACHE_DURATION)->createCommand($sql)->queryColumn();
+	}
+
+	/**
 	 * Find item storage info
 	 * @param string item reference code
 	 * @return array storage data of given item (false if no result).
@@ -182,8 +205,6 @@ class XAisForm extends CFormModel
 		";
 		return Yii::app()->aisdb->cache(self::CACHE_DURATION)->createCommand($sql)->queryRow();
 	}
-
-
 
 	/**
 	 * Find item data alongside with storage info
