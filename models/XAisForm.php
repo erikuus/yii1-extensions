@@ -168,7 +168,7 @@ class XAisForm extends CFormModel
 		$sql = "
 			SELECT yksus
 			FROM ra.sailik
-			AND fondi_nr=".$this->quote($arrReference['f'])."
+			WHERE fondi_nr=".$this->quote($arrReference['f'])."
 			AND yksus in ($archiveIds)
 			GROUP BY yksus
 		";
