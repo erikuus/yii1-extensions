@@ -1,4 +1,4 @@
-<?php
+ <?php
 /**
  * XDynamicForm class file.
  *
@@ -169,9 +169,10 @@ SCRIPT;
 
 	/**
 	 * Generates open HTML element of dynamic area for select.
-	 * @param string $input radiobutton or checkbox HTML
-	 * @param array $containerOptions the container tag attributes.
-	 * @param array $contentOptions the content tag attributes.
+	 * @param CModel $model the data model
+	 * @param string $attribute the attribute
+	 * @param mixed $selected the dynamic dropdown selected value or array of values
+	 * @param array $options the content tag attributes.
 	 */
 	public function beginDynamicAreaDDL($model, $attribute, $selected, $options=array())
 	{
@@ -265,6 +266,9 @@ SCRIPT;
 			$contentOptions['class'].=' '.$this->contentCssClass;
 		else
 			$contentOptions = array_merge($contentOptions, array('class'=>$this->contentCssClass));
+
+		if(isset($contentOptions['style']) && (stristr($contentOptions['style'], 'display: inline') || stristr($contentOptions['style'], 'display:inline')))
+			$contentOptions['class'].=' '.$this->contentInlineCssClass;
 
 		echo CHtml::openTag('div', $containerOptions);
 			echo $input;
