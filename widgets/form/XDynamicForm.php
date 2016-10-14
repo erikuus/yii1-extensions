@@ -95,10 +95,17 @@ class XDynamicForm extends CActiveForm
 	 */
 	public $containerCssClass='dynamic-container';
 	/**
-	 * @var string CSS class for the tag that is shown only when sibling checkbox/radiobutton is selected or
+	 * @var string CSS class for the tag that is shown only when sibling checkbox/radiobutton is selected.
 	 * Defaults to 'dynamic-content'
 	 */
 	public $contentCssClass='dynamic-content';
+	/**
+	 * @var string optional CSS class for the tag that is shown only when sibling checkbox/radiobutton is selected.
+	 * This class is automatically added to beginDynamicArea contentOptions, when there is display:inline in these options
+	 * If this class is added to beginDynamicArea contentOptions, css property 'inline' is used instead 'block' by js
+	 * Defaults to 'inline'
+	 */
+	public $contentInlineCssClass='inline';
 	/**
 	 * @var boolean whether to enable radiobutton to toggle dynamic area
 	 * Defaults to true
@@ -297,7 +304,8 @@ SCRIPT;
 <<<SCRIPT
 	$('#{$this->id} .{$this->containerCssClass} :radio:not(:checked)').siblings('.{$this->contentCssClass}').hide();
 	$('#{$this->id} .{$this->containerCssClass} :radio').live('click',function() {
-		$('.{$this->contentCssClass}', $(this).parents('div:first')).css('display', this.checked ? 'block':'none');
+		var content=$('.{$this->contentCssClass}', $(this).parents('div:first'));
+		content.css('display', this.checked ? (content.hasClass('{$this->contentInlineCssClass}') ? 'inline':'block'):'none');
 		$('#{$this->id} .{$this->containerCssClass} :radio:not(:checked)').siblings('.{$this->contentCssClass}').hide();
 	});
 SCRIPT;
@@ -313,7 +321,8 @@ SCRIPT;
 <<<SCRIPT
 	$('#{$this->id} .{$this->containerCssClass} :checkbox:not(:checked)').siblings('.{$this->contentCssClass}').hide();
 	$('#{$this->id} .{$this->containerCssClass} :checkbox').live('click',function() {
-		$('.{$this->contentCssClass}', $(this).parents('div:first')).css('display', this.checked ? 'block':'none');
+		var content=$('.{$this->contentCssClass}', $(this).parents('div:first'));
+		content.css('display', this.checked ? (content.hasClass('{$this->contentInlineCssClass}') ? 'inline':'block'):'none');
 	});
 SCRIPT;
 		Yii::app()->clientScript->registerScript(__CLASS__.'#checkbox#'.$this->id, $script, CClientScript::POS_READY);
