@@ -39,10 +39,10 @@
 class XTabularInputAction extends CAction
 {
 	/**
-	 * @var string name of the model class.
+	 * @var mixed the name of the model class that will be passed to
+	 * view as variable $model or array (variable name => model name)
 	 */
 	public $modelName;
-
 	/**
 	 * @var string name of the partial view.
 	 */
@@ -55,19 +55,20 @@ class XTabularInputAction extends CAction
 	{
 		if(Yii::app()->request->isAjaxRequest && isset($_GET['index']))
 		{
-			$params=$_GET;
-			$params['model']=$this->getModel();
+			$params=array();
+			$params['index']=$_GET['index'];
+
+			if(is_array($this->modelName))
+			{
+				foreach ($this->modelName as $varName => $modelName)
+					$params[$varName]=CActiveRecord::model($modelName);
+			}
+			else
+				$params['model']=CActiveRecord::model($this->modelName);
+
 			$this->getController()->renderPartial($this->viewName, $params);
 		}
 		else
 			throw new CHttpException(400,'Invalid request. Please do not repeat this request again.');
-	}
-
-	/**
-	 * @return CActiveRecord
-	 */
-	protected function getModel()
-	{
-		return CActiveRecord::model($this->modelName);
 	}
 }
