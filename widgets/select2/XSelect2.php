@@ -295,7 +295,10 @@ SCRIPT;
 		if ($this->sortable)
 			$script.=$sortable;
 
-		$cs->registerScript(__CLASS__ . '#' . $id, $script, CClientScript::POS_READY);
+		if(Yii::app()->request->isAjaxRequest)
+			echo CHtml::script($script);
+		else
+			$cs->registerScript(__CLASS__ . '#' . $id, $script, CClientScript::POS_READY);
 	}
 
 	/**

@@ -113,6 +113,11 @@ class XTabularInput extends CWidget
 {
 	/**
 	 * @var array models for tabular input.
+	 * It can be either array of same model instances, eg. 'models'=>$models
+	 * or associative array of instances of different models, eg. 'models'=>array(
+	 *   'person'=>$persons,
+	 *   'occupation'=>$occupation
+	 * )
 	 */
 	public $models=array();
 	/**
@@ -252,6 +257,10 @@ class XTabularInput extends CWidget
 	 * @var mixed input limit to be used inside javascript
 	 */
 	private $_jsInputLimit;
+	/**
+	 * @var array models as originally set in configuration
+	 */
+	private $_models=array();
 
 	/**
 	 * Initializes the widget.
@@ -259,6 +268,12 @@ class XTabularInput extends CWidget
 	public function init()
 	{
 		parent::init();
+
+		if(is_string(key($this->models)))
+		{
+			$this->_models=$this->models;
+			$this->models=$this->models[key($this->models)];
+		}
 
 		if(isset($this->containerHtmlOptions['id']))
 			$this->id=$this->containerHtmlOptions['id'];
@@ -399,11 +414,18 @@ SCRIPT;
 
 		foreach($this->models as $index=>$model)
 		{
-			$data['model']=$model;
-			$data['index']=$index;
-
 			if($this->inputLimit && $index==$this->inputLimit)
 				break;
+
+			$data['index']=$index;
+
+			if($this->_models!==array())
+			{
+				foreach ($this->_models as $name=>$models)
+					$data[$name]=$models[$index];
+			}
+			else
+				$data['model']=$model;
 
 			echo CHtml::openTag($this->inputTagName, $this->inputHtmlOptions);
 			$this->controller->renderPartial($this->inputView, $data);
