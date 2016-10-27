@@ -44,6 +44,10 @@ class XTabularInputAction extends CAction
 	 */
 	public $modelName;
 	/**
+	 * @var array additional $_GET params to be passed to view when rendering each data item.
+	 */
+	public $viewParams=array();
+	/**
 	 * @var string name of the partial view.
 	 */
 	public $viewName;
@@ -56,6 +60,13 @@ class XTabularInputAction extends CAction
 		if(Yii::app()->request->isAjaxRequest && isset($_GET['index']))
 		{
 			$params=array();
+
+			foreach($this->viewParams as $paramName)
+			{
+				if(isset($_GET[$paramName]))
+					$params[$paramName]=$_GET[$paramName];
+			}
+
 			$params['index']=$_GET['index'];
 
 			if(is_array($this->modelName))
