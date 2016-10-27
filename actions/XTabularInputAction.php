@@ -44,7 +44,7 @@ class XTabularInputAction extends CAction
 	 */
 	public $modelName;
 	/**
-	 * @var array additional $_GET params to be passed to view when rendering each data item.
+	 * @var array additional $_GET params to be passed to view.
 	 */
 	public $viewParams=array();
 	/**
@@ -61,13 +61,17 @@ class XTabularInputAction extends CAction
 		{
 			$params=array();
 
-			foreach($this->viewParams as $paramName)
+			if($this->viewParams!==array())
 			{
-				if(isset($_GET[$paramName]))
-					$params[$paramName]=$_GET[$paramName];
+				foreach($this->viewParams as $paramName)
+				{
+					if(isset($_GET[$paramName]))
+						$params[$paramName]=$_GET[$paramName];
+				}
+				$params['index']=$_GET['index'];
 			}
-
-			$params['index']=$_GET['index'];
+			else
+				$params=$_GET;
 
 			if(is_array($this->modelName))
 			{
