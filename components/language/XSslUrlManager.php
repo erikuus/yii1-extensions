@@ -74,7 +74,7 @@ class XSslUrlManager extends CUrlManager
 		// If not, prefix the generated URL with the correct host info.
 		$secureRoute = $this->isSecureRoute($route);
 
-		if (Yii::app()->request->isSecureConnection)
+		if ($this->isSecureConnection())
 			return $secureRoute ? $url : $this->hostInfo . $url;
 		else
 			return $secureRoute ? $this->secureHostInfo . $url : $url;
@@ -94,7 +94,7 @@ class XSslUrlManager extends CUrlManager
 		// Perform a 301 redirection if the current protocol
 		// does not match the expected protocol
 		$secureRoute = $this->isSecureRoute($route);
-		$sslRequest = $request->isSecureConnection;
+		$sslRequest = $this->isSecureConnection();
 
 		if ($secureRoute !== $sslRequest)
 		{
@@ -104,6 +104,18 @@ class XSslUrlManager extends CUrlManager
 				$request->redirect($hostInfo . $request->url, true, 301);
 		}
 		return $route;
+	}
+
+	/**
+	 * Return if the request is sent via secure channel (https).
+	 * NOTE! We can not use Yii::app()->request->isSecureConnection
+	 * as earlier versions of yii do not account for HTTP_X_FORWARDED_PROTO
+	 * @return boolean if the request is sent via secure channel (https)
+	 */
+	function isSecureConnection()
+	{
+	    return isset($_SERVER['HTTPS']) && (strcasecmp($_SERVER['HTTPS'],'on')===0 || $_SERVER['HTTPS']==1)
+	        || isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && strcasecmp($_SERVER['HTTP_X_FORWARDED_PROTO'],'https')===0;
 	}
 
 	/**
