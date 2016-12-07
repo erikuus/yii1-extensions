@@ -69,7 +69,7 @@ class XVauLoginAction extends CAction
 	 * @var string $redirectUrl the url user will be redirected after successful login.
 	 * If empty, Yii::app()->user->returnUrl will be used.
 	 */
-	public $redirectUrl=false;
+	public $redirectUrl;
 
 	/**
 	 * Logins user into application based on data posted by VAU after successful login in VAU.
