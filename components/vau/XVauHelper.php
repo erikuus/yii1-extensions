@@ -33,7 +33,7 @@
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 1.0.0
  */
-class XVauHelper extends CHtml
+class XVauHelper
 {
 	/**
 	 * @param string $route to application VAU login action. Defaults to '/site/vauLogin'.
