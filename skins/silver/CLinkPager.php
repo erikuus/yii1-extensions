@@ -10,5 +10,5 @@ return array(
 		'nextPageLabel'=>'&gt;',
 		'lastPageLabel'=>'&gt;&gt;',
 		'cssFile'=>Yii::app()->baseUrl.'/css/yiithemes/skins/silver/pager/pager.css',
-	)
+	),
 );
