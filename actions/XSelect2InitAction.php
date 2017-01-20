@@ -56,15 +56,27 @@ class XSelect2InitAction extends CAction
 	 * @var string name of the model attribute that is used as text value for Select2 widget.
 	 */
 	public $textField;
+	/**
+	 * @var string name of the model method that returns array of options [id=>text].
+	 */
+	public $getOptionsMethod;
+	/**
+	 * @var string name of the model method that returns text by id.
+	 */
+	public $getTextByIdMethod;
+	/**
+	 * @var boolean whether id and text are same.
+	 */
+	public $idTextSame=false;
 
 	/**
 	 * Runs the action.
 	 */
 	public function run()
 	{
-		if(isset($_GET[$this->idField]))
+		if(isset($_GET['id']))
 		{
-			$id=$_GET[$this->idField];
+			$id=$_GET['id'];
 			if(strstr($id, ','))
 				$this->getMultiple($id);
 			else
@@ -78,9 +90,29 @@ class XSelect2InitAction extends CAction
 	 */
 	protected  function getSingle($id)
 	{
-		$model=$this->getModel()->findByAttributes(array($this->idField=>$id));
-		if($model!==null)
-			echo CJSON::encode(array('id'=>$model->{$this->idField},'text'=>$model->{$this->textField}));
+		$data=array();
+
+		if($this->textField)
+		{
+			$model=$this->getModel()->findByAttributes(array($this->idField=>$id));
+			if($model!==null)
+				$data=array('id'=>$model->{$this->idField},'text'=>$model->{$this->textField});
+		}
+		elseif($this->getOptionsMethod)
+		{
+			$options=$this->getModel()->{$this->getOptionsMethod}();
+			$text=isset($options[$id]) ? $options[$id] : null;
+			$data=array('id'=>$id,'text'=>$text);
+		}
+		elseif($this->getTextByIdMethod)
+		{
+			$text=$this->getModel()->{$this->getTextByIdMethod}($id);
+			$data=array('id'=>$id,'text'=>$text);
+		}
+		elseif($this->idTextSame)
+			$data=array('id'=>$id,'text'=>$id);
+
+		echo CJSON::encode($data);
 	}
 
 	/**
@@ -89,10 +121,41 @@ class XSelect2InitAction extends CAction
 	 */
 	public function getMultiple($id)
 	{
-		$models=$this->getModel()->findAll("$this->idField IN ($id)");
 		$data=array();
-		foreach($models as $model)
-	    	$data[]=array('id'=>$model->{$this->idField},'text'=>$model->{$this->textField});
+
+		if($this->textField)
+		{
+			$criteria=new CDbCriteria();
+			$criteria->addInCondition($this->idField, explode(',',$id));
+			$models=$this->getModel()->findAll($criteria);
+			foreach($models as $model)
+		    	$data[]=array('id'=>$model->{$this->idField},'text'=>$model->{$this->textField});
+		}
+		elseif($this->getOptionsMethod)
+		{
+			$options=$this->getModel()->{$this->getOptionsMethod}();
+			$ids=explode(',',$id);
+			foreach($ids as $id)
+			{
+		    	$text=isset($options[$id]) ? $options[$id] : null;
+				$data[]=array('id'=>$id,'text'=>$text);
+			}
+		}
+		elseif($this->getTextByIdMethod)
+		{
+			$ids=explode(',',$id);
+			foreach($ids as $id)
+			{
+		    	$text=$this->getModel()->{$this->getTextByIdMethod}($id);
+				$data[]=array('id'=>$id,'text'=>$text);
+			}
+		}
+		elseif($this->idTextSame)
+		{
+			$ids=explode(',',$id);
+			foreach($ids as $id)
+		    	$data[]=array('id'=>$id,'text'=>$id);
+		}
 
 		echo CJSON::encode($data);
 	}
