@@ -396,19 +396,20 @@ class XAisForm extends CFormModel
 	protected function archiveIds()
 	{
 		return array(
-			'EAA'=>'200,201',
-			'ERA'=>'100,101,110,121,215,217,219',
+			'EAA'=>'200',
+			'ERA'=>'110,121,215,217,219',
 			'ERAF'=>'111,216,218',
+			'EFA'=>'122',
 			'HAMA'=>'112',
 			'LAMA'=>'115',
 			'LVMA'=>'117',
-			'RPMA'=>'118',
 			'SAMA'=>'119',
-			'JOMA'=>'211',
 			'VAMA'=>'213',
 			'TLA'=>'124',
 			'MKA'=>'123',
 			'EAM'=>'125',
+			'EELKKA'=>'128',
+			'TTI'=>'701',
 		);
 	}
 
