@@ -397,7 +397,7 @@ class XAisForm extends CFormModel
 	{
 		return array(
 			'EAA'=>'200',
-			'ERA'=>'110,121,215,217,219',
+			'ERA'=>'110,121,215,217,219,122',
 			'ERAF'=>'111,216,218',
 			'EFA'=>'122',
 			'HAMA'=>'112',
