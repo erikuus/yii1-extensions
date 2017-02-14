@@ -5,10 +5,10 @@
 return array(
 	'default'=>array(
 		'options'=>array(
-			'shortPassText'=>Yii::t('ui','Too short'),
-			'badPassText'=>Yii::t('ui','Weak'),
-			'goodPassText'=>Yii::t('ui','Good'),
-			'strongPassText'=>Yii::t('ui','Strong'),
+			'shortPassText'=>Yii::t('XPasswordStrength.password','Too short'),
+			'badPassText'=>Yii::t('XPasswordStrength.password','Weak'),
+			'goodPassText'=>Yii::t('XPasswordStrength.password','Good'),
+			'strongPassText'=>Yii::t('XPasswordStrength.password','Strong'),
 		)
 	)
 );
