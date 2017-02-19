@@ -60,8 +60,8 @@ class XHoverArea extends CWidget
 		{
 			$this->registerClientScript();
 			if($this->align=='right')
-				$cssClass=$this->cssClass.' hover-area-right';
-			echo "<div class=\"{$cssClass}\">\n";
+				$this->cssClass=$this->cssClass.' hover-area-right';
+			echo "<div class=\"{$this->cssClass}\">\n";
 			echo "<div class=\"{$this->triggerCssClass}\">".$this->trigger."</div>\n";
 			echo "<div class=\"{$this->contentCssClass}\" style=\"{$this->align}:0\">\n";
 			if($this->align=='right')
