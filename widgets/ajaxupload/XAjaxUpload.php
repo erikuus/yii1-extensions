@@ -28,7 +28,7 @@ In form:
 
 <?php echo $form->labelEx($model,'Photo'); ?>
 <?php $this->widget('ext.widgets.ajaxupload.XAjaxUpload', array(
-	'id'=>'image',
+	'id'=>'image', // NOTE! Do not use "-" in id
 	'options'=>array(
 		'action'=>Yii::app()->createUrl('/controller/upload'),
 		'allowedExtensions'=>array('jpg', 'jpeg', 'png', 'gif'),

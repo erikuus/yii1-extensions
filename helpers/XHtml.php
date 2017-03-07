@@ -126,6 +126,24 @@ class XHtml extends CHtml
 	}
 
 	/**
+	 * Format bytes to kilobytes, megabytes, gigabytes
+	 * @param integer bytes
+	 * @param integer precision
+	 * @return string formatted
+	 */
+	public static function formatBytes($bytes, $precision = 0)
+	{
+		$units = array('B', 'KB', 'MB', 'GB', 'TB');
+
+		$bytes = max($bytes, 0);
+		$pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+		$pow = min($pow, count($units) - 1);
+		$bytes /= pow(1024, $pow);
+
+		return round($bytes, $precision) . ' ' . $units[$pow];
+	}
+
+	/**
 	 * Add option
 	 * @return array of 'add new' option for dropdown
 	 */
@@ -295,6 +313,33 @@ class XHtml extends CHtml
 				$htmlOptions['class']=self::$errorSummaryCss;
 			return self::tag('div',$htmlOptions,$header."\n<ul>\n$content</ul>".$footer);
 		}
+		else
+			return '';
+	}
+
+	/**
+	 * Displays a summary of validation errors in palin text format form array returned by getErrors method.
+	 * @param array arrErrors the array returned by getErrors method
+	 * @param string $header a piece of text that appears in front of the errors
+	 * @param string $footer a piece of text that appears at the end of the errors
+	 * @return string the error summary. Empty if no errors are found.
+	 * @see CModel::getErrors
+	 */
+	public static function errorSummaryTextFromArray($arrErrors,$header=null,$footer=null)
+	{
+		$content='';
+
+		foreach($arrErrors as $errors)
+		{
+			foreach($errors as $error)
+			{
+				if($error!='')
+					$content.="$error\n";
+			}
+		}
+
+		if($content!=='')
+			return $header."\n".$content.$footer;
 		else
 			return '';
 	}
