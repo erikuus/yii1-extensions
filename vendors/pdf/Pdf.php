@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Print to pdf using dompdf HTML to PDF converter
  *
  * For example, to create pdf put this action into controller:

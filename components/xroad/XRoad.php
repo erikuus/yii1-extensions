@@ -58,16 +58,16 @@ class XRoad extends CApplicationComponent
 	public $serverIP;
 
 	/**
-	 * Initializes the co.
+	 * Initializes the component.
 	 * This method checks if required values are set
 	 */
 	public function init()
 	{
 		if(!$this->institutionRegNr)
-			throw new CException('"institutionRegNr" have to be set!');
+			throw new CException('"institutionRegNr" has to be set!');
 
 		if(!$this->serverIP)
-			throw new CException('"serverIP" have to be set!');
+			throw new CException('"serverIP" has to be set!');
 	}
 
 	/**
@@ -87,7 +87,7 @@ class XRoad extends CApplicationComponent
 	 * @param $folder The target folder name, defaults to '/' meaning root folder
 	 * @return mixed the xml string on success, false on failure
 	 */
-	function receiveDocuments($folder='/')
+	public function receiveDocuments($folder='/')
 	{
 		$soapBody = $this->fetch('receiveDocuments', array('kaust'=>$folder));
 		return $this->dhlRequest($soapBody, 'dhl.receiveDocuments.v1');
