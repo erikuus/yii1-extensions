@@ -67,8 +67,8 @@
  * $documentId=1871;
  * $fileName='protokoll.pdf';
  * $mimeType='application/pdf';
- * $pathToFile='path/to/protokoll.pdf';
- * $restult=Yii::app()->pinal->addFile($documentId, $fileName, $mimeType, $pathToFile)
+ * $fileContent=file_get_contents('path/to/protokoll.pdf');
+ * $restult=Yii::app()->pinal->addFile($documentId, $fileName, $mimeType, $fileContent)
  * if (is_object($restult)) echo 'File was successfully added!';
  * </pre>
  *
@@ -126,8 +126,28 @@ class XPinal extends CApplicationComponent
 
 		if($this->soapOptions===array())
 			throw new CException('"soapOptions" has to be set!');
+	}
 
-		$this->_soapClient=new NTLMSoapClient($this->soapWSDL, $this->soapOptions);
+	/**
+	 * Get soap client
+	 * @return soap client object
+	 */
+	public function getClient()
+	{
+		if($this->_soapClient===null)
+			$this->_soapClient=new NTLMSoapClient($this->soapWSDL, $this->soapOptions);
+
+		return $this->_soapClient;
+	}
+
+	/**
+	 * Checks whether services work
+	 * @return string; for example:
+	 * Hello HARMIN\test.kasutaja7. At 20.03.2017 18:44:00 +02:00 it works!
+	 */
+	public function doesItWork()
+	{
+		return $this->getClient()->DoesItWork();
 	}
 
 	/**
@@ -187,8 +207,15 @@ class XPinal extends CApplicationComponent
 			'registerAfterCapture'=>$registerAfterCapture
 		));
 
-		$params=new SoapVar($captureXml, XSD_ANYXML);
-		return $this->_soapClient->Capture($params);
+		try
+		{
+			$params=new SoapVar($captureXml, XSD_ANYXML);
+			return $this->getClient()->Capture($params);
+		}
+		catch(SoapFault $fault)
+		{
+			return $fault;
+		}
 	}
 
 	/**
@@ -196,23 +223,28 @@ class XPinal extends CApplicationComponent
 	 * @param string $documentId the id of the target document
 	 * @param string $fileName the name of file to be sent
 	 * @param string $mimeType the mime type of file to be sent
-	 * @param string $pathToFile the path to file to be sent
+	 * @param string $fileContent the content of file to be sent
 	 * @return stdClass object; you can check if sending file
 	 * succeeded by checking is_object($return)
 	 */
-	public function addFile($documentId, $fileName, $mimeType, $pathToFile)
+	public function addFile($documentId, $fileName, $mimeType, $fileContent)
 	{
-		$fileContent=base64_encode(file_get_contents($pathToFile));
-
 		$addFileXml=$this->fetch('addFile', array(
 			'documentId'=>$documentId,
 			'fileName'=>$fileName,
 			'mimeType'=>$mimeType,
-			'fileContent'=>$fileContent
+			'fileContent'=>base64_encode($fileContent)
 		));
 
-		$params=new SoapVar($addFileXml, XSD_ANYXML);
-		return $this->_soapClient->AddFile($params);
+		try
+		{
+			$params=new SoapVar($addFileXml, XSD_ANYXML);
+			return $this->getClient()->AddFile($params);;
+		}
+		catch(SoapFault $fault)
+		{
+			return $fault;
+		}
 	}
 
 	/**
@@ -254,7 +286,7 @@ class XPinal extends CApplicationComponent
 		else
 			$tpl='addDocument';
 
-		return $this->fetch($tpl, array(
+		return '<?xml version="1.0" encoding="utf-8"?>'.$this->fetch($tpl, array(
 			'parentReferenceCode'=>$parentReferenceCode,
 			'mergeReferenceCode'=>$mergeReferenceCode,
 			'documentName'=>$documentName,
@@ -282,16 +314,11 @@ class XPinal extends CApplicationComponent
 	 */
 	protected function convertMetadata($metadata)
 	{
-		$xml=new SimpleXMLElement('<metadata></metadata>');
-		$i=0;
-		foreach($a as $name => $value)
-		{
-			$xml->field[$i]=null;
-			$xml->field[$i]->addAttribute('name', $name);
-			$xml->field[$i]->addAttribute('value', $value);
-			$i++;
-		}
-		return $xml->asXML();
+		$xml='<metadata>';
+		foreach($metadata as $name => $value)
+			$xml.='<field name="'.$name.'" value="'.$value.'"/>';
+		$xml.='</metadata>';
+		return $xml;
 	}
 
 	/**
