@@ -18,7 +18,17 @@
  */
 class Pdf
 {
-	public function render($html,$filename,$attachment=1,$paper='a4',$orientation='portrait')
+	/**
+	 * Render pdf content
+	 * @param string $html
+	 * @param string $filename
+	 * @param integer $mode [0|1|2];
+	 * defaults to 1 meaning that pdf is rendered as attachment;
+	 * other options are: 0 - pdf is rendered as inline file, 2 - pdf content is returned
+	 * @param string $paper, defaults to 'a4'
+	 * @param string $orientation [portrait|landscape], defaults to 'portrait'
+	 */
+	public function render($html,$filename,$mode=1,$paper='a4',$orientation='portrait')
 	{
 		Yii::import('ext.vendors.pdf.dompdf.*');
 		require_once ('dompdf_config.inc.php');
@@ -28,6 +38,10 @@ class Pdf
 		$dompdf->load_html($html);
 		$dompdf->set_paper($paper,$orientation);
 		$dompdf->render();
-		$dompdf->stream($filename.".pdf", array("Attachment"=>$attachment));
+
+		if($mode>1)
+			return $dompdf->output();
+		else
+			$dompdf->stream($filename.".pdf", array("Attachment"=>$mode));
 	}
 }
