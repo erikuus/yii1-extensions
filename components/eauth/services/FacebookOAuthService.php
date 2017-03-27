@@ -27,7 +27,7 @@ class FacebookOAuthService extends EOAuth2Service {
 	protected $client_secret = '';
 	protected $scope = '';
 	protected $providerOptions = array(
-		'authorize' => 'https://www.facebook.com/v2.0/dialog/oauth',
+		'authorize' => 'https://www.facebook.com/v2.8/dialog/oauth',
 		'access_token' => 'https://graph.facebook.com/oauth/access_token',
 	);
 
@@ -66,7 +66,12 @@ class FacebookOAuthService extends EOAuth2Service {
 
 	protected function getAccessToken($code) {
 		$response = $this->makeRequest($this->getTokenUrl($code), array(), false);
-		parse_str($response, $result);
+		// The response format of https://www.facebook.com/v2.3/oauth/access_token returned
+		// when you exchange a code for an access_token now return valid JSON instead of being URL encoded.
+		// The new format of this response is {"access_token": {TOKEN}, "token_type":{TYPE}, "expires_in":{TIME}}.
+		// We made this update to be compliant with section 5.1 of RFC 6749.
+		//parse_str($response, $result);
+		$result=CJSON::decode($response);
 		return $result;
 	}
 
