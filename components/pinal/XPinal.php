@@ -76,10 +76,18 @@
  * @version 1.0.0
  */
 
+require_once dirname(__FILE__).'/vendor/NTLMStream.php';
 require_once dirname(__FILE__).'/vendor/NTLMSoapClient.php';
 
 class XPinal extends CApplicationComponent
 {
+ 	/**
+ 	 * @var boolean whether to register NTLM sream wrapper
+ 	 * If wsdl and xsd files are behind NTLM Authentication we
+ 	 * need to register NTLM sream wrapper for SoapClient to work.
+ 	 */
+	public $registerWrapper=true;
+
 	/**
 	 * @var string the URI of the WSDL file or NULL if working in non-WSDL mode
 	 */
@@ -135,15 +143,25 @@ class XPinal extends CApplicationComponent
 	public function getClient()
 	{
 		if($this->_soapClient===null)
+		{
+			if($this->registerWrapper)
+			{
+				stream_wrapper_unregister('https');
+				stream_wrapper_register('https', 'PinalNTLMStream') or die('Failed to register protocol');
+			}
+
 			$this->_soapClient=new NTLMSoapClient($this->soapWSDL, $this->soapOptions);
+
+			if($this->registerWrapper)
+				stream_wrapper_restore('https');
+		}
 
 		return $this->_soapClient;
 	}
 
 	/**
 	 * Checks whether services work
-	 * @return string; for example:
-	 * Hello HARMIN\test.kasutaja7. At 20.03.2017 18:44:00 +02:00 it works!
+	 * @return stdClass object
 	 */
 	public function doesItWork()
 	{
@@ -336,5 +354,20 @@ class XPinal extends CApplicationComponent
 			return $app->controller->renderFile($file, $data, true);
 		else // CConsoleApplication
 			return $app->command->renderFile($file, $data, true); // get console application command is available since 1.1.14
+	}
+}
+
+class PinalNTLMStream extends NTLMStream
+{
+	protected $login;
+	protected $password;
+
+	public function __construct()
+	{
+		if(Yii::app()->hasComponent('pinal'))
+			$this->login=Yii::app()->pinal->soapOptions['login'];
+
+		if(Yii::app()->hasComponent('pinal'))
+			$this->password=Yii::app()->pinal->soapOptions['password'];
 	}
 }
