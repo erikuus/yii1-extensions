@@ -118,6 +118,11 @@ class XPinal extends CApplicationComponent
 	public $soapOptions=array();
 
 	/**
+	 * @var string url that points to Pinal document view
+	 */
+	public $viewUrl;
+
+	/**
 	 * @var NTLMSoapClient object
 	 */
 	private $_soapClient;
