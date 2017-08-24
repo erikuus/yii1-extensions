@@ -89,7 +89,7 @@ class XReturnableBehavior extends CBehavior
 	 *
 	 * @param mixed $route the route as used by {@link CController::createUrl}
 	 * @param array $params additional GET parameters as used by {@link CController::createUrl}
-	 * @param string $stackParams additional GET parameters for returnable url (added by Erik Uus)
+	 * @param array $stackParams additional GET parameters for returnable url (added by Erik Uus)
 	 * @param string $amp the separator as used by {@link CController::createUrl}
 	 * @return string the constructed URL with appended return parameters
 	 */
