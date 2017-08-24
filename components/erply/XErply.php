@@ -74,7 +74,7 @@ class XErply extends CApplicationComponent
 	 */
 	public function getUserId()
 	{
-		$result=$this->sendRequest("verifyUser",array(
+		$result=$this->sendRequest('verifyUser',array(
 			'clientCode'=>$this->clientCode,
 			'username'=>$this->username,
 			'password'=>$this->password
@@ -84,6 +84,23 @@ class XErply extends CApplicationComponent
 			return $result['records'][0]['userID'];
 		else
 			return null;
+	}
+
+	/**
+	 * Gets Erply user id if user exists
+	 * @param string unique product code
+	 * @return array product data, array() if user does not exists
+	 */
+	public function getProduct($code)
+	{
+		$result=$this->sendRequest('getProducts',array(
+			'code'=>$code
+		));
+
+		if(isset($result['records'][0]))
+			return $result['records'][0];
+		else
+			return array();
 	}
 
 	/**
