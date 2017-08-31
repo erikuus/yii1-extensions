@@ -70,7 +70,8 @@ class XErply extends CApplicationComponent
 
 	/**
 	 * Gets Erply user id if user exists
-	 * @return integer userID, null if user does not exists
+	 * @link https://erply.com/api/verifyUser/
+	 * @return integer userID
 	 */
 	public function getUserId()
 	{
@@ -87,9 +88,11 @@ class XErply extends CApplicationComponent
 	}
 
 	/**
-	 * Gets Erply user id if user exists
+	 * Gets Erply product
+	 * @link https://erply.com/api/getProducts/
 	 * @param string unique product code
-	 * @return array product data, array() if user does not exists
+	 * @return array product data
+	 *
 	 */
 	public function getProduct($code)
 	{
@@ -99,6 +102,24 @@ class XErply extends CApplicationComponent
 
 		if(isset($result['records'][0]))
 			return $result['records'][0];
+		else
+			return array();
+	}
+
+	/**
+	 * Gets Erply product prices
+	 * @link https://erply.com/api/getProductPrices/
+	 * @param array product id's
+	 * @return array product prices
+	 */
+	public function getProductPrices($productIDs)
+	{
+		$result=$this->sendRequest('getProductPrices',array(
+			'productIDs'=>$productIDs
+		));
+
+		if(isset($result['records']))
+			return $result['records'];
 		else
 			return array();
 	}
