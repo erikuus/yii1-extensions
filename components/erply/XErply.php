@@ -69,11 +69,11 @@ class XErply extends CApplicationComponent
 	}
 
 	/**
-	 * Gets Erply user id if user exists
+	 * Gets Erply employee id if user exists
 	 * @link https://erply.com/api/verifyUser/
-	 * @return integer userID
+	 * @return integer employeeID
 	 */
-	public function getUserId()
+	public function getEmployeeId()
 	{
 		$result=$this->sendRequest('verifyUser',array(
 			'clientCode'=>$this->clientCode,
@@ -81,16 +81,98 @@ class XErply extends CApplicationComponent
 			'password'=>$this->password
 		));
 
-		if(isset($result['records'][0]['userID']))
-			return $result['records'][0]['userID'];
+		if(isset($result['records'][0]['employeeID']))
+			return $result['records'][0]['employeeID'];
 		else
 			return null;
 	}
 
 	/**
+	 * Gets Erply company
+	 * @link https://erply.com/api/getCustomers/
+	 * @param string $registryCode
+	 * @return array company data
+	 *
+	 */
+	public function getCompany($registryCode)
+	{
+		$result=$this->sendRequest('getCustomers',array(
+			'searchRegistryCode'=>$registryCode
+		));
+
+		if(isset($result['records'][0]))
+			return $result['records'][0];
+		else
+			return array();
+	}
+
+	/**
+	 * Gets Erply customers
+	 * @link https://erply.com/api/getCustomers/
+	 * @param array $customerIDs
+	 * @return array customer data
+	 */
+	public function getCustomers($customerIDs)
+	{
+		$result=$this->sendRequest('getCustomers',array(
+			'customerIDs'=>$customerIDs
+		));
+
+		if(isset($result['records']))
+			return $result['records'];
+		else
+			return array();
+	}
+
+	/**
+	 * Gets Erply sales documents
+	 * @link https://erply.com/api/getSalesDocuments/
+	 * @param array $documentIDs
+	 * @return array document data
+	 */
+	public function getSalesDocuments($documentIDs)
+	{
+		$result=$this->sendRequest('getSalesDocuments',array(
+			'ids'=>$documentIDs
+		));
+
+		if(isset($result['records']))
+			return $result['records'];
+		else
+			return array();
+	}
+
+	/**
+	 * Gets Erply country code
+	 * @link https://erply.com/api/getCountries/
+	 * @param integer $id the country id
+	 * @return string country code
+	 *
+	 */
+	public function getCountryCode($id)
+	{
+		$code='EE';
+
+		$result=$this->sendRequest('getCountries');
+
+		if(isset($result['records']))
+		{
+			foreach ($result['records'] as $country)
+			{
+				if($country['countryID']==$id)
+				{
+					$code=$country['countryCode'];
+					break;
+				}
+			}
+		}
+		return $code;
+	}
+
+	/**
 	 * Gets Erply product
 	 * @link https://erply.com/api/getProducts/
-	 * @param string unique product code
+	 * @param string $code the unique product code
 	 * @return array product data
 	 *
 	 */
@@ -109,7 +191,7 @@ class XErply extends CApplicationComponent
 	/**
 	 * Gets Erply product prices
 	 * @link https://erply.com/api/getProductPrices/
-	 * @param array product id's
+	 * @param array $productIDs
 	 * @return array product prices
 	 */
 	public function getProductPrices($productIDs)
@@ -125,12 +207,99 @@ class XErply extends CApplicationComponent
 	}
 
 	/**
+	 * Gets Erply Customer Address Id
+	 * If given address exists, return it's id.
+	 * If given address does not exist, add it and return it's id
+	 * @link https://erply.com/api/getAddresses/
+	 * @link https://erply.com/api/saveAddress/
+	 * @param integer $ownerID the customer id of address owner
+	 * @param string $street
+	 * @param string $city
+	 * @param string $postalCode
+	 * @param string $country
+	 * @return integer address id
+	 */
+	public function getAddressId($ownerID, $street, $postalCode, $city, $state, $country)
+	{
+		$id=null;
+
+		$result=$this->sendRequest('getAddresses',array(
+			'ownerID'=>$ownerID,
+			'typeID'=>1
+		));
+
+		if(isset($result['records']))
+		{
+			foreach ($result['records'] as $address)
+			{
+				if($address['street']==$street && $address['city']==$city && $address['postalCode']==$postalCode && $address['country']==$country)
+				{
+					if (!$address['state'] || $address['state']==$state) // NB! State can be empty in ERPLY
+					{
+						$id=$address['addressID'];
+						break;
+					}
+				}
+			}
+		}
+
+		if($id===null)
+		{
+			$result=$this->sendRequest('saveAddress',array(
+				'ownerID'=>$ownerID,
+				'typeID'=>1,
+				'street'=>$street,
+				'postalCode'=>$postalCode,
+				'city'=>$city,
+				'state'=>$state,
+				'country'=>$country
+			));
+
+			if(isset($result['records'][0]['addressID']))
+				$id=$result['records'][0]['addressID'];
+		}
+
+		return $id;
+	}
+
+	/**
+	 * Update Erply customer email
+	 * @link https://erply.com/api/saveCustomer/
+	 * @param integer $customerID the ID of a customer.
+	 * @param string $email
+	 */
+	public function updateCustomerEmail($customerID, $email)
+	{
+		$this->sendRequest('saveCustomer',array(
+			'customerID'=>$customerID,
+			'email'=>$email
+		));
+	}
+
+	/**
+	 * Save sales document
+	 * @link https://erply.com/api/saveSalesDocument/
+	 * @param array $params document data to be saved
+	 * @return array document response data
+	 *
+	 */
+	public function saveSalesDocument($params)
+	{
+		$result=$this->sendRequest('saveSalesDocument',$params);
+
+		if(isset($result['records'][0]))
+			return $result['records'][0];
+		else
+			return array();
+	}
+
+	/**
 	 * Send API request
 	 * @param string $request the name of the request
 	 * @param array $params parameters (name=>value) of the request
 	 * @return array response
 	 */
-	public function sendRequest($request,$params)
+	public function sendRequest($request, $params=array())
 	{
 		if(!$this->username)
 			throw new CException('"username" has to be set!');
