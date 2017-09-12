@@ -97,11 +97,25 @@ class XErply extends CApplicationComponent
 	public function getCompany($registryCode)
 	{
 		$result=$this->sendRequest('getCustomers',array(
-			'searchRegistryCode'=>$registryCode
+			'searchRegistryCode'=>$registryCode,
+			'getAddresses'=>1
 		));
 
 		if(isset($result['records'][0]))
-			return $result['records'][0];
+		{
+			// put reg. address as default address
+			$company=$result['records'][0];
+			foreach ($company['addresses'] as $address)
+			{
+				if($address['typeID']=='3')
+				{
+					$company['address']=$address['address'];
+					break;
+				}
+			}
+
+			return $company;
+		}
 		else
 			return array();
 	}
