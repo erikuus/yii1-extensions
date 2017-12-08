@@ -41,7 +41,7 @@ class XAjaxEchoAction extends CAction
 	 */
 	public function run()
 	{
-		if(isset($_GET['id']))
+		if(isset($_GET['id']) && $_GET['id'])
 		{
 			$model=$this->getModel()->findByPk($_GET['id']);
 			if(isset($_GET['lang']))
