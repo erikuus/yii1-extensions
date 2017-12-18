@@ -88,13 +88,42 @@ class XErply extends CApplicationComponent
 	}
 
 	/**
+	 * Save new customer or update existing
+	 * @link https://erply.com/api/saveCustomer/
+	 * @param array $params customer data to be saved
+	 * @return integer customer id or false
+	 */
+	public function saveCustomer($params)
+	{
+		// check if customer exists
+		$result=$this->sendRequest('getCustomers',array(
+			'searchRegistryCode'=>$params['code'],
+		));
+
+		if(isset($result['records'][0])) // update
+		{
+			$params['customerID']=$result['records'][0]['customerID'];
+			$this->sendRequest('saveCustomer', $params);
+			return $params['customerID'];
+		}
+		else // create
+		{
+			$result=$this->sendRequest('saveCustomer',$params);
+			if(isset($result['records'][0]))
+				return $result['records'][0]['customerID'];
+			else
+				return false;
+		}
+	}
+
+	/**
 	 * Gets Erply company
 	 * @link https://erply.com/api/getCustomers/
 	 * @param string $registryCode
 	 * @return array company data
 	 *
 	 */
-	public function getCompany($registryCode)
+	public function getCustomer($registryCode)
 	{
 		$result=$this->sendRequest('getCustomers',array(
 			'searchRegistryCode'=>$registryCode,
@@ -121,7 +150,7 @@ class XErply extends CApplicationComponent
 	}
 
 	/**
-	 * Gets Erply customers
+	 * Gets Erply customers by ids
 	 * @link https://erply.com/api/getCustomers/
 	 * @param array $customerIDs
 	 * @return array customer data
@@ -139,21 +168,17 @@ class XErply extends CApplicationComponent
 	}
 
 	/**
-	 * Gets Erply sales documents
-	 * @link https://erply.com/api/getSalesDocuments/
-	 * @param array $documentIDs
-	 * @return array document data
+	 * Update Erply customer email
+	 * @link https://erply.com/api/saveCustomer/
+	 * @param integer $customerID the ID of a customer.
+	 * @param string $email
 	 */
-	public function getSalesDocuments($documentIDs)
+	public function updateCustomerEmail($customerID, $email)
 	{
-		$result=$this->sendRequest('getSalesDocuments',array(
-			'ids'=>$documentIDs
+		$this->sendRequest('saveCustomer',array(
+			'customerID'=>$customerID,
+			'email'=>$email
 		));
-
-		if(isset($result['records']))
-			return $result['records'];
-		else
-			return array();
 	}
 
 	/**
@@ -181,43 +206,6 @@ class XErply extends CApplicationComponent
 			}
 		}
 		return $code;
-	}
-
-	/**
-	 * Gets Erply product
-	 * @link https://erply.com/api/getProducts/
-	 * @param string $code the unique product code
-	 * @return array product data
-	 *
-	 */
-	public function getProduct($code)
-	{
-		$result=$this->sendRequest('getProducts',array(
-			'code'=>$code
-		));
-
-		if(isset($result['records'][0]))
-			return $result['records'][0];
-		else
-			return array();
-	}
-
-	/**
-	 * Gets Erply product prices
-	 * @link https://erply.com/api/getProductPrices/
-	 * @param array $productIDs
-	 * @return array product prices
-	 */
-	public function getProductPrices($productIDs)
-	{
-		$result=$this->sendRequest('getProductPrices',array(
-			'productIDs'=>$productIDs
-		));
-
-		if(isset($result['records']))
-			return $result['records'];
-		else
-			return array();
 	}
 
 	/**
@@ -277,20 +265,6 @@ class XErply extends CApplicationComponent
 	}
 
 	/**
-	 * Update Erply customer email
-	 * @link https://erply.com/api/saveCustomer/
-	 * @param integer $customerID the ID of a customer.
-	 * @param string $email
-	 */
-	public function updateCustomerEmail($customerID, $email)
-	{
-		$this->sendRequest('saveCustomer',array(
-			'customerID'=>$customerID,
-			'email'=>$email
-		));
-	}
-
-	/**
 	 * Save sales document
 	 * @link https://erply.com/api/saveSalesDocument/
 	 * @param array $params document data to be saved
@@ -303,6 +277,61 @@ class XErply extends CApplicationComponent
 
 		if(isset($result['records'][0]))
 			return $result['records'][0];
+		else
+			return array();
+	}
+
+	/**
+	 * Gets Erply sales documents
+	 * @link https://erply.com/api/getSalesDocuments/
+	 * @param array $documentIDs
+	 * @return array document data
+	 */
+	public function getSalesDocuments($documentIDs)
+	{
+		$result=$this->sendRequest('getSalesDocuments',array(
+			'ids'=>$documentIDs
+		));
+
+		if(isset($result['records']))
+			return $result['records'];
+		else
+			return array();
+	}
+
+	/**
+	 * Gets Erply product
+	 * @link https://erply.com/api/getProducts/
+	 * @param string $code the unique product code
+	 * @return array product data
+	 *
+	 */
+	public function getProduct($code)
+	{
+		$result=$this->sendRequest('getProducts',array(
+			'code'=>$code
+		));
+
+		if(isset($result['records'][0]))
+			return $result['records'][0];
+		else
+			return array();
+	}
+
+	/**
+	 * Gets Erply product prices
+	 * @link https://erply.com/api/getProductPrices/
+	 * @param array $productIDs
+	 * @return array product prices
+	 */
+	public function getProductPrices($productIDs)
+	{
+		$result=$this->sendRequest('getProductPrices',array(
+			'productIDs'=>$productIDs
+		));
+
+		if(isset($result['records']))
+			return $result['records'];
 		else
 			return array();
 	}
