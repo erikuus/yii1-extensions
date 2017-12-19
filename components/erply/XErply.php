@@ -282,6 +282,24 @@ class XErply extends CApplicationComponent
 	}
 
 	/**
+	 * Gets Erply sales document reference number
+	 * @link https://erply.com/api/getSalesDocuments/
+	 * @param integer $id the document id
+	 * @return string
+	 */
+	public function getSalesDocumentReferenceNumber($id)
+	{
+		$result=$this->sendRequest('getSalesDocuments',array(
+			'id'=>$id
+		));
+
+		if(isset($result['records'][0]['referenceNumber']))
+			return $result['records'][0]['referenceNumber'];
+		else
+			return null;
+	}
+
+	/**
 	 * Gets Erply sales documents
 	 * @link https://erply.com/api/getSalesDocuments/
 	 * @param array $documentIDs
