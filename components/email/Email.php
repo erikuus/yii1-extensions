@@ -101,6 +101,7 @@ class Email extends CApplicationComponent {
 	 * @var string the delivery type
 	 * If set to 'php' it will use php's mail() function.
 	 * If set to 'debug' it will not actually send it but output it to the screen.
+	 * If set to 'dummy' it will do nothing.
 	 */
 	public $delivery = 'php';
 	/**
@@ -194,6 +195,9 @@ class Email extends CApplicationComponent {
 				), true);
 				$uniqid = md5(uniqid(rand(), true));
 				Yii::app()->user->setFlash('debug.email'.$uniqid, $debug);
+				return true;
+				break;
+			case 'dummy':
 				return true;
 				break;
 		}
