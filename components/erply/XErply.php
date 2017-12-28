@@ -214,29 +214,25 @@ class XErply extends CApplicationComponent
 	 * If given address does not exist, add it and return it's id
 	 * @link https://erply.com/api/getAddresses/
 	 * @link https://erply.com/api/saveAddress/
-	 * @param integer $ownerID the customer id of address owner
-	 * @param string $street
-	 * @param string $city
-	 * @param string $postalCode
-	 * @param string $country
+	 * @param array $params the address parts (ownerID, typeID [1-postal, 3-registred], street, city, postalCode, country)
 	 * @return integer address id
 	 */
-	public function getAddressId($ownerID, $street, $postalCode, $city, $state, $country)
+	public function getAddressId($params)
 	{
 		$id=null;
 
 		$result=$this->sendRequest('getAddresses',array(
-			'ownerID'=>$ownerID,
-			'typeID'=>1
+			'ownerID'=>$params['ownerID'],
+			'typeID'=>$params['typeID']
 		));
 
 		if(isset($result['records']))
 		{
 			foreach ($result['records'] as $address)
 			{
-				if($address['street']==$street && $address['city']==$city && $address['postalCode']==$postalCode && $address['country']==$country)
+				if($address['street']==$params['street'] && $address['city']==$params['city'] && $address['postalCode']==$params['postalCode'] && $address['country']==$params['country'])
 				{
-					if (!$address['state'] || $address['state']==$state) // NB! State can be empty in ERPLY
+					if (!$address['state'] || $address['state']==$params['state']) // NB! State can be empty in ERPLY
 					{
 						$id=$address['addressID'];
 						break;
@@ -247,15 +243,7 @@ class XErply extends CApplicationComponent
 
 		if($id===null)
 		{
-			$result=$this->sendRequest('saveAddress',array(
-				'ownerID'=>$ownerID,
-				'typeID'=>1,
-				'street'=>$street,
-				'postalCode'=>$postalCode,
-				'city'=>$city,
-				'state'=>$state,
-				'country'=>$country
-			));
+			$result=$this->sendRequest('saveAddress', $params);
 
 			if(isset($result['records'][0]['addressID']))
 				$id=$result['records'][0]['addressID'];
