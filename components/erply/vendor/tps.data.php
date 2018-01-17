@@ -1,6 +1,6 @@
 <?php
 /**
- * List that enables to find TP code (tehingupartneri kood) for customer
+ * List that enables to find integration code (tehingupartneri kood) for ERPLY customer
  *
  * First include it into variable:
  * ```
@@ -32,7 +32,7 @@
  *
  * 5. Get TP code by foreign company type and country
  * ```
- * $tps['foreignGovermentAgencyByCountry']['EE']
+ * $tps['foreignGovernmentAgencyByCountry']['EE']
  * $tps['foreignLocalAgencyByCountry']['AT']
  * $tps['foreignInternationalOrganisationByCountry']['AU']
  * $tps['foreignFinancialInstitutionByCountry']['BE']
@@ -41,8 +41,7 @@
  *
  * 6. Selest TP code from special dropdown options
  * ```
- * $tps['euDropdownOptions']
- * $tps['euDropdownOptions']
+ * $tps['dropdownOptions']
  * ```
  *
  * @author Erik Uus <erik.uus@gmail.com>
@@ -1795,7 +1794,7 @@ return array (
     'MTÜ' => '800399',
     'SA' => '800399',
   ),
-  'foreignGovermentAgencyByCountry' => array( // välismaised valitsusasutused
+  'foreignGovernmentAgencyByCountry' => array( // välismaised valitsusasutused
     'AT' => '900003',
     'AU' => '900004',
     'BE' => '900005',
