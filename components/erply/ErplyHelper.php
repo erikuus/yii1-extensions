@@ -28,7 +28,7 @@ class ErplyHelper
 	const FOREIGN_TYPE_FINANCIAL_INSTITUTION=4;
 	const FOREIGN_TYPE_OTHER=5;
 
-	private static $_data = array();
+	private static $data = array();
 
 	/**
 	 * Get type options for foreign companies
@@ -152,7 +152,7 @@ class ErplyHelper
 	protected static function getForeignTypeMethod($typeCode)
 	{
 		$methods=array(
-			self::FOREIGN_TYPE_GOVERNMENT_AGENCY=>'foreignGovermentAgencyByCountry',
+			self::FOREIGN_TYPE_GOVERNMENT_AGENCY=>'foreignGovernmentAgencyByCountry',
 			self::FOREIGN_TYPE_LOCAL_AGENCY=>'foreignLocalAgencyByCountry',
 			self::FOREIGN_TYPE_INTERNATIONAL_ORGANISATION=>'foreignInternationalOrganisationByCountry',
 			self::FOREIGN_TYPE_FINANCIAL_INSTITUTION=>'foreignFinancialInstitutionByCountry',
@@ -187,9 +187,9 @@ class ErplyHelper
 	 */
 	protected static function getData()
 	{
-		if($this->_data===array())
-			$this->_data = include dirname(__FILE__).'/vendor/tps.data.php';
+		if(self::$data===array())
+			self::$data = include dirname(__FILE__).'/vendor/tps.data.php';
 
-		return $this->_data;
+		return self::$data;
 	}
 }
