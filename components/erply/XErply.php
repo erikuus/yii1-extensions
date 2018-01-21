@@ -347,10 +347,11 @@ class XErply extends CApplicationComponent
 	 * @link https://erply.com/api/savePayment/
 	 * @param integer $documentID the sales document id
 	 * @param numeric $paymentSum the payment sum
+	 * @param integer $paymentType the payment type
 	 * @param string $paymentInfo the sales document payment info
 	 * @return integer payment id
 	 */
-	public function saveCardPayment($documentID, $paymentSum, $paymentInfo=null)
+	public function savePayment($documentID, $paymentSum, $paymentType=3, $paymentInfo=null)
 	{
 		$result=$this->sendRequest('saveSalesDocument',array(
 			'id'=>$documentID,
@@ -362,9 +363,9 @@ class XErply extends CApplicationComponent
 			return null;
 
 		$result=$this->sendRequest('savePayment',array(
+			'typeID'=>$paymentType,
 			'documentID'=>$documentID,
-			'sum'=>$paymentSum,
-			'type'=>'CARD',
+			'sum'=>$paymentSum
 		));
 
 		if(isset($result['records'][0]))
