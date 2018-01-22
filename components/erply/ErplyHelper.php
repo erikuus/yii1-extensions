@@ -133,7 +133,11 @@ class ErplyHelper
 	 */
 	protected static function getBusinessEntity($name)
 	{
-		$entities=array('AS','TÜ','UÜ','OÜ','TÜH','MTÜ','SA','FIE');
+		$entities=array(
+			'AS','TÜ','UÜ','OÜ','TÜH','MTÜ','SA','FIE',
+    		'Aktsiaselts','Täisühing','Usaldusühing','Osaühing','Tulundusühistu','Mittetulundusühing','Sihtasutus',
+    		'aktsiaselts','täisühing','usaldusühing','osaühing','tulundusühistu','mittetulundusühing','sihtasutus'
+		);
 
 		foreach ($entities as $entity)
 		{
