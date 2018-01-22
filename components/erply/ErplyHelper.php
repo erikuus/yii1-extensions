@@ -135,8 +135,9 @@ class ErplyHelper
 	{
 		$entities=array(
 			'AS','TÜ','UÜ','OÜ','TÜH','MTÜ','SA','FIE',
+			'AKTSIASELTS','TÄISÜHING','USALDUSÜHING','OSAÜHING','TULUNDUSÜHISTU','MITTETULUNDUSÜHING','SIHTASUTUS',
     		'Aktsiaselts','Täisühing','Usaldusühing','Osaühing','Tulundusühistu','Mittetulundusühing','Sihtasutus',
-    		'aktsiaselts','täisühing','usaldusühing','osaühing','tulundusühistu','mittetulundusühing','sihtasutus'
+    		'aktsiaselts','täisühing','usaldusühing','osaühing','tulundusühistu','mittetulundusühing','sihtasutus',
 		);
 
 		foreach ($entities as $entity)
