@@ -33,6 +33,7 @@ class XFileForm extends CFormModel
 		'tam'=>'TAMA',
 		'sam'=>'SAMA',
 		'lka'=>'EELKKA',
+		'eam'=>'EAM',
 		'-0-'=>'-',
 		'-1-'=>'/',
 		'-2-'=>'_',
