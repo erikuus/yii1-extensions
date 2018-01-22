@@ -25,7 +25,6 @@
  * ```
  *
  * 4. Get TP code by estonian business entity (if methods 2 and 3 fail to return)
- * Supported types are 'FIE','AS','TÜ','UÜ','OÜ','TÜH','MTÜ','SA'
  * ```
  * $tps['estCompanyByEntity']['FIE']
  * ```
@@ -1793,6 +1792,20 @@ return array (
     'TÜH' => '800599',
     'MTÜ' => '800399',
     'SA' => '800399',
+    'Aktsiaselts' => '800599',
+    'Täisühing' => '800599',
+    'Usaldusühing' => '800599',
+    'Osaühing' => '800599',
+    'Tulundusühistu' => '800599',
+    'Mittetulundusühing' => '800399',
+    'Sihtasutus' => '800399',
+    'aktsiaselts' => '800599',
+    'täisühing' => '800599',
+    'usaldusühing' => '800599',
+    'osaühing' => '800599',
+    'tulundusühistu' => '800599',
+    'mittetulundusühing' => '800399',
+    'sihtasutus' => '800399',
   ),
   'foreignGovernmentAgencyByCountry' => array( // välismaised valitsusasutused
     'AT' => '900003',
