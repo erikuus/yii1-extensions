@@ -53,6 +53,14 @@ class XErply extends CApplicationComponent
 	 * If empty, url is formed as follows: https://[clientCode].erply.com/api/
 	 */
 	public $url;
+	/**
+	 * @var integer the banklink typeID for savePayment
+	 */
+	public $paymentIdBankLink;
+	/**
+	 * @var integer the creaditcard typeID for savePayment
+	 */
+	public $paymentIdCreditCard;
 
 	/**
 	 * Initializes the component.
@@ -347,12 +355,18 @@ class XErply extends CApplicationComponent
 	 * @link https://erply.com/api/savePayment/
 	 * @param integer $documentID the sales document id
 	 * @param numeric $paymentSum the payment sum
-	 * @param integer $paymentType the payment type
+	 * @param string $paymentType the payment type codename [BANKLINK|CREDITCARD]
 	 * @param string $paymentInfo the sales document payment info
 	 * @return integer payment id
 	 */
 	public function savePayment($documentID, $paymentSum, $paymentType=3, $paymentInfo=null)
 	{
+		if(!$this->paymentIdBankLink)
+			throw new CException('"paymentIdBankLink" has to be set!');
+
+		if(!$this->paymentIdCreditCard)
+			throw new CException('"paymentIdCreditCard" has to be set!');
+
 		$result=$this->sendRequest('saveSalesDocument',array(
 			'id'=>$documentID,
 			'paymentStatus'=>'PAID',
@@ -362,8 +376,15 @@ class XErply extends CApplicationComponent
 		if(!isset($result['records'][0]))
 			return null;
 
+		if($paymentType=='BANKLINK')
+			$typeID=$this->paymentIdBankLink;
+		elseif($paymentType=='CREDITCARD')
+			$typeID=$this->paymentIdCreditCard;
+		else
+			$typeID=3;
+
 		$result=$this->sendRequest('savePayment',array(
-			'typeID'=>$paymentType,
+			'typeID'=>$typeID,
 			'documentID'=>$documentID,
 			'sum'=>$paymentSum
 		));
