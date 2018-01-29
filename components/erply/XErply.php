@@ -298,6 +298,24 @@ class XErply extends CApplicationComponent
 	}
 
 	/**
+	 * Gets Erply sales document payment status
+	 * @link https://erply.com/api/getSalesDocuments/
+	 * @param integer $id the document id
+	 * @return string
+	 */
+	public function getSalesDocumentPaymentStatus($id)
+	{
+		$result=$this->sendRequest('getSalesDocuments',array(
+			'id'=>$id
+		));
+
+		if(isset($result['records'][0]['paymentStatus']))
+			return $result['records'][0]['paymentStatus'];
+		else
+			return null;
+	}
+
+	/**
 	 * Gets Erply sales documents
 	 * @link https://erply.com/api/getSalesDocuments/
 	 * @param array $documentIDs
