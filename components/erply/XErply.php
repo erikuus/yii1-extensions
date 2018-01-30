@@ -269,7 +269,7 @@ class XErply extends CApplicationComponent
 	 */
 	public function saveSalesDocument($params)
 	{
-		$params['NewInErp']=1;
+		$params['newInErp']=1;
 
 		$result=$this->sendRequest('saveSalesDocument',$params);
 
