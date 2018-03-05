@@ -166,7 +166,8 @@ class XErply extends CApplicationComponent
 	public function getCustomers($customerIDs)
 	{
 		$result=$this->sendRequest('getCustomers',array(
-			'customerIDs'=>$customerIDs
+			'customerIDs'=>$customerIDs,
+			'recordsOnPage'=>100
 		));
 
 		if(isset($result['records']))
@@ -326,7 +327,8 @@ class XErply extends CApplicationComponent
 	public function getSalesDocuments($documentIDs)
 	{
 		$result=$this->sendRequest('getSalesDocuments',array(
-			'ids'=>$documentIDs
+			'ids'=>$documentIDs,
+			'recordsOnPage'=>100
 		));
 
 		if(isset($result['records']))
