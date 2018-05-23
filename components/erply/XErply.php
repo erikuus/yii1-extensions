@@ -142,12 +142,15 @@ class XErply extends CApplicationComponent
 		{
 			// put reg. address as default address
 			$company=$result['records'][0];
-			foreach ($company['addresses'] as $address)
+			if(isset($company['addresses']))
 			{
-				if($address['typeID']=='3')
+				foreach ($company['addresses'] as $address)
 				{
-					$company['address']=$address['address'];
-					break;
+					if($address['typeID']=='3')
+					{
+						$company['address']=$address['address'];
+						break;
+					}
 				}
 			}
 
