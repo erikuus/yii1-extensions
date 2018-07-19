@@ -272,6 +272,15 @@ class XEcom extends CApplicationComponent
 	}
 
 	/**
+	 * Check whether it is automated request
+	 * @return boolean whether it is automated request
+	 */
+	public function isAutoRequest()
+	{
+		return isset($_REQUEST['auto']) && $_REQUEST['auto']=='Y';
+	}
+
+	/**
 	 * Convert hexcode to string
 	 * @param $hex the mac signature in hexdecimal format
 	 * @return string mac signature

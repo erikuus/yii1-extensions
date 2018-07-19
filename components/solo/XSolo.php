@@ -252,6 +252,15 @@ class XSolo extends CApplicationComponent
 	}
 
 	/**
+	 * Check whether it is automated request
+	 * @return boolean whether it is automated request
+	 */
+	public function isAutoRequest()
+	{
+		return true;
+	}
+
+	/**
 	 * Generates the MAC data string
 	 * @param string $requestType the key of getMacParamMap() array
 	 * @param array request params

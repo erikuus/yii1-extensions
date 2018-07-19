@@ -156,4 +156,13 @@ class XSeb extends XIPizza
 			),
 		);
 	}
+
+	/**
+	 * Check whether it is automated request
+	 * @return boolean whether it is automated request
+	 */
+	public function isAutoRequest()
+	{
+		return isset($_REQUEST['VK_AUTO']) && $_REQUEST['VK_AUTO']=='Y';
+	}
 }
