@@ -155,6 +155,10 @@ class XEcom extends CApplicationComponent
 	 * @var string the authentication error message. Defaults to empty.
 	 */
 	public $errorMessage;
+	/**
+	 * @var boolean whether to force request as auto (for testing only)
+	 */
+	public $forceAutoRequest;
 
 	/**
 	 * Render form with hidden fields and autosubmit
@@ -277,7 +281,10 @@ class XEcom extends CApplicationComponent
 	 */
 	public function isAutoRequest()
 	{
-		return isset($_REQUEST['auto']) && $_REQUEST['auto']=='Y';
+		if($this->forceAutoRequest===true)
+			return true;
+		else
+			return isset($_REQUEST['auto']) && $_REQUEST['auto']=='Y';
 	}
 
 	/**
