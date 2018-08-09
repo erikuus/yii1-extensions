@@ -59,7 +59,7 @@ class qqFileUploaderBehavior extends CBehavior
 		if($replaceOldFile===false)
 		{
 			while(file_exists($uploadDirectory.$filename.'.'.$ext))
-				$filename.=rand(10,99);
+				$filename.='-c';
 		}
 
 		// upload file
