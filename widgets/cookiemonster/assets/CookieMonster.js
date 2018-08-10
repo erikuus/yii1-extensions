@@ -40,7 +40,7 @@ var CookieMonster = {
         this.hideMonit();
     },
     bind: function() {
-        this.button.on('click', jQuery.proxy(this.agree, this));
+        this.button.live('click', jQuery.proxy(this.agree, this));
     },
     checkCookie: function() {
         if (this.readCookie() !== this.value) {
