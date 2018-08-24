@@ -1,0 +1,43 @@
+.idSignModalContent table, .mobileSignModalContent table {
+	border-collapse: collapse;
+	margin-bottom: 15px;
+	width: 90%;
+}
+
+.idSignModalContent table td, .mobileSignModalContent table td {
+	margin: 0;
+	padding: 3px 0 3px 0;
+	vertical-align: top;
+}
+
+.idSignModalContent table input[type=text],
+.idSignModalContent table textarea,
+.mobileSignModalContent table input[type=text],
+.mobileSignModalContent table textarea
+{
+	padding: 6px 4px 6px 4px;
+	border: 1px solid #cacaca;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	background-color: #ffffff;
+	box-sizing: border-box;
+	width: 100%
+}
+
+.idSignModalContent table input[type=text]:focus,
+.idSignModalContent table textarea:focus,
+.mobileSignModalContent table input[type=text]:focus,
+.mobileSignModalContent table textarea:focus{
+	border: 1px solid rgba(82, 168, 236, 0.8);
+}
+
+#idSignModalErrorContainer,
+#mobileSignErrorContainer {
+	margin: 0 0 10px 0;
+	padding: 10px 30px 10px 10px;
+	border: 1px solid #C00;
+	background: #FFE4E1;
+	color: #C00;
+	font-weight: bold;
+}
