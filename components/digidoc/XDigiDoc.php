@@ -28,7 +28,7 @@
  * </pre>
  *
  * CONTROLLER ACTIONS
- * Set up {@link XDigiDocAction} action and code sign, success and failure actions according to your needs.
+ * Set up {@link XDigiDocAction} and code sign, success and failure actions according to your needs.
  *
  * <pre>
  * class DigidocController extends Controller
@@ -36,7 +36,7 @@
  *     public function actions()
  *     {
  *         return array(
- *             'digidocSigning'=>array(
+ *             'signing'=>array(
  *                 'class'=>'ext.components.digidoc.XDigiDocAction',
  *                 'successUrl'=>$this->createUrl('/digidoc/success'),
  *                 'failureUrl'=>$this->createUrl('/digidoc/failure'),
