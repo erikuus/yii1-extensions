@@ -138,14 +138,14 @@ class XDigiDoc extends CApplicationComponent
 	 */
 	public $version='2.1';
 	/**
-	 * @var string the directory wherein session directory will be created for digidoc container.
+	 * @var string the directory wherein session directory will be created for digidoc container
 	 * For example, if directory is 'path/to/upload/', container will be saved to 'path/to/upload/1002967812/example.bdoc'
 	 * NOTE! Should end with a directory separator
 	 */
 	public $directory;
 
 	/**
-	 * Initializes the component.
+	 * Initializes the component
 	 * This method checks if required values are set
 	 * and constructs soap client object
 	 */
