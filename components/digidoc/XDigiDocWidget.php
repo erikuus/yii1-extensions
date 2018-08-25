@@ -167,6 +167,11 @@ class XDigiDocWidget extends CWidget
 	 */
 	public $enableImages=false;
 	/**
+	 * @var boolean $testEnvironmentInfo whether to display information about digidoc test enviroment
+	 * Defaults to false.
+	 */
+	public $testEnvironmentInfo=false;
+	/**
 	 * @var string $mobilePhoneNumber the signer mobile phone number
 	 * This is used only to prefill mobile sign form
 	 */
@@ -223,6 +228,10 @@ class XDigiDocWidget extends CWidget
 				'mobilePhoneNumber'=>$this->signerMobilePhoneNumber
 			), true);
 		}
+
+		// display test enviroment info
+		if($this->testEnvironmentInfo)
+			$this->render('testEnvironmentInfo');
 
 		// display views
 		switch ($this->layout) {

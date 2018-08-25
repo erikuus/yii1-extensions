@@ -114,7 +114,7 @@ ee.sk.hashcode = {
                         $('#mobileSignModalHeader').hide();
                         $('#mobileSignModalFooter').hide();
                         var challenge = response.challenge;
-                        $('.mobileSignModalContent').html(self.mobileSignIsInProgressMessage + '<b>' + challenge + '</b>');
+                        $('.mobileSignModalContent').html('<div id="mobileSignProgressContainer">' + self.mobileSignIsInProgressMessage + '<b>' + challenge + '</b></div>');
                         var intervalId = setInterval(function () {
                             $.post(self.defaultPath, {
                                 _token: token,

@@ -32,6 +32,13 @@
 	border: 1px solid rgba(82, 168, 236, 0.8);
 }
 
+.testEnviromentInfo {
+	margin: 0 0 10px 0;
+	padding: 10px 30px 10px 10px;
+	border: 1px solid #FAE8BC;
+	background: #FFFFE0;
+}
+
 #idSignModalErrorContainer,
 #mobileSignErrorContainer {
 	margin: 0 0 10px 0;
@@ -40,4 +47,8 @@
 	background: #FFE4E1;
 	color: #C00;
 	font-weight: bold;
+}
+
+#mobileSignProgressContainer {
+	font-size: 12px;
 }
