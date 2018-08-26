@@ -15,7 +15,7 @@
     </table>
 </div>
 <div id="mobileSignModalFooter">
-    <input type="hidden" name="_token" value="<?php echo $csrfToken; ?>">
+    <input type="hidden" name="_token" value="<?php echo $token; ?>">
     <button type="button" class="<?php echo $buttonCssClass; ?>" onclick="ee.sk.hashcode.StartMobileSign()">
     	<?php echo Yii::t('XDigiDocWidget.digidoc', 'Sign the document'); ?>
     </button>

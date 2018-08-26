@@ -17,7 +17,8 @@
  *
  * <pre>
  * $this->widget('ext.components.digidoc.XDigiDocWidget', array(
- *     'callbackUrl'=>$this->createUrl('/digidoc/signing')
+ *     'callbackUrl'=>$this->createUrl('/digidoc/signing'),
+ *     'callbackToken'=>$token
  * ));
  * </pre>
  *
@@ -27,6 +28,7 @@
  * <pre>
  * $this->widget('ext.components.digidoc.XDigiDocWidget', array(
  *     'callbackUrl'=>$this->createUrl('/digidoc/signing'),
+ *     'callbackToken'=>$token,
  *     'template'=>'<h1>{cardTitle}</h1><p>{cardSign}</p><h1>{mobileTitle}</h1><p>{mobileSign}</p>',
  *     'buttonCssClass'=>'btn btn-primary'
  * ));
@@ -38,6 +40,7 @@
  * <pre>
  * $this->widget('ext.components.digidoc.XDigiDocWidget', array(
  *     'callbackUrl'=>$this->createUrl('/digidoc/signing'),
+ *     'callbackToken'=>$token,
  *     'layout'=>'tabs'
  * ));
  * </pre>
@@ -48,6 +51,7 @@
  * <pre>
  * $this->widget('ext.components.digidoc.XDigiDocWidget', array(
  *     'callbackUrl'=>$this->createUrl('/digidoc/signing'),
+ *     'callbackToken'=>$token,
  *     'layout'=>'tabs',
  *     'enableCardSignFields'=>false,
  *     'buttonCssClass'=>'btn btn-primary',
@@ -63,6 +67,7 @@
  * <pre>
  * $this->widget('ext.components.digidoc.XDigiDocWidget', array(
  *     'callbackUrl'=>$this->createUrl('/digidoc/signing'),
+ *     'callbackToken'=>$token,
  *     'layout'=>'modals',
  *     'buttonCssClass'=>'btn btn-primary',
  * ));
@@ -74,6 +79,7 @@
  * <pre>
  * $this->widget('ext.components.digidoc.XDigiDocWidget', array(
  *     'callbackUrl'=>$this->createUrl('/digidoc/signing'),
+ *     'callbackToken'=>$token,
  *     'layout'=>'modals',
  *     'buttonCssClass'=>'btn btn-primary',
  *     'enableCardSignFields'=>false,
@@ -94,14 +100,15 @@ class XDigiDocWidget extends CWidget
 {
 	/**
 	 * @var string $callbackUrl the URL to which the ajax/post requests are sent during and after the signing process.
-	 * Must point to XDigiDocAction
+	 * This may point to {@link XDigiDocAction} or to some custom action that handles the signing process.
 	 * @see XDigiDocAction
 	 */
 	public $callbackUrl;
 	/**
-	 * @var string $csrfToken the random token used to perform CSRF validation.
+	 * @var string $callbackToken the request token that gets validated in {@link XDigiDocAction}.
+	 * @see XDigiDocAction
 	 */
-	public $csrfToken;
+	public $callbackToken;
 	/**
 	 * @var mixed $cssFile the CSS file used for the widget. Defaults to null, meaning
 	 * using the default CSS file included together with the widget.
@@ -214,7 +221,7 @@ class XDigiDocWidget extends CWidget
 			$this->_cardSign=$this->render('cardSignForm', array(
 				'enableCardSignFields'=>$this->enableCardSignFields,
 				'buttonCssClass'=>$this->buttonCssClass,
-				'csrfToken'=>$this->csrfToken
+				'token'=>$this->callbackToken
 			), true);
 		}
 
@@ -223,7 +230,7 @@ class XDigiDocWidget extends CWidget
 		{
 			$this->_mobileSign=$this->render('mobileSignForm', array(
 				'buttonCssClass'=>$this->buttonCssClass,
-				'csrfToken'=>$this->csrfToken,
+				'token'=>$this->callbackToken,
 				'idCode'=>$this->signerIdCode,
 				'mobilePhoneNumber'=>$this->signerMobilePhoneNumber
 			), true);

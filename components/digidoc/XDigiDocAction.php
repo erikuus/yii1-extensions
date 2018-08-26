@@ -16,6 +16,8 @@
  * return array(
  *     'signing'=>array(
  *         'class'=>'ext.components.digidoc.XDigiDocAction',
+ *         'componentName='digidoc',
+ *         'tokenValidator'=>'validateToken',
  *         'successUrl'=>$this->createUrl('/digidoc/success'),
  *         'failureUrl'=>$this->createUrl('/digidoc/failure'),
  *         'mobileServiceName'=>'Testimine',
@@ -41,11 +43,16 @@ class XDigiDocAction extends CAction
 	 */
 	public $componentName='digidoc';
 	/**
-	 * @var string $successUrl the location this action redirects after signing success
+	 * @var string $tokenValidator the owner controller method that validates request token set in {@link XDigiDocWidget}
+	 * @see XDigiDocWidget
+	 */
+	public $tokenValidator;
+	/**
+	 * @var string $successUrl the location this action posts request token after signing success
 	 */
 	public $successUrl;
 	/**
-	 * @var string $failureUrl the location this action redirects after signing failure
+	 * @var string $failureUrl the location this action posts request token after signing failure
 	 */
 	public $failureUrl;
 	/**
@@ -101,6 +108,10 @@ class XDigiDocAction extends CAction
 	 */
 	public function run()
 	{
+		// validate token
+		if (!(isset($_POST['_token']) && $this->validateToken($_POST['_token'])))
+			throw new CHttpException(400,'Invalid request. Please do not repeat this request again.');
+
 		// import vendor classes
 		if(!Yii::getPathOfAlias('xdigidoc'))
 			Yii::setPathOfAlias('xdigidoc', __DIR__);
@@ -201,7 +212,7 @@ class XDigiDocAction extends CAction
 			Yii::app()->user->setFlash($this->flashKey, $_POST['error_message']);
 
 			// redirect
-			$this->controller->redirect($this->failureUrl);
+			$this->postWithToken($this->failureUrl);
 		}
 		else
 		{
@@ -209,7 +220,7 @@ class XDigiDocAction extends CAction
 			$this->handleIdCardSigningSuccess($dds);
 
 			// redirect
-			$this->controller->redirect($this->successUrl);
+			$this->postWithToken($this->successUrl);
 		}
 	}
 
@@ -358,10 +369,10 @@ class XDigiDocAction extends CAction
 			Yii::app()->user->setFlash($this->flashKey, $_POST['error_message']);
 
 			// redirect
-			$this->controller->redirect($this->failureUrl);
+			$this->postWithToken($this->failureUrl);
 		}
 		else
-			$this->controller->redirect($this->successUrl);
+			$this->postWithToken($this->successUrl);
 	}
 
 	/**
@@ -437,6 +448,34 @@ class XDigiDocAction extends CAction
 		$response['is_success']=true;
 
 		return $response;
+	}
+
+	/**
+	 * Validate request token
+	 * @param string $token the request token
+	 * @return boolean whether token is valid
+	 */
+	protected function validateToken($token)
+	{
+		if($this->tokenValidator)
+			return $this->controller->{$this->tokenValidator}($token);
+		else
+			return true;
+	}
+
+	/**
+	 * Post to given url sending request token as parameter
+	 * @param string $url
+	 * @return void
+	 */
+	protected function postWithToken($url)
+	{
+		$file=dirname(__FILE__).DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'postWithTokenForm.php';
+
+		return $this->controller->renderFile($file, array(
+			'url'=>$url,
+			'token'=>$_POST['_token']
+		));
 	}
 
 	/**

@@ -29,6 +29,8 @@
  *
  * CONTROLLER ACTIONS
  * Set up {@link XDigiDocAction} and code sign, success and failure actions according to your needs.
+ * Note that fixed token is used here only to keep the example simple. In real life you should use
+ * some random token or crypted data that can be decrypted and used in success action.
  *
  * <pre>
  * class DigidocController extends Controller
@@ -40,6 +42,7 @@
  *                 'class'=>'ext.components.digidoc.XDigiDocAction',
  *                 'successUrl'=>$this->createUrl('/digidoc/success'),
  *                 'failureUrl'=>$this->createUrl('/digidoc/failure'),
+ *                 'tokenValidator'=>'validateToken',
  *                 'mobileServiceName'=>'Testimine',
  *                 'mobileServiceInfo'=>'Sign test document'
  *             )
@@ -54,11 +57,17 @@
  *             'path/to/doc.pdf'=>'application/pdf'
  *         );
  *         Yii::app()->digidoc->createContainerWithFiles($container, $files);
- *         $this->render('sign');
+ *         $this->render('sign', array(
+ *             'token'=>'0c9dbf2fc0f87ac6752'
+ *         ));
  *     }
  *
  *     public function actionSuccess()
  *     {
+ *         // validate token
+ *         if (!(isset($_POST['_token']) && $this->validateToken($_POST['_token'])))
+ *             throw new CHttpException(400,'Invalid request. Please do not repeat this request again.');
+ *
  *         // get directory and container from session
  *         $sessDirectory=Yii::app()->digidoc->getDirectoryFromDdsSession();
  *         $containerName=Yii::app()->digidoc->getContainerNameFromDdsSession();
@@ -89,6 +98,11 @@
  *     {
  *         $this->render('failure');
  *     }
+ *
+ *     public function validateToken($token)
+ *     {
+ *         return $token=='0c9dbf2fc0f87ac6752';
+ *     }
  * }
  * </pre>
  *
@@ -98,7 +112,8 @@
  *
  * <pre>
  * $this->widget('ext.components.digidoc.XDigiDocWidget', array(
- *     'callbackUrl'=>$this->createUrl('/digidoc/signing')
+ *     'callbackUrl'=>$this->createUrl('/digidoc/signing'),
+ *     'callbackToken'=>$token
  * ));
  * </pre>
  *
