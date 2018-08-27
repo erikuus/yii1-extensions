@@ -10,7 +10,7 @@
  * 1) route part of returnable url are mapped to labels via routeLabels array,
  * 2) text is queried with model method using parameter extracted from return url.
  *
- * It can be attached to a model on its behaviors() method:
+ * It can be attached to a controller on its behaviors() method:
  * <pre>
  * public function behaviors()
  * {
