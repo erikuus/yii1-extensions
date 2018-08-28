@@ -14,7 +14,7 @@ return array(
   'Social security number' => 'Isikukood',
   'Phone number is mandatory!' => 'Telefoninumber on kohustuslik!',
   'Social security number is mandatory!' => 'Isikukood on kohustuslik!',
-  '<b>Sending digital signing request to phone is in progress.</b> Make sure control code matches with one in the phone screen and enter Mobile-ID PIN2. Control code: ' => '<b>Toimub allkirjastamine.</b> Veendu kontrollkoodi õigsuses ja sisesta telefonil Mobiil-ID PIN2-kood. Kontrollkood: ',
+  '<b>Sending digital signing request to phone is in progress.</b><br />Make sure control code matches with one in the phone screen and<br />enter Mobile-ID PIN2.<br />Control code:<br />' => '<b>Toimub allkirjastamine.</b><br />Veendu kontrollkoodi õigsuses ja<br />sisesta telefonil Mobiil-ID PIN2-kood.<br />Kontrollkood:<br />',
   'There was an error performing AJAX request to initiate MID signing: ' => 'Mobiil-ID kaudu allkirjastamist ei õnnestunud alustada: ',
   'Cannot find ID-card browser extensions!' => 'Veebilehitsejas puudub ID-kaardi tugi!',
   'Signing canceled by user!' => 'Kasutaja katkestas digiallkirjastamise!',

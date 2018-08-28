@@ -263,7 +263,7 @@ class XDigiDocWidget extends CWidget
 			ee.sk.hashcode.defaultPath='{$this->callbackUrl}';
 			ee.sk.hashcode.phoneNumberIsMandatory='".Yii::t('XDigiDocWidget.digidoc', 'Phone number is mandatory!')."';
 			ee.sk.hashcode.socialSecurityNumberIsMandatory='".Yii::t('XDigiDocWidget.digidoc', 'Social security number is mandatory!')."';
-			ee.sk.hashcode.mobileSignIsInProgressMessage='".Yii::t('XDigiDocWidget.digidoc', '<b>Sending digital signing request to phone is in progress.</b> Make sure control code matches with one in the phone screen and enter Mobile-ID PIN2. Control code: ')."';
+			ee.sk.hashcode.mobileSignIsInProgressMessage='".Yii::t('XDigiDocWidget.digidoc', '<b>Sending digital signing request to phone is in progress.</b><br />Make sure control code matches with one in the phone screen and<br />enter Mobile-ID PIN2.<br />Control code:<br />')."';
 			ee.sk.hashcode.mobileSignAjaxErrorMessage='".Yii::t('XDigiDocWidget.digidoc', 'There was an error performing AJAX request to initiate MID signing: ')."';
 			ee.sk.hashcode.noBackendMessage='".Yii::t('XDigiDocWidget.digidoc', 'Cannot find ID-card browser extensions!')."';
 			ee.sk.hashcode.userCancelMessage='".Yii::t('XDigiDocWidget.digidoc', 'Signing canceled by user!')."';
