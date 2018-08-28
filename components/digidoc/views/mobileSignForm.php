@@ -5,11 +5,11 @@
         <tbody>
 	        <tr>
 	            <td><label for="mid_PhoneNumber"><?php echo Yii::t('XDigiDocWidget.digidoc', 'Mobile phone number'); ?>:</label></td>
-	            <td><input id="mid_PhoneNumber" type="text"><?php echo $mobilePhoneNumber; ?></td>
+	            <td><input id="mid_PhoneNumber" type="text" value="<?php echo $mobilePhoneNumber; ?>"></td>
 	        </tr>
 	        <tr>
 	            <td><label for="mid_idCode"><?php echo Yii::t('XDigiDocWidget.digidoc', 'Social security number'); ?>:</label></td>
-	            <td><input id="mid_idCode" type="text"><?php echo $idCode;?></td>
+	            <td><input id="mid_idCode" type="text" value="<?php echo $idCode;?>"></td>
 	        </tr>
     	</tbody>
     </table>
