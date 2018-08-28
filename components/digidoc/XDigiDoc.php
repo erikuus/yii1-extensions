@@ -23,6 +23,7 @@
  *         'class'=>'ext.components.digidoc.XDigiDoc',
  *         'url'=>'https://tsp.demo.sk.ee',
  *         'directory'=>'temp/',
+ *         'mobileServiceName'=>'Testimine'
  *     )
  * )
  * </pre>
@@ -43,7 +44,6 @@
  *                 'successUrl'=>$this->createUrl('/digidoc/success'),
  *                 'failureUrl'=>$this->createUrl('/digidoc/failure'),
  *                 'tokenValidator'=>'validateToken',
- *                 'mobileServiceName'=>'Testimine',
  *                 'mobileServiceInfo'=>'Sign test document'
  *             )
  *         );
@@ -158,6 +158,12 @@ class XDigiDoc extends CApplicationComponent
 	 * NOTE! Should end with a directory separator
 	 */
 	public $directory;
+	/**
+	 * @var string $mobileServiceName the service name for mobile signing
+	 * Must be 'Testimine' if using test service https://tsp.demo.sk.ee/
+	 * Note that it is used in {@link XDigiDocAction} only
+	 */
+	public $mobileServiceName;
 
 	/**
 	 * Initializes the component

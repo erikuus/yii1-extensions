@@ -20,7 +20,6 @@
  *         'tokenValidator'=>'validateToken',
  *         'successUrl'=>$this->createUrl('/digidoc/success'),
  *         'failureUrl'=>$this->createUrl('/digidoc/failure'),
- *         'mobileServiceName'=>'Testimine',
  *         'mobileServiceInfo'=>'Sign test document'
  *     ),
  * );
@@ -55,12 +54,6 @@ class XDigiDocAction extends CAction
 	 * @var string $failureUrl the location this action posts request token after signing failure
 	 */
 	public $failureUrl;
-	/**
-	 * @var string $mobileServiceName the name of service for mobile
-	 * This will be displayed to users mobile phones screen during signing process.
-	 * Must be 'Testimine' if using test service https://tsp.demo.sk.ee/
-	 */
-	public $mobileServiceName;
 	/**
 	 * @var string $mobileServiceInfo the explanatory message for mobile
 	 * This will be displayed to users mobile phones screen during signing process.
@@ -103,6 +96,8 @@ class XDigiDocAction extends CAction
 	 */
 	public $logCategory='ext.components.digidoc.XDigiDocAction';
 
+	private $_component;
+
 	/**
 	 * Runs the action.
 	 */
@@ -123,10 +118,10 @@ class XDigiDocAction extends CAction
 		Yii::import('xdigidoc.vendor.exceptions.*');
 
 		// get DigiDoc component
-		$component=Yii::app()->getComponent($this->componentName);
+		$this->_component=Yii::app()->getComponent($this->componentName);
 
 		// get digidoc service instance
-		$dds=DigiDocService::instance($component->url);
+		$dds=DigiDocService::instance($this->_component->url);
 
 		// handle signing requests
 		switch($_POST['request_act'])
@@ -393,7 +388,7 @@ class XDigiDocAction extends CAction
 			'Sesscode'=>SessionHelper::getDdsSessionCode(),
 			'SignerIDCode'=>$identityCode,
 			'SignerPhoneNo'=>$phoneNumber,
-			'ServiceName'=>$this->mobileServiceName,
+			'ServiceName'=>$this->_component->mobileServiceName,
 			'AdditionalDataToBeDisplayed'=>$this->mobileServiceInfo,
 			'Language'=>'EST',
 			'MessagingMode'=>'asynchClientServer',
