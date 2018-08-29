@@ -96,14 +96,19 @@ class XFileForm extends CFormModel
 		$endPath2 = strtolower($endPath1);
 		$endPath3 = implode('/',array_filter(array(strtoupper($archive).$fond, $inventory, $volume)));
 
-		if (is_dir($this->mntRoot.$startPath.$endPath1))
-			return $this->mntRoot.$startPath.$endPath1;
-		elseif (is_dir($this->mntRoot.$startPath.$endPath2))
-			return $this->mntRoot.$startPath.$endPath2;
-		elseif (is_dir($this->mntRoot.$startPath.$endPath3))
-			return $this->mntRoot.$startPath.$endPath3;
+		if($startPath)
+		{
+			if (is_dir($this->mntRoot.$startPath.$endPath1))
+				return $this->mntRoot.$startPath.$endPath1;
+			elseif (is_dir($this->mntRoot.$startPath.$endPath2))
+				return $this->mntRoot.$startPath.$endPath2;
+			elseif (is_dir($this->mntRoot.$startPath.$endPath3))
+				return $this->mntRoot.$startPath.$endPath3;
+			else
+				return null;
+		}
 		else
-			return '';
+			return $endPath2;
 	}
 
 	/**
