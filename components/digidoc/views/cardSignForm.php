@@ -1,6 +1,6 @@
 <div class="idSignModalContent">
 	<div id="idSignModalErrorContainer" style="display: none;"></div>
-	<p><?php echo Yii::t('XDigiDocWidget.digidoc', 'Make sure ID-card is inserted correctly! Only then press button.'); ?></p>
+	<p><?php echo Yii::t('XDigiDocWidget.digidoc', 'Make sure ID-card is inserted correctly and browser extension installed and enabled! Only then press button.'); ?></p>
 	<?php if($enableCardSignFields) :?>
 	<table>
 		 <tbody>
@@ -33,4 +33,10 @@
 	<button type="button" class="<?php echo $buttonCssClass; ?>" onclick="ee.sk.hashcode.IDCardSign()">
 		<?php echo Yii::t('XDigiDocWidget.digidoc', 'Sign the document'); ?>
 	</button>
+	<?php if($helpUrl) :?>
+		<?php echo CHtml::link(Yii::t('XDigiDocWidget.digidoc', 'Help'), $helpUrl, array(
+			'class'=>$helpLinkCssClass,
+			'target'=>'_blank'
+		));?></p>
+	<?php endif;?>
 </div>

@@ -82,6 +82,7 @@
  *     'callbackToken'=>$token,
  *     'layout'=>'modals',
  *     'buttonCssClass'=>'btn btn-primary',
+ *     'helpLinkCssClass'=>'btn',
  *     'enableCardSignFields'=>false,
  *     'enableImages'=>true,
  *     'mobileModalOptions'=>array(
@@ -110,17 +111,6 @@ class XDigiDocWidget extends CWidget
 	 */
 	public $callbackToken;
 	/**
-	 * @var mixed $cssFile the CSS file used for the widget. Defaults to null, meaning
-	 * using the default CSS file included together with the widget.
-	 * If false, no CSS file will be used. Otherwise, the specified CSS file
-	 * will be included when using this widget.
-	 */
-	public $cssFile;
-	/**
-	 * @var string $buttonCssClass the css class for buttons
-	 */
-	public $buttonCssClass;
-	/**
 	 * @var string the $layout template used to rende rcardSign and mobileSign views
 	 * May be one of the following: [tabs|modals]
 	 * Note that id card modal is displayed only if $enableCardSignForm is set to true.
@@ -137,6 +127,21 @@ class XDigiDocWidget extends CWidget
 	 * Note that this is used only if layout is set to 'modals'.
 	 */
 	public $modalButtonsTemplate='{cardSignBtn} {mobileSignBtn}';
+	/**
+	 * @var mixed $cssFile the CSS file used for the widget. Defaults to null, meaning
+	 * using the default CSS file included together with the widget.
+	 * If false, no CSS file will be used. Otherwise, the specified CSS file
+	 * will be included when using this widget.
+	 */
+	public $cssFile;
+	/**
+	 * @var string $pBtnCssClass the css class for primary buttons
+	 */
+	public $buttonCssClass;
+	/**
+	 * @var string $helpLinkCssClass the css class for help link
+	 */
+	public $helpLinkCssClass;
 	/**
 	 * @var array $tabsHtmlOptions the HTML options for CTabView
 	 * Note that this is used only if layout is set to 'tabs'.
@@ -179,6 +184,17 @@ class XDigiDocWidget extends CWidget
 	 */
 	public $testEnvironmentInfo=false;
 	/**
+	 * @var array $helpUrls locations of help resources for id card signing
+	 * Defaults to array(
+	 *     'et'=>'https://www.id.ee/?lang=et&id=36636',
+	 *     'en'=>'https://www.id.ee/?lang=en&id=36639'
+	 * )
+	 */
+	public $helpUrls=array(
+		'et'=>'https://www.id.ee/?lang=et&id=36636',
+		'en'=>'https://www.id.ee/?lang=en&id=36639'
+	);
+	/**
 	 * @var string $mobilePhoneNumber the signer mobile phone number
 	 * This is used only to prefill mobile sign form
 	 */
@@ -219,9 +235,13 @@ class XDigiDocWidget extends CWidget
 		if($this->enableCardSign)
 		{
 			$this->_cardSign=$this->render('cardSignForm', array(
+				'token'=>$this->callbackToken,
 				'enableCardSignFields'=>$this->enableCardSignFields,
 				'buttonCssClass'=>$this->buttonCssClass,
-				'token'=>$this->callbackToken
+				'helpLinkCssClass'=>$this->helpLinkCssClass,
+				'helpUrl'=>isset($this->helpUrls[yii::app()->language]) ?
+					$this->helpUrls[yii::app()->language] :
+					null
 			), true);
 		}
 
@@ -229,8 +249,8 @@ class XDigiDocWidget extends CWidget
 		if($this->enableMobileSign)
 		{
 			$this->_mobileSign=$this->render('mobileSignForm', array(
-				'buttonCssClass'=>$this->buttonCssClass,
 				'token'=>$this->callbackToken,
+				'buttonCssClass'=>$this->buttonCssClass,
 				'idCode'=>$this->signerIdCode,
 				'mobilePhoneNumber'=>$this->signerMobilePhoneNumber
 			), true);
@@ -271,7 +291,7 @@ class XDigiDocWidget extends CWidget
 			ee.sk.hashcode.noCertificatesMessage='".Yii::t('XDigiDocWidget.digidoc', 'Failed reading ID-card certificates! Make sure ID-card reader or ID-card is inserted correctly.')."';
 			ee.sk.hashcode.noImplementationMessage='".Yii::t('XDigiDocWidget.digidoc', 'Please install or update ID-card Utility or install missing browser extension!')."';
 			ee.sk.hashcode.unknownTechnicalErrorMessage='".Yii::t('XDigiDocWidget.digidoc', 'Unknown technical error occurred!')."';
-			ee.sk.hashcode.unknownErrorMessage='".Yii::t('XDigiDocWidget.digidoc', 'Make sure ID-card is inserted correctly! Only then press button.')."';
+			ee.sk.hashcode.unknownErrorMessage='".Yii::t('XDigiDocWidget.digidoc', 'Make sure ID-card is inserted correctly and browser extension installed and enabled! Only then press button.')."';
 		", CClientScript::POS_END);
 	}
 
@@ -316,7 +336,7 @@ class XDigiDocWidget extends CWidget
 					'autoOpen'=>false,
 					'modal'=>true,
 					'width'=>$this->enableCardSignFields ? 600 : 400,
-					'height'=>$this->enableCardSignFields ? 460 : 200,
+					'height'=>$this->enableCardSignFields ? 500 : 240,
 				),
 				$this->cardModalOptions
 			)
