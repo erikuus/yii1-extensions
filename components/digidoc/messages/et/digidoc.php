@@ -23,6 +23,7 @@ return array(
   'Please install or update ID-card Utility or install missing browser extension!' => 'Paigalda oma arvutisse ID-kaardi tarkvara või puuduv veebilehitseja laiendus!',
   'Unknown technical error occurred!' => 'Tehniline viga!',
   'Unknown error occurred that we can not explain!' => 'Tundmatu viga!',
+  'Signing failed! Please try closing and re-opening your browser window. If this error persists, search for help.' => 'Allkirjastmine ebaõnnestus! Sulge veebilehitseja, ava see uuesti ja proovi veelkord. Kui viga kordub, otsi abi.',
   'In order to test digital signing, the certificates of a your ID-card and Mobile-ID should be registered:'=>'Digitaalallkirja testimiseks peate oma ID-kaardi ja mobiil-ID serifikaadid registreerima:',
   'register ID-card'=>'registreeri ID-kaart',
   'register Mobile-ID'=>'registreeri mobiil-ID',

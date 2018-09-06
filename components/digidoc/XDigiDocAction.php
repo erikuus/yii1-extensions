@@ -184,7 +184,10 @@ class XDigiDocAction extends CAction
 			$code=$e->getCode();
 			$message=(!!$code ? $code.': ' : '').$e->getMessage();
 			$this->log($message);
-			$response['error_message']=$message;
+
+			$response['error_message']=$this->_component->debug===false ?
+				Yii::t('XDigiDocAction.digidoc', 'Signing failed! Please try closing and re-opening your browser window. If this error persists, search for help.') :
+				$message;
 		}
 
 		echo json_encode($response);
@@ -344,7 +347,10 @@ class XDigiDocAction extends CAction
 			$code=$e->getCode();
 			$message=((bool)$code ? $code.': ' : '').$e->getMessage();
 			$this->log($message);
-			$response['error_message']=$message;
+
+			$response['error_message']=$this->_component->debug===false ?
+				Yii::t('XDigiDocAction.digidoc', 'Signing failed! Please try closing and re-opening your browser window. If this error persists, search for help.') :
+				$message;
 		}
 
 		echo json_encode($response);

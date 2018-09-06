@@ -164,6 +164,12 @@ class XDigiDoc extends CApplicationComponent
 	 * Note that it is used in {@link XDigiDocAction} only
 	 */
 	public $mobileServiceName;
+	/**
+	 * @var boolean $debug whether to display exception messages to client
+	 * Defaults to false
+	 * Note that it is used in {@link XDigiDocAction} only
+	 */
+	public $debug=false;
 
 	/**
 	 * Initializes the component
