@@ -51,6 +51,7 @@ class XTipsy extends CWidget
 	public $opacity;
 	public $title;
 	public $trigger;
+	public $live;
 
 	private $_baseUrl;
 
@@ -88,11 +89,10 @@ class XTipsy extends CWidget
 			else
 				$tipsyID=$item['id'];
 
-			// OPTION: delayIn
 			if(isset($this->delayIn))
 				$params['delayIn']=$this->delayIn;
 			else
-				$params['delayIn']=50; //DEFAULT
+				$params['delayIn']=50;
 
 			if(isset($item['delayIn']))
 				$params['delayIn']=$item['delayIn'];
@@ -161,10 +161,20 @@ class XTipsy extends CWidget
 			if(isset($this->trigger))
 				$params['trigger']=$this->trigger;
 			else
-				$params['trigger']='hover'; //DEFAULT
+				$params['trigger']='hover';
 
 			if(isset($item['trigger']))
 				$params['trigger']=$item['trigger'];
+
+			// OPTION: live
+			if(isset($this->live))
+				$params['live']=$this->live;
+			else
+				$params['live']=false;
+
+			if(isset($item['live']))
+				$params['live']=$item['live'];
+
 
 			// GENERATE JS CODE
 			if(!empty($tipsyID))
