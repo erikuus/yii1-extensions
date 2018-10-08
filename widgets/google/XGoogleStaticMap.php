@@ -6,7 +6,8 @@
  *
  * Example of usage:
  * <pre>
- * $this->widget('application.components.widgets.WGoogleStaticMap',array(
+ * $this->widget('application.components.widgets.WGoogleStaticMap', array(
+ *     'googleApiKey'=>Yii::app()->params['googleApiKey'],
  *     'center'=>'52.3214,2.34403',
  *     'alt'=>"Map for location of something", // Alt text for image
  *     'zoom'=>0, // Google map zoom level
@@ -29,9 +30,16 @@
  * </pre>
  *
  * @author Alex Muir
+ * @author Erik Uus <erik.uus@gmail.com>
+ * @version 1.0.1
  */
 class XGoogleStaticMap extends CWidget
 {
+	/**
+	 * @var string the google map api key
+	 * Note that Maps Static API must be enabled in Google developer console
+	 */
+	public $googleApiKey;
 	/**
 	 * @var boolean whether the portlet is visible. Defaults to true.
 	 */
@@ -41,39 +49,32 @@ class XGoogleStaticMap extends CWidget
 	 * @var array
 	 */
 	public $imageOptions;
-
 	/**
 	 * Alt text to be displayed for image
 	 * @var string
 	 */
-	public $alt = 'Google Map';
-
+	public $alt;
 	/**
 	 *
 	 * @var string Centre of map Eg. 52.32132,42.3212321, or string.
 	 */
-	public $center = null;
-
+	public $center;
 	/**
 	 * @var int Zoom level (0 is whole world)
 	 */
-	public $zoom = null;
-
+	public $zoom;
 	/**
 	 * @var string Whether this device has a sensor(!?!)
 	 */
-	public $sensor = 'false';
-
+	public $sensor='false';
 	/**
 	 * @var int width of image in pixels (used in img tag too)
 	 */
-	public $width = null;
-
+	public $width;
 	/**
 	 * @var int height of image in pixels
 	 */
-	public $height = null;
-
+	public $height;
 	/**
 	 * Possible attributes for each marker:
 	 * -style
@@ -83,8 +84,7 @@ class XGoogleStaticMap extends CWidget
 	 * - locations (array of text locations)
 	 * @var array holds an array of markers
 	 */
-	public $markers = array();
-
+	public $markers=array();
 	/**
 	 * Possible attributes for each marker:
 	 * -style
@@ -94,14 +94,12 @@ class XGoogleStaticMap extends CWidget
 	 * - locations (array of path locations)
 	 * @var array holds an array of markers
 	 */
-	public $paths = array();
-
+	public $paths=array();
 	/**
 	 * HTML options for link tag
 	 * @var array
 	 */
-	public $linkOptions = array();
-
+	public $linkOptions=array();
 	/**
 	 * Route to link image to
 	 * @var mixed
@@ -114,11 +112,14 @@ class XGoogleStaticMap extends CWidget
 	{
 		if($this->visible)
 		{
+			if(!$this->googleApiKey)
+				throw new CException('"googleApiKey" have to be set!');
+
 			if (is_null($this->center))
-				throw new CHttpException('No center supplied for static Google Map image');
+				throw new CHttpException('"center" have to be set!');
 
 			if (is_null($this->width) || is_null($this->height))
-				throw new CHttpException('No size specified for static Google Map image');
+				throw new CHttpException('"width" and "height" have to be set!');
 		}
 	}
 
@@ -145,7 +146,8 @@ class XGoogleStaticMap extends CWidget
 	public function createImageUrl ()
 	{
 		$url = $this->_baseUrl;
-		$url .= 'center='.urlencode($this->center);
+		$url .= 'key='.$this->googleApiKey;
+		$url .= '&center='.urlencode($this->center);
 		$url .= "&size={$this->width}x{$this->height}";
 
 		$url .= $this->resolveMarkers();
