@@ -272,7 +272,6 @@ class Email extends CApplicationComponent
 				$headers[] = "$value: {$this->processAddresses($this->$key)}";
 		}
 		$headers[] = "Content-Type: {$this->type}; charset=".$this->charSet;
-		$headers[] = "MIME-Version: 1.0";
 		$headers[] = "X-Mailer: PHP/" . phpversion();
 
 		return $headers;
