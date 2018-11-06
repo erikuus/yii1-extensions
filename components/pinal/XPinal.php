@@ -13,15 +13,21 @@
  * 'components'=>array(
  *     'pinal'=> array(
  *         'class'=>'ext.components.pinal.XPinal',
- *         'soapWSDL'=>'https://pinal.hm.ee/_vti_bin/RMService.svc?wsdl',
+ *         'soapWSDL'=>'https://pinal.hm.ee:8080/RMService.svc?wsdl',
  *         'soapOptions'=>array(
  *             'login'=>'some_name',
  *             'password'=>'some_password',
- *             'cache_wsdl'=>WSDL_CACHE_NONE,
- *             'cache_ttl'=>86400,
  *             'trace'=>true,
  *             'exceptions'=>true,
- *         )
+ *             'stream_context' => stream_context_create(array(
+ *                 'ssl' => array(
+ *                     'ciphers'=>'RC4-SHA',
+ *                     'verify_peer'=>false,
+ *                     'verify_peer_name'=>false
+ *                 )
+ *             ))
+ *         ),
+ *         'viewUrl'=>'https://pinal.hm.ee/dhs/Active/_layouts/15/RM/ViewDocument.aspx?ID='
  *     )
  * )
  * </pre>
@@ -242,7 +248,7 @@ class XPinal extends CApplicationComponent
 	}
 
 	/**
-	 * Receive documents
+	 * Add file to document
 	 * @param string $documentId the id of the target document
 	 * @param string $fileName the name of file to be sent
 	 * @param string $mimeType the mime type of file to be sent
