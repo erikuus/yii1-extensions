@@ -18,22 +18,24 @@
  */
 class XVauHelpdesk extends CWidget
 {
-	private $cssClass='vauHelpdesk2';
-
 	/**
 	 * @var boolean whether the portlet is visible. Defaults to true.
 	 */
 	public $visible = true;
-
 	/**
 	 * @var string name of the helpdesk link. If not set, default icon is used.
 	 */
 	public $label;
-
 	/**
 	 * @var string the title attribute of helpdesk link.
 	 */
 	public $title;
+	/**
+	 * @var array additional HTML attributes of helpdesk link.
+	 */
+	public $htmlOptions=array();
+
+	private $_cssClass='vauHelpdesk2';
 
 	/**
 	 * @var string the name of language (et|en) for VAU helpdesk.
@@ -47,19 +49,26 @@ class XVauHelpdesk extends CWidget
 
 		$baseUrl=$this->registerClientScript();
 
-		$text=$this->label ?
-			$this->label :
-			CHtml::image($baseUrl.'/helpdesk.gif',$this->title,array('title'=>$this->title,'style'=>'margin-left: 3px'));
+		if(!$this->label)
+			$this->label=CHtml::image($baseUrl.'/helpdesk.gif');
 
-		$params=array(
+		$urlParams=array(
 			'language'=>$this->lang,
 			'url'=>$this->controller->createAbsoluteUrl('',$_GET),
 			'dialog'=>1
 		);
 
-		$url='http://www.ra.ee/vau/index.php/helpdesk/message/feedback?'.http_build_query($params);
+		$url='http://www.ra.ee/vau/index.php/helpdesk/message/feedback?'.http_build_query($urlParams);
 
-		echo CHtml::link($text,$url,array('class'=>$this->cssClass,'title'=>$this->title));
+		if(!isset($this->htmlOptions['title']))
+			$this->htmlOptions['title']=$this->title;
+
+		if(!isset($this->htmlOptions['class']))
+			$this->htmlOptions['class']=$this->_cssClass;
+		else
+			$this->htmlOptions['class'].=' '.$this->_cssClass;
+
+		echo CHtml::link($this->label, $url, $this->htmlOptions);
 	}
 
 	/**
@@ -69,7 +78,7 @@ class XVauHelpdesk extends CWidget
 	{
 		$script =
 <<<SCRIPT
-	jQuery(".{$this->cssClass}").live("click", function(e){
+	jQuery(".{$this->_cssClass}").live("click", function(e){
 		e.preventDefault();
 		window.open(this.href,"","top=100,left=100,width=800,height=600,resizable=yes,location=no,menubar=no,scrollbars=yes,status=no,toolbar=no,fullscreen=no,dependent=no");
 	});
