@@ -19,53 +19,45 @@
  */
 class XVauBookmark extends CWidget
 {
-	private $_cssClass='vauBookmark';
-	private $_vauUrl='http://www.ra.ee/vau/index.php';
-
 	/**
 	 * @var boolean whether the portlet is visible. Defaults to true.
 	 */
 	public $visible = true;
-
 	/**
 	 * @var boolean whether the 'Add bookmark' link is visible. Defaults to true.
 	 */
 	public $addTag = true;
-
 	/**
 	 * @var boolean whether the 'My bookmarks' link is visible. Defaults to true.
 	 */
 	public $listTag = true;
-
 	/**
 	 * @var string the title attribute of the 'Add bookmark' link.
 	 */
 	public $addTitle;
-
 	/**
 	 * @var string the title attribute of the 'My bookmarks' link.
 	 */
 	public $listTitle;
-
 	/**
 	 * @var string name of the of the 'Add bookmark' link. If not set, icon is used.
 	 */
 	public $addLabel;
-
 	/**
 	 * @var string name of the 'My Bookmarks' link. If not set, icon is used.
 	 */
 	public $listLabel;
-
 	/**
 	 * @var string url for saving as bookmark. If not set, url of the current page is used.
 	 */
 	public $addUrl;
-
 	/**
 	 * @var string the name of language (et|en) for VAU linkbook.
 	 */
 	public $lang;
+
+	private $_cssClass='vauBookmark';
+	private $_vauUrl='http://www.ra.ee/vau/index.php';
 
 	/**
 	 * @var string the name of GET parameter that should be removed from url.

@@ -21,7 +21,7 @@ class XVauHelpdesk extends CWidget
 	/**
 	 * @var boolean whether the portlet is visible. Defaults to true.
 	 */
-	public $visible = true;
+	public $visible=true;
 	/**
 	 * @var string name of the helpdesk link. If not set, default icon is used.
 	 */
@@ -34,13 +34,17 @@ class XVauHelpdesk extends CWidget
 	 * @var array additional HTML attributes of helpdesk link.
 	 */
 	public $htmlOptions=array();
-
-	private $_cssClass='vauHelpdesk2';
-
 	/**
 	 * @var string the name of language (et|en) for VAU helpdesk.
 	 */
 	public $lang;
+	/**
+	 * @var string the dev url (if set used instead _vauUrl)
+	 */
+	public $devUrl;
+
+	private $_cssClass='vauHelpdesk2';
+	private $_vauUrl='http://www.ra.ee/vau/index.php/helpdesk/message/feedback?';
 
 	public function run()
 	{
@@ -58,7 +62,8 @@ class XVauHelpdesk extends CWidget
 			'dialog'=>1
 		);
 
-		$url='http://www.ra.ee/vau/index.php/helpdesk/message/feedback?'.http_build_query($urlParams);
+		$url=$this->devUrl ? $this->devUrl : $this->_vauUrl;
+		$url.=http_build_query($urlParams);
 
 		if(!isset($this->htmlOptions['title']))
 			$this->htmlOptions['title']=$this->title;
