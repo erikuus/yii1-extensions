@@ -80,11 +80,11 @@ class XHtml extends CHtml
 	 * @param string $ellipsis the concatenation characters
 	 * @return string
 	 */
-	public static function truncate($str,$length=50,$ellipsis='...')
+	public static function truncate($str,$length=50,$ellipsis='...', $encoding='utf-8')
 	{
 		if(mb_strlen($str)<$length)
 			return $str;
-		$tmp=mb_substr($str,0,($length-mb_strlen($ellipsis)));
+		$tmp=mb_substr($str,0,($length-mb_strlen($ellipsis)),$encoding);
 		return $tmp.$ellipsis;
 	}
 
