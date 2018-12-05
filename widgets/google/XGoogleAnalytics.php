@@ -31,20 +31,27 @@ class XGoogleAnalytics extends CWidget
 		if(!$this->visible || !$this->tracker)
 			return;
 
-		// prepare code
+		$cs=Yii::app()->clientScript;
+
+		// register js file
+		// <script async src="https://www.googletagmanager.com/gtag/js?id={$this->tracker}"></script>
+		$cs->registerScriptFile(
+			"https://www.googletagmanager.com/gtag/js?id={$this->tracker}",
+			CClientScript::POS_HEAD,
+			array('async'=>'async')
+		);
+
+		// register js code
 		$script =
 <<<SCRIPT
-	<!--Start of GA Script-->
-	var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-	document.write(unescape("%3Cscript src=\'" + gaJsHost + "google-analytics.com/ga.js\' type=\'text/javascript\'%3E%3C/script%3E"));
-	try {
-	var pageTracker = _gat._getTracker("{$this->tracker}");
-	pageTracker._trackPageview();
-	} catch(err) {}
-	<!--End of GA Script-->
+<!--Start of GA Script-->
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '{$this->tracker}');
+<!--End of GA Script-->
 SCRIPT;
 
-		// register code
-		Yii::app()->clientScript->registerScript(__CLASS__, $script, CClientScript::POS_END);
+		Yii::app()->clientScript->registerScript(__CLASS__, $script, CClientScript::POS_HEAD);
 	}
 }
