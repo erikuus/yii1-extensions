@@ -69,6 +69,10 @@ class XTawkMessenger extends CWidget
 	 */
 	public $source;
 	/**
+	 * @var array $visitor the list of user data for tawk API
+	 */
+	public $visitor=array();
+	/**
 	 * @var boolean $visible whether the widget is visible. Defaults to true.
 	 */
 	public $visible=true;
@@ -118,11 +122,15 @@ class XTawkMessenger extends CWidget
 		if($this->exceptDays!==array() && $this->checkDay($this->exceptDays))
 			return;
 
+		// define visitor
+		$tawkApiVisitor=$this->visitor!==array() ? 'Tawk_API.visitor='.CJavaScript::encode($this->visitor).';' : null;
+
 		// prepare widget code
 		$script =
 <<<SCRIPT
 	<!--Start of Tawk.to Script-->
 	var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+	{$tawkApiVisitor}
 	(function(){
 	var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
 	s1.async=true;
