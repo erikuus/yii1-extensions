@@ -291,7 +291,7 @@ class XDigiDocWidget extends CWidget
 			ee.sk.hashcode.noCertificatesMessage='".Yii::t('XDigiDocWidget.digidoc', 'Failed reading ID-card certificates! Make sure ID-card reader or ID-card is inserted correctly.')."';
 			ee.sk.hashcode.noImplementationMessage='".Yii::t('XDigiDocWidget.digidoc', 'Please install or update ID-card Utility or install missing browser extension!')."';
 			ee.sk.hashcode.unknownTechnicalErrorMessage='".Yii::t('XDigiDocWidget.digidoc', 'Unknown technical error occurred!')."';
-			ee.sk.hashcode.unknownErrorMessage='".Yii::t('XDigiDocWidget.digidoc', 'Make sure ID-card is inserted correctly and browser extension installed and enabled! Only then press button.')."';
+			ee.sk.hashcode.unknownErrorMessage='".Yii::t('XDigiDocWidget.digidoc', 'Make sure ID-card is inserted correctly and browser extension installed and enabled!')."';
 		", CClientScript::POS_END);
 	}
 

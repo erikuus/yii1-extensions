@@ -8,6 +8,7 @@ return array(
   'Country' => 'Riik',
   'Postal Code' => 'Postikood',
   'Role' => 'Roll',
+  'Make sure ID-card is inserted correctly and browser extension installed and enabled!' => 'Veendu, et kaardilugeja on ühendatud, ID-kaart on kaardilugejas, veebilehitseja lisamoodul on paigaldatud ja lubatud!',
   'Make sure ID-card is inserted correctly and browser extension installed and enabled! Only then press button.' => 'Kõigepealt veendu, et <ul><li>kaardilugeja on ühendatud,</li><li>ID-kaart on kaardilugejas,</li><li>veebilehitseja lisamoodul on paigaldatud ja lubatud!</li></ul>Alles seejärel vajuta nupule "Allkirjasta". Ole kannatlik, ID-kaardi tarkvara käivitumine sinu arvutis võtab veidi aega.',
   'Phone number must start with country prefix.<br>Example: +37212345678' => 'Telefoninumber peab algama riigi koodiga.<br>Näiteks: +37212345678',
   'Mobile phone number' => 'Telefoninumber',
