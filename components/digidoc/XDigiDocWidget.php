@@ -336,7 +336,7 @@ class XDigiDocWidget extends CWidget
 					'autoOpen'=>false,
 					'modal'=>true,
 					'width'=>$this->enableCardSignFields ? 600 : 400,
-					'height'=>$this->enableCardSignFields ? 500 : 240,
+					'height'=>$this->enableCardSignFields ? 500 : 260,
 				),
 				$this->cardModalOptions
 			)

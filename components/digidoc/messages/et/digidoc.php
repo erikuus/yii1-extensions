@@ -8,7 +8,7 @@ return array(
   'Country' => 'Riik',
   'Postal Code' => 'Postikood',
   'Role' => 'Roll',
-  'Make sure ID-card is inserted correctly and browser extension installed and enabled! Only then press button.' => 'Veendu, et kaardilugeja on ühendatud, ID-kaart on kaardilugejas, veebilehitseja lisamoodul on paigaldatud ja lubatud! Alles seejärel vajuta nupule.',
+  'Make sure ID-card is inserted correctly and browser extension installed and enabled! Only then press button.' => 'Kõigepealt veendu, et <ul><li>kaardilugeja on ühendatud,</li><li>ID-kaart on kaardilugejas,</li><li>veebilehitseja lisamoodul on paigaldatud ja lubatud!</li></ul>Alles seejärel vajuta nupule "Allkirjasta". Ole kannatlik, ID-kaardi tarkvara käivitumine sinu arvutis võtab veidi aega.',
   'Phone number must start with country prefix.<br>Example: +37212345678' => 'Telefoninumber peab algama riigi koodiga.<br>Näiteks: +37212345678',
   'Mobile phone number' => 'Telefoninumber',
   'Social security number' => 'Isikukood',
@@ -27,5 +27,5 @@ return array(
   'In order to test digital signing, the certificates of a your ID-card and Mobile-ID should be registered:'=>'Digitaalallkirja testimiseks peate oma ID-kaardi ja mobiil-ID serifikaadid registreerima:',
   'register ID-card'=>'registreeri ID-kaart',
   'register Mobile-ID'=>'registreeri mobiil-ID',
-  'Help'=>'Abi',
+  'Help'=>'Kui allkirjastamine ebaõnnestub',
 );
