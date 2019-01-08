@@ -24,14 +24,14 @@ class XHumanNameFilterValidator extends CValidator
 	/**
 	 * @var array list of word delimiters ins
 	 */
-	public $delimiters=array("-",".","'","O'","Mc"," ");
+	public $delimiters=array("-","'","O'","Mc"," ");
 
 	/**
 	 * @var array list of conversion exceptions
 	 * In lower case are words you want lowercase.
 	 * In upper case are words you want uppercase.
 	 */
-	public $exceptions=array('bar','ben','bin','da','dal','de la','de','del','der','di','ibn','la','le','san','st','ste','van','van der','van den','vel','von','I', 'II', 'III', 'IV', 'V', 'VI');
+	public $exceptions=array('bar','bin','da','dal','de la','de','del','der','di','ibn','la','le','san','st','ste','van','van der','van den','vel','von','I', 'II', 'III', 'IV', 'V', 'VI');
 
 	/**
 	 * Validates the attribute of the object.
