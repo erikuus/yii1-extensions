@@ -186,13 +186,13 @@ class XDigiDocWidget extends CWidget
 	/**
 	 * @var array $helpUrls locations of help resources for id card signing
 	 * Defaults to array(
-	 *     'et'=>'https://www.id.ee/?lang=et&id=36636',
+	 *     'et'=>'https://www.id.ee/?lang=et&id=35803',
 	 *     'en'=>'https://www.id.ee/?lang=en&id=36639'
 	 * )
 	 */
 	public $helpUrls=array(
-		'et'=>'https://www.id.ee/?lang=et&id=36636',
-		'en'=>'https://www.id.ee/?lang=en&id=36639'
+		'et'=>'https://www.id.ee/?lang=et&id=35803',
+		'en'=>'https://www.id.ee/?lang=en&id=30475'
 	);
 	/**
 	 * @var string $mobilePhoneNumber the signer mobile phone number
