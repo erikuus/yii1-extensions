@@ -36,19 +36,10 @@ class XStepBar extends CWidget
 	 * will be HTML-encoded.</li>
 	 * <li>visible: boolean, optional, whether this step is visible. Defaults to true.</li>
 	 * <li>active: boolean, optional, whether this step is active. Defaults to false.</li>
-	 * <li>template: string, optional, the template used to render this step.
-	 * In this template, the token "{step}" will be replaced with the corresponding text.</li>
 	 * <li>options: array, optional, additional HTML attributes to be rendered for list tag of the step.</li>
 	 * </ul>
 	 */
 	public $steps=array();
-	/**
-	 * @var string the template used to render an individual step. In this template,
-	 * the token "{step}" will be replaced with the corresponding text.
-	 * If this property is not set, each step will be rendered without any decoration.
-	 * This property will be overridden by the 'template' option set in individual steps via {@steps}.
-	 */
-	public $stepTemplate;
 	/**
 	 * @var boolean whether the widget is visible. Defaults to true.
 	 */
@@ -144,15 +135,7 @@ class XStepBar extends CWidget
 					$step['options']['class'].=' '.$this->activeCssClass;
 			}
 
-			$step=CHtml::tag('li',isset($step['options']) ? $step['options'] : array(), $step['label']);
-
-			if(isset($this->stepTemplate) || isset($step['template']))
-			{
-				$template=isset($step['template']) ? $step['template'] : $this->stepTemplate;
-				echo strtr($template,array('{step}'=>$step))."\n";
-			}
-			else
-				echo $step."\n";
+			echo CHtml::tag('li',isset($step['options']) ? $step['options'] : array(), $step['label'])."\n";
 		}
 	}
 
