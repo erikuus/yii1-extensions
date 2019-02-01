@@ -1,0 +1,52 @@
+.stepbar {
+	width: auto;
+	padding: 0;
+}
+.stepbar>ul {
+	counter-reset: step;
+    margin: 0;
+    padding: 0;
+}
+.stepbar>ul li {
+	list-style-type: none;
+	float: left;
+	font-size: 12px;
+	position: relative;
+	text-align: center;
+	text-transform: uppercase;
+	color: #ccc;
+}
+.stepbar>ul li:before {
+	width: 30px;
+	height: 30px;
+	content: counter(step);
+	counter-increment: step;
+	line-height: 30px;
+	border: 3px solid #ccc;
+	display: block;
+	margin: 0 auto 10px auto;
+	border-radius: 50%;
+	background-color: white;
+}
+.stepbar>ul li:after {
+	width: 100%;
+	height: 2px;
+	content: '';
+	position: absolute;
+	background-color: #ccc;
+	top: 15px;
+	left: -50%;
+	z-index: -1;
+}
+.stepbar>ul li:first-child:after {
+	content: none;
+}
+.stepbar>ul li.active {
+	color: #008000;
+}
+.stepbar>ul li.active:before {
+	border-color: #008000;
+}
+.stepbar>ul li.active + li:after {
+	background-color: #008000;
+}
