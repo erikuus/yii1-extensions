@@ -315,6 +315,7 @@ class XDigiDocWidget extends CWidget
 			$cs->registerCssFile($this->cssFile);
 
 		// register js files
+		$cs->registerScriptFile($this->_assets. '/js/npo.js');
 		$cs->registerScriptFile($this->_assets. '/js/hwcrypto.js');
 		$cs->registerScriptFile($this->_assets. '/js/hashcode.js');
 	}
