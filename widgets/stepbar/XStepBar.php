@@ -75,9 +75,9 @@ class XStepBar extends CWidget
 	{
 		if($this->visible)
 		{
-			$this->registerClientScript();
-			$this->htmlOptions['id']=$this->getId();
 			$this->steps=$this->normalizeSteps($this->steps);
+			$this->htmlOptions['id']=$this->getId();
+			$this->registerClientScript();
 		}
 	}
 
