@@ -350,7 +350,8 @@ class XErply extends CApplicationComponent
 	public function getProduct($code)
 	{
 		$result=$this->sendRequest('getProducts',array(
-			'code'=>$code
+			'code'=>$code,
+			'status'=>'ACTIVE'
 		));
 
 		if(isset($result['records'][0]))
