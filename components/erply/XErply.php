@@ -387,22 +387,16 @@ class XErply extends CApplicationComponent
 	 * @param string $paymentInfo the sales document payment info
 	 * @return integer payment id
 	 */
-	public function savePayment($documentID, $paymentSum, $paymentType=3, $paymentInfo=null)
+	public function savePayment($documentID, $paymentSum, $paymentType=null, $paymentInfo=null)
 	{
 		if(!$this->paymentIdBankLink)
-			throw new CException('"paymentIdBankLink" has to be set!');
+			throw new CException('Component parameter "paymentIdBankLink" has to be set!');
 
 		if(!$this->paymentIdCreditCard)
-			throw new CException('"paymentIdCreditCard" has to be set!');
+			throw new CException('Component parameter "paymentIdCreditCard" has to be set!');
 
-		$result=$this->sendRequest('saveSalesDocument',array(
-			'id'=>$documentID,
-			'paymentStatus'=>'PAID',
-			'paymentInfo'=>$paymentInfo
-		));
-
-		if(!isset($result['records'][0]))
-			return null;
+		if(!$paymentType)
+			throw new CException('Function parameter "paymentType" has to be set!');
 
 		if($paymentType=='BANKLINK')
 			$typeID=$this->paymentIdBankLink;
@@ -414,7 +408,8 @@ class XErply extends CApplicationComponent
 		$result=$this->sendRequest('savePayment',array(
 			'typeID'=>$typeID,
 			'documentID'=>$documentID,
-			'sum'=>$paymentSum
+			'sum'=>$paymentSum,
+			'info'=>$paymentInfo
 		));
 
 		if(isset($result['records'][0]))
