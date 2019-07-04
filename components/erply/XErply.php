@@ -403,7 +403,7 @@ class XErply extends CApplicationComponent
 		elseif($paymentType=='CREDITCARD')
 			$typeID=$this->paymentIdCreditCard;
 		else
-			$typeID=3;
+			throw new CException('Unknown "paymentType": '.$paymentType);
 
 		$result=$this->sendRequest('savePayment',array(
 			'typeID'=>$typeID,
