@@ -93,9 +93,13 @@ class XTrackUserBehavior extends CActiveRecordBehavior
 	 */
 	public $firstname='firstname';
 	/**
-	 * @var the format string for current time date() function. Defaults to null, meaning the time() function is used instead.
+	 * @var string the format for current date() function. Defaults to null, meaning the time() function is used instead.
 	 */
 	public $dateFormat=null;
+	/**
+	 * @var boolean whether to set update_time and update_user_id on create scenario. Defaults to false.
+	 */
+	public $updateOnCreate=false;
 
 	/**
 	 * @return string fullname of user who created this record
@@ -116,6 +120,52 @@ class XTrackUserBehavior extends CActiveRecordBehavior
 	}
 
 	/**
+	 * @param string $format the date format
+	 * @return string create date or time
+	 */
+	protected function getCreateTime($format)
+	{
+		$owner=$this->getOwner();
+		if($this->dateFormat)
+			return date_format(date_create($owner->getAttribute($this->create_time)),$format);
+		else
+			return date($format, $owner->getAttribute($this->create_time));
+	}
+
+	/**
+	 * @param string $format the date format
+	 * @return string update date or time
+	 */
+	protected function getUpdateTime($format)
+	{
+		$owner=$this->getOwner();
+		if($this->dateFormat)
+			return date_format(date_create($owner->getAttribute($this->update_time)),$format);
+		else
+			return date($format, $owner->getAttribute($this->update_time));
+	}
+
+	/**
+	 * @param string $dateFormat the date format, defaults to 'd.m.Y'
+	 * @return string fullname of user who created this record and date created
+	 */
+	public function getCreateDetail($dateFormat='d.m.Y')
+	{
+		$owner=$this->getOwner();
+		return $this->createUserFullname ? $this->createUserFullname.' '.$this->getCreateTime($dateFormat) : null;
+	}
+
+	/**
+	 * @param string $dateFormat the date format, defaults to 'd.m.Y'
+	 * @return string fullname of user who updated this record and date modified
+	 */
+	public function getUpdateDetail($dateFormat='d.m.Y')
+	{
+		$owner=$this->getOwner();
+		return $this->updateUserFullname ? $this->updateUserFullname.' '.$this->getUpdateTime($dateFormat) : null;
+	}
+
+	/**
 	 * This is invoked before the record is saved.
 	 */
 	public function beforeSave($event)
@@ -125,15 +175,16 @@ class XTrackUserBehavior extends CActiveRecordBehavior
 		{
 			$owner->setAttribute($this->create_time,$this->getCurrentTime());
 			$owner->setAttribute($this->create_user_id,Yii::app()->user->id);
+
+			if($this->updateOnCreate)
+			{
+				$owner->setAttribute($this->update_time,$currentTime);
+				$owner->setAttribute($this->update_user_id,Yii::app()->user->id);
+			}
 		}
 		else
 		{
 			$currentTime=$this->getCurrentTime();
-			if(!$owner->getAttribute($this->create_user_id))
-			{
-				$owner->setAttribute($this->create_time,$currentTime);
-				$owner->setAttribute($this->create_user_id,Yii::app()->user->id);
-			}
 			$owner->setAttribute($this->update_time,$currentTime);
 			$owner->setAttribute($this->update_user_id,Yii::app()->user->id);
 		}
