@@ -311,6 +311,7 @@ SCRIPT;
 		var content=$('.{$this->contentCssClass}', $(this).parents('div:first'));
 		content.css('display', this.checked ? (content.hasClass('{$this->contentInlineCssClass}') ? 'inline':'block'):'none');
 		$('#{$this->id} .{$this->containerCssClass} :radio:not(:checked)').siblings('.{$this->contentCssClass}').hide();
+		$('#{$this->id} .{$this->containerCssClass} :checkbox:not(:checked)').siblings('.{$this->contentCssClass}').hide();
 	});
 SCRIPT;
 		Yii::app()->clientScript->registerScript(__CLASS__.'#radio#'.$this->id, $script, CClientScript::POS_READY);
