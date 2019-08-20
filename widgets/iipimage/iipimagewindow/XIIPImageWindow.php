@@ -44,13 +44,17 @@ class XIIPImageWindow extends CWidget
 {
 	/**
 	 * @var array of image filenames. The array elements must use zero-based integer keys.
-	 * Example: array([0]=>array('id'=>1,'filename'=>'/path/to/image.tif'));
+	 * Example: array(
+	 *   [0]=>array('id'=>1, 'filename'=>'/path/to/image.tif')
+	 * );
 	 */
 	public $imageData=array();
 
 	/**
 	 * @var array of widget configuration.
-	 * Example: array('class'=>'ext.widgets.iipimage.iipmooviewer.XIIPMooViewer')
+	 * Example: array(
+	 *   'class'=>'ext.widgets.iipimage.iipmooviewer.XIIPMooViewer'
+	 * )
 	 */
 	public $widgetConfig=array();
 
@@ -58,13 +62,62 @@ class XIIPImageWindow extends CWidget
 	 * @var array the configuration for the pager.
 	 * Defaults to <code>array('cssFile'=>false)</code>.
 	 */
-	public $pager=array('cssFile'=>false);
+	public $pager=array(
+		'cssFile'=>false
+	);
 
 	/**
 	 * @var string the CSS class name for the pager container.
 	 * Defaults to 'iip-image-window-pager'.
 	 */
 	public $pagerCssClass='iip-image-window-pager';
+
+	/**
+	 * @var boolean whether to enable download link.
+	 * Defaults to false.
+	 */
+	public $enableDownloadLink=false;
+
+	/**
+	 * @var boolean whether to enable download link.
+	 * Defaults to ''.
+	 */
+	public $downloadLinkLabel='Download';
+
+	/**
+	 * @var array the html attributes for download link
+	 * Defaults to
+	 * <code>
+	 * array(
+	 *   'download'=>''
+	 * )
+	 * </code>
+	 */
+	public $downloadLinkOptions=array(
+		'download'=>''
+	);
+
+	/**
+	 * @var array the list of parameters for IIP image download link
+	 * @link https://iipimage.sourceforge.io/documentation/protocol/
+	 * Defaults to
+	 * <code>
+	 * array(
+	 *   'server'=>'/fcgi-bin/iipsrv.fcgi',
+	 *   'wid'=>5000,
+	 *   'hei'=>5000,
+	 *   'qlt'=>100,
+	 *   'cvt'=>'jpeg'
+	 * )
+	 * </code>
+	 */
+	public $downloadParams=array(
+		'server'=>'/fcgi-bin/iipsrv.fcgi',
+		'wid'=>5000,
+		'hei'=>5000,
+		'qlt'=>100,
+		'cvt'=>'jpeg'
+	);
 
 	/**
 	 * @var string the CSS class name for the widget container
@@ -93,6 +146,21 @@ class XIIPImageWindow extends CWidget
 
 		if(!isset($this->widgetConfig['config']))
 			throw new CException('The "config" value of "widgetConfig" array have to be set.');
+
+		if(!isset($this->downloadParams['server']))
+			throw new CException('The "downloadParams" array must have "server" key.');
+
+		if(!isset($this->downloadParams['wid']))
+			throw new CException('The "downloadParams" array must have "wid" key.');
+
+		if(!isset($this->downloadParams['hei']))
+			throw new CException('The "downloadParams" array must have "hei" key.');
+
+		if(!isset($this->downloadParams['qlt']))
+			throw new CException('The "downloadParams" array must have "qlt" key.');
+
+		if(!isset($this->downloadParams['cvt']))
+			throw new CException('The "downloadParams" array must have "cvt" key.');
 	}
 
 	/**
@@ -137,8 +205,11 @@ class XIIPImageWindow extends CWidget
 		// When using CArrayDataProvider, you cannot load the pagination
 		// properly before the data is loaded via ->getData().
 		$dataProvider=$this->dataProvider;
-		$dataProvider->getData();
+		$data=$dataProvider->getData();
 		$pager['pages']=$dataProvider->getPagination();
+
+		if($this->enableDownloadLink)
+			$pager['footer']=CHtml::link($this->downloadLinkLabel, $this->getIIPImageSource($data['0']['filename']), $this->downloadLinkOptions);
 
 		echo '<div class="'.$this->pagerCssClass.'">';
 			$this->widget($class,$pager);
@@ -181,5 +252,20 @@ class XIIPImageWindow extends CWidget
 	protected function arrayWalkEvaluateExpression(&$value, $key, $data)
 	{
 	    $value=$this->evaluateExpression($value, $data);
+	}
+
+	/**
+	 * Get IIPImage source for html image
+	 * @param string current filename
+	 * @return string image source
+	 */
+	public function getIIPImageSource($filename)
+	{
+		return $this->downloadParams['server'].
+			'?FIF='.$filename.
+			'&wid='.$this->downloadParams['wid'].
+			'&hei='.$this->downloadParams['hei'].
+			'&qlt='.$this->downloadParams['qlt'].
+			'&cvt='.$this->downloadParams['cvt'];
 	}
 }
