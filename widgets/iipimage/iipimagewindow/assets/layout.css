@@ -28,6 +28,12 @@ body {
 	padding: 0;
 }
 
+.iip-image-window-pager a.download {
+	text-decoration:none;
+	color:#0e509e;
+	float:0 6px;
+}
+
 .lt-ie7 .iip-image-window-viewer-multiple {
 	height: 100%;
 	min-height: 100%;

@@ -95,7 +95,7 @@ class XIIPImageWindow extends CWidget
 	 */
 	public $downloadLinkOptions=array(
 		'download'=>'',
-		'style'=>'float:right'
+		'class'=>'download'
 	);
 
 	/**
@@ -133,6 +133,8 @@ class XIIPImageWindow extends CWidget
 	 * Defaults to '.iip-image-window-viewer-single'.
 	 */
 	public $viewerSingleCssClass='iip-image-window-viewer-single';
+
+	private $_countImageData;
 
 	/**
 	 * Initialize the widget.
@@ -182,12 +184,22 @@ class XIIPImageWindow extends CWidget
 		// get data ready
 		$dataProvider=$this->dataProvider;
 		$data=$dataProvider->getData();
+		$this->_countImageData=count($this->imageData);
 
 		// render
-		if($this->enableDownloadLink)
-			echo CHtml::link($this->downloadLinkLabel, $this->getIIPImageSource($data['0']['filename']), $this->downloadLinkOptions);
+		if($this->_countImageData>1 || $this->enableDownloadLink)
+		{
+			echo '<div class="'.$this->pagerCssClass.'">';
 
-		$this->renderPager($dataProvider, $data);
+			if($this->_countImageData>1)
+				$this->renderPager($dataProvider, $data);
+
+			if($this->enableDownloadLink)
+				echo CHtml::link($this->downloadLinkLabel, $this->getIIPImageSource($data['0']['filename']), $this->downloadLinkOptions);
+
+			echo '</div>';
+		}
+
 		$this->renderViewer($data);
 	}
 
@@ -198,9 +210,6 @@ class XIIPImageWindow extends CWidget
 	 */
 	protected function renderPager($dataProvider, $data)
 	{
-		if(count($this->imageData)<2)
-			return;
-
 		$pager=array();
 		$class='CLinkPager';
 		if(is_string($this->pager))
@@ -216,10 +225,7 @@ class XIIPImageWindow extends CWidget
 		}
 
 		$pager['pages']=$dataProvider->getPagination();
-
-		echo '<div class="'.$this->pagerCssClass.'">';
-			$this->widget($class,$pager);
-		echo '</div>';
+		$this->widget($class,$pager);
 	}
 
 	/**
@@ -229,7 +235,7 @@ class XIIPImageWindow extends CWidget
 	public function renderViewer($data)
 	{
 		$this->widgetConfig['config']['htmlOptions']['class']=
-			count($this->imageData)>1 ? $this->viewerMultipleCssClass : $this->viewerSingleCssClass;
+			$this->_countImageData>1 || $this->enableDownloadLink ? $this->viewerMultipleCssClass : $this->viewerSingleCssClass;
 
 		array_walk($this->widgetConfig['config']['options'], array($this, 'arrayWalkEvaluateExpression'), $data[0]);
 
