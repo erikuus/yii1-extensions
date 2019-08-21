@@ -178,7 +178,7 @@ class XIIPImageWindow extends CWidget
 
 		// register css
 		$cs=Yii::app()->clientScript;
-		$cs->registerCssFile($baseUrl.'/layout.css');
+		$cs->registerCssFile($baseUrl.'/main.css');
 		$cs->registerCssFile($baseUrl.'/pager.css');
 
 		// get data ready

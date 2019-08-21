@@ -31,7 +31,7 @@ body {
 .iip-image-window-pager a.download {
 	text-decoration:none;
 	color:#0e509e;
-	float:0 6px;
+	padding:1px 6px;
 }
 
 .lt-ie7 .iip-image-window-viewer-multiple {
