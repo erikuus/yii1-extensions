@@ -94,7 +94,8 @@ class XIIPImageWindow extends CWidget
 	 * </code>
 	 */
 	public $downloadLinkOptions=array(
-		'download'=>''
+		'download'=>'',
+		'style'=>'float:right'
 	);
 
 	/**
@@ -169,21 +170,33 @@ class XIIPImageWindow extends CWidget
 	 */
 	public function run()
 	{
+		// publish assets
 		$assets = dirname(__FILE__).'/assets';
 		$baseUrl = Yii::app()->assetManager->publish($assets);
 
+		// register css
 		$cs=Yii::app()->clientScript;
 		$cs->registerCssFile($baseUrl.'/layout.css');
 		$cs->registerCssFile($baseUrl.'/pager.css');
 
-		$this->renderPager();
-		$this->renderViewer();
+		// get data ready
+		$dataProvider=$this->dataProvider;
+		$data=$dataProvider->getData();
+
+		// render
+		if($this->enableDownloadLink)
+			echo CHtml::link($this->downloadLinkLabel, $this->getIIPImageSource($data['0']['filename']), $this->downloadLinkOptions);
+
+		$this->renderPager($dataProvider, $data);
+		$this->renderViewer($data);
 	}
 
 	/**
 	 * Renders the pager.
+	 * @param CArrayDataProvider $dataprovider the image dataprovider
+	 * @param array $data the current image dat
 	 */
-	protected function renderPager()
+	protected function renderPager($dataProvider, $data)
 	{
 		if(count($this->imageData)<2)
 			return;
@@ -202,14 +215,7 @@ class XIIPImageWindow extends CWidget
 			}
 		}
 
-		// When using CArrayDataProvider, you cannot load the pagination
-		// properly before the data is loaded via ->getData().
-		$dataProvider=$this->dataProvider;
-		$data=$dataProvider->getData();
 		$pager['pages']=$dataProvider->getPagination();
-
-		if($this->enableDownloadLink)
-			$pager['footer']=CHtml::link($this->downloadLinkLabel, $this->getIIPImageSource($data['0']['filename']), $this->downloadLinkOptions);
 
 		echo '<div class="'.$this->pagerCssClass.'">';
 			$this->widget($class,$pager);
@@ -218,13 +224,12 @@ class XIIPImageWindow extends CWidget
 
 	/**
 	 * Renders widget
+	 * @param array $data the current image data
 	 */
-	public function renderViewer()
+	public function renderViewer($data)
 	{
 		$this->widgetConfig['config']['htmlOptions']['class']=
 			count($this->imageData)>1 ? $this->viewerMultipleCssClass : $this->viewerSingleCssClass;
-
-		$data=$this->dataProvider->getData();
 
 		array_walk($this->widgetConfig['config']['options'], array($this, 'arrayWalkEvaluateExpression'), $data[0]);
 
