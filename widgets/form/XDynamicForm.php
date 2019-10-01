@@ -122,6 +122,8 @@ class XDynamicForm extends CActiveForm
 	 */
 	public function init()
 	{
+		Yii::app()->clientScript->registerCoreScript('jquery');
+		
 		if($this->enableRadioToggle)
 			$this->registerRadioClientScript();
 
