@@ -114,8 +114,8 @@ class XIIPImageWindow extends CWidget
 	 */
 	public $downloadParams=array(
 		'server'=>'/fcgi-bin/iipsrv.fcgi',
-		'wid'=>5000,
-		'hei'=>5000,
+		'wid'=>4000,
+		'hei'=>4000,
 		'qlt'=>100,
 		'cvt'=>'jpeg'
 	);
