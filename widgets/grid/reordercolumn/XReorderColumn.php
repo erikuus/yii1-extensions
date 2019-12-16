@@ -51,6 +51,10 @@ class XReorderColumn extends CGridColumn
 	 * Defaults to array('class'=>'button-column')
 	 */
 	public $htmlOptions=array('class'=>'button-column');
+	/**
+	 * @var mixed boolean or PHP expression that is evaluated for every data cell whether the reorder links are visible. Defaults to true.
+	 */
+	public $reorderVisible=true;
 
 	private $_upIcon;
 	private $_downIcon;
@@ -59,10 +63,15 @@ class XReorderColumn extends CGridColumn
 	 * Init column
 	 * Publish necessary client script.
 	 */
-	public function init() {
+	public function init()
+	{
 		parent::init();
-		$this->publishReorderColumnAssets();
-		$this->registerReorderColumnClientScript();
+
+		if($this->visible)
+		{
+			$this->publishReorderColumnAssets();
+			$this->registerReorderColumnClientScript();
+		}
 	}
 
 	/**
@@ -101,8 +110,11 @@ SCRIPT;
 	 */
 	protected function renderDataCellContent($row, $data)
 	{
-		$this->renderReorderLink($data->primaryKey, 'up', $this->_upIcon);
-		$this->renderReorderLink($data->primaryKey, 'down', $this->_downIcon);
+		if ($this->reorderVisible===true || $this->evaluateExpression($this->reorderVisible, array('row'=>$row,'data'=>$data)))
+		{
+			$this->renderReorderLink($data->primaryKey, 'up', $this->_upIcon);
+			$this->renderReorderLink($data->primaryKey, 'down', $this->_downIcon);
+		}
 	}
 
 	/**
