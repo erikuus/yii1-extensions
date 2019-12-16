@@ -7,9 +7,25 @@
  * 'components'=>array(
  *     'email'=>array(
  *         'class'=>'application.extensions.email.Email',
- *         'delivery'=>'php', //Will use the php mailing function.
- *         // May also be set to 'debug' to instead dump the contents of the email into the view
- *     ),
+ *         'delivery'=>'php'
+ *     )
+ * )
+ *
+ * or as follows:
+ *
+ * 'components'=>array(
+ *     'email'=>array(
+ *         'class'=>'ext.components.email.Email',
+ *         'delivery'=>'phpmailer',
+ *         'phpmailerOptions'=>array(
+ *             'Host'=>'mail.server.com',
+ *             'SMTPAuth'=>true,
+ *             'Port'=>2525,
+ *             'Username'=>'xxx',
+ *             'Password'=>'yyy',
+ *         )
+ *     )
+ * )
  *
  * You need to put the debug widget somewhere in the view or layout, if you wish to use debug mode
  *
@@ -51,11 +67,24 @@
  * @version 1.0
  *
  * @author Erik Uus <erik.uus@gmail.com>
- * @version 1.1
+ * @version 1.2
  */
-class Email extends CApplicationComponent {
+class Email extends CApplicationComponent
+{
 	/**
-	 * @var string Type of email.  Options include "text/html" and "text/plain".
+	 * @var string the delivery type
+	 * If set to 'php' it will use php's mail() function.
+	 * If set to 'phpmailer' it will use PHPMailer class.
+	 * If set to 'debug' it will not actually send it but output it to the screen.
+	 * If set to 'dummy' it will do nothing.
+	 */
+	public $delivery = 'php';
+	/**
+	 * @var array options for phpmailer class
+	 */
+	public $phpmailerOptions = array();
+	/**
+	 * @var string content type of email.  Options include "text/html" and "text/plain".
 	 */
 	public $type = 'text/html';
 	/**
@@ -71,6 +100,10 @@ class Email extends CApplicationComponent {
 	 */
 	public $from;
 	/**
+	 * @var string the sender name
+	 */
+	public $fromName;
+	/**
 	 * @var string the reply-to address
 	 */
 	public $replyTo;
@@ -78,7 +111,6 @@ class Email extends CApplicationComponent {
 	 * @var string the return-path address
 	 */
 	public $returnPath;
-
 	/**
 	 * @var string MTA command line parameter. It is useful when setting the correct Return-Path header when using sendmail.
 	 */
@@ -98,20 +130,13 @@ class Email extends CApplicationComponent {
 	 */
 	public $message;
 	/**
-	 * @var string the delivery type
-	 * If set to 'php' it will use php's mail() function.
-	 * If set to 'debug' it will not actually send it but output it to the screen.
-	 * If set to 'dummy' it will do nothing.
-	 */
-	public $delivery = 'php';
-	/**
 	 * @var string the language to encode the message in (eg "Japanese", "ja", "English", "en" and "uni" (UTF-8))
 	 */
 	public $language = 'uni';
 	/**
 	 * @var string the content-type of the email
 	 */
-	public $contentType = 'utf-8';
+	public $charSet = 'utf-8';
 	/**
 	 * @var string the path to the email view directory. Defaults to 'application.views.email'.
 	 */
@@ -135,7 +160,6 @@ class Email extends CApplicationComponent {
 	 * application.views.email.layouts directory.  Not required even if you are using a view
 	 */
 	public $layout;
-
 	/**
 	 * @var integer line length of email as per RFC2822 Section 2.1.1
 	 */
@@ -184,6 +208,34 @@ class Email extends CApplicationComponent {
 	{
 		switch ($this->delivery)
 		{
+			case 'phpmailer':
+				require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'class.phpmailer.php';
+				$phpmailer = new PHPMailer();
+				$phpmailer->IsSMTP();
+				// options
+				$phpmailer->Host = $this->phpmailerOptions['Host'];
+				$phpmailer->SMTPAuth = $this->phpmailerOptions['SMTPAuth'];
+				$phpmailer->Port = $this->phpmailerOptions['Port'];
+				$phpmailer->Username = $this->phpmailerOptions['Username'];
+				$phpmailer->Password = $this->phpmailerOptions['Password'];
+				$phpmailer->AltBody = 'To view the message, please use an HTML compatible email viewer!';
+				// headers
+				$phpmailer->ContentType = $this->type;
+				$phpmailer->CharSet = $this->charSet;
+				$phpmailer->WordWrap =  $this->lineLength;
+				// addresses
+				$phpmailer->FromName = $this->fromName;
+				$phpmailer->From = $this->from;
+				$phpmailer->Sender =  $this->returnPath;
+				$phpmailer->AddReplyTo($this->from);
+				$phpmailer->AddAddress($to, "");
+				// contents
+				$phpmailer->Subject = $subject;
+				$phpmailer->Body = $message;
+				if($this->type == 'text/html')
+					$phpmailer->IsHTML(true);
+				return $phpmailer->Send();
+				break;
 			case 'php':
 				$message = wordwrap($message, $this->lineLength);
 				mb_language($this->language);
@@ -219,8 +271,8 @@ class Email extends CApplicationComponent {
 			if (isset($this->$key))
 				$headers[] = "$value: {$this->processAddresses($this->$key)}";
 		}
-		$headers[] = "Content-Type: {$this->type}; charset=".$this->contentType;
-		// $headers[] = "MIME-Version: 1.0";
+		$headers[] = "Content-Type: {$this->type}; charset=".$this->charSet;
+		$headers[] = "MIME-Version: 1.0";
 		$headers[] = "X-Mailer: PHP/" . phpversion();
 
 		return $headers;
