@@ -44,12 +44,12 @@
  *     'items'=>array(
  *         array(
  *             'label'=>Yii::t('ui', 'Login'),
- *             'url'=>'http://www.ra.ee/vau/index.php/site/login?v=2&s=user&remoteUrl='.$this->controller->createAbsoluteUrl('/site/vauLogin'),
+ *             'url'=>'http://www.ra.ee/vau/index.php/site/login?v=2&s=user&remoteUrl='.$this->createAbsoluteUrl('/site/vauLogin'),
  *             'visible'=>Yii::app()->user->isGuest
  *         )
  *         array(
  *             'label'=>Yii::t('ui', 'Logout'),
- *             'url'=>'http://www.ra.ee/vau/index.php/site/logout?remoteUrl='.$this->controller->createAbsoluteUrl('/site/logout'),
+ *             'url'=>'http://www.ra.ee/vau/index.php/site/logout?remoteUrl='.$this->createAbsoluteUrl('/site/logout'),
  *             'visible'=>!Yii::app()->user->isGuest
  *         ),
  * ));
