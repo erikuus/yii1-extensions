@@ -3,25 +3,26 @@
 /**
  * XVauRedirectLoginAction class file.
  *
- * XVauRedirectLoginAction redirects to VAU login page.
+ * XVauRedirectLoginAction provides simple redirect action that can be used to implement authentication
+ * based on VauID 2.0 protocol
  *
- * When user requests action that requires authentication, framework by default redirects user
- * to 'site/login' action. In case of VAU login we need that this login action redirects user
- * into VAU login page.
+ * When user requests action that requires authentication, Yii framework by default redirects user
+ * to 'site/login' action. In case of VAU login we need that this login action redirects user into
+ * VAU login page.
  *
- * For usage set up 'login' action inside actions() method of SiteController:
+ * For example set up 'login' action inside actions() method of SiteController as follows:
  * <pre>
  * public function actions()
  * {
  *     return array(
  *         'login'=>array(
- *             'class'=>'ext.components.vau.XVauRedirectLoginAction',
+ *             'class'=>'ext.components.vauid.XVauRedirectLoginAction'
  *         ),
  *     );
  * }
  * </pre>
  *
- * @link http://www.ra.ee/apps/remotelogin/
+ * @link http://www.ra.ee/apps/vauid/
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 1.0
  */
