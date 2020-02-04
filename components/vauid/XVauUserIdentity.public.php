@@ -112,7 +112,7 @@ class XVauUserIdentity extends CBaseUserIdentity
 	const ERROR_INVALID_DATA=1;
 	const ERROR_EXPIRED_DATA=2;
 	const ERROR_SYNC_DATA=3;
-	const ERROR_ACCESS_DENIED=4;
+	const ERROR_UNAUTHORIZED=4;
 
 	/**
 	 * @var string encrypted JSON posted back by VAU after successful login.
@@ -147,7 +147,7 @@ class XVauUserIdentity extends CBaseUserIdentity
 	/**
 	 * @var string the encryption key for VAU remote login
 	 */
-	private $_key='##########';
+	private $_key='###';
 
 	/**
 	 * Constructor
@@ -186,21 +186,23 @@ class XVauUserIdentity extends CBaseUserIdentity
 	 * <ul>
 	 *     <li>accessRules</li>
 	 *     <ul>
-	 *         <li>safelogin: whether authentication is allowed only if user logged into
+	 *         <li>safelogin: whether access is allowed only if user logged into
 	 *         VAU using ID-card or Mobile-ID.</li>
-	 *         <li>safehost: whether authentication is allowed only if user logged into
+	 *         <li>safehost: whether access is allowed only if user logged into
 	 *         VAU from host that is recognized as safe in VauID 2.0 protocol.</li>
-	 *         <li>safe: whether authentication is allowed only if at least one of the above conditions
+	 *         <li>safe: whether access is allowed only if at least one of the above conditions
 	 *         are met, i.e. user logged into VAU using ID-card or Mobile-ID or from the safe host.</li>
-	 *         <li>employee: whether authentication is allowed only if VAU user type is employee.</li>
-	 *         <li>roles: the list of VAU role names; authentication is allowed only if user has at
+	 *         <li>employee: whether access is allowed only if VAU user type is employee.</li>
+	 *         <li>roles: the list of VAU role names; access is allowed only if user has at
 	 *         least one role in VAU that is present in this list.</li>
 	 *     </ul>
 	 *     <li>dataMapping</li>
 	 *     <ul>
 	 *         <li>model: the name of the model that stores user data in the application.</li>
 	 *         <li>scenario: the name of the scenario that is used to save VAU user data.</li>
-	 *         <li>id: the name of the column that stores VAU user id in the application model.</li>
+	 *         <li>id: the name of the model attribute that stores VAU user id in the application.</li>
+	 *         <li>name: the name of the model attribute that stores user name in the application.
+	 *         In user session a value of this attribute will be assigned to Yii::app()->user->name.</li>
 	 *         <li>create: whether new user should be created in application based on VAU user data
 	 *         if there is no user with given VAU user id.</li>
 	 *         <li>update: whether user data in application database should be overwritten with
@@ -225,6 +227,7 @@ class XVauUserIdentity extends CBaseUserIdentity
 	 *         'model'=>'User',
 	 *         'scenario'=>'vauid',
 	 *         'id'=>'vau_id',
+	 *         'name'=>'username',
 	 *         'create'=>false,
 	 *         'update'=>false,
 	 *         'attributes'=>array(
@@ -258,12 +261,13 @@ class XVauUserIdentity extends CBaseUserIdentity
 					if($this->getValue($options, 'dataMapping'))
 					{
 						// set variables for convenience
-						$modelName=$this->getValue($options, 'dataMapping.modelName');
+						$modelName=$this->getValue($options, 'dataMapping.model');
 						$scenario=$this->getValue($options, 'dataMapping.scenario');
-						$vauIdAttribute=$this->getValue($options, 'dataMapping.vauid');
-						$enableCreate=$this->getValue($options, 'dataMapping.enableCreate');
-						$enableUpdate=$this->getValue($options, 'dataMapping.enableUpdate');
-						$syncAttributes=$this->getValue($options, 'dataMapping.syncAttributes');
+						$vauIdAttribute=$this->getValue($options, 'dataMapping.id');
+						$userNameAttribute=$this->getValue($options, 'dataMapping.name');
+						$enableCreate=$this->getValue($options, 'dataMapping.create');
+						$enableUpdate=$this->getValue($options, 'dataMapping.update');
+						$syncAttributes=$this->getValue($options, 'dataMapping.attributes');
 
 						// check required
 						if(!$modelName || !$vauIdAttribute)
@@ -285,7 +289,7 @@ class XVauUserIdentity extends CBaseUserIdentity
 								$user->{$vauIdAttribute}=$vauUserData['id'];
 							}
 							else
-								$this->errorCode=self::ERROR_ACCESS_DENIED;
+								$this->errorCode=self::ERROR_UNAUTHORIZED;
 						}
 
 						// sync user data
@@ -300,7 +304,9 @@ class XVauUserIdentity extends CBaseUserIdentity
 							{
 								// assign identity attributes
 								$this->id=$user->id;
-								$this->name=$vauUserData['fullname'];
+								$this->name=$userNameAttribute ?
+								 	$user->{$userNameAttribute} :
+									$vauUserData['fullname'];
 								$this->errorCode=self::ERROR_NONE;
 							}
 							else
@@ -323,7 +329,7 @@ class XVauUserIdentity extends CBaseUserIdentity
 					}
 				}
 				else
-					$this->errorCode=self::ERROR_ACCESS_DENIED;
+					$this->errorCode=self::ERROR_UNAUTHORIZED;
 			}
 			else
 				$this->errorCode=self::ERROR_EXPIRED_DATA;

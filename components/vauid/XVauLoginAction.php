@@ -101,8 +101,8 @@ class XVauLoginAction extends CAction
 				Yii::app()->user->login($identity);
 				$this->controller->redirect($this->redirectUrl ? $this->redirectUrl : Yii::app()->user->returnUrl);
 			}
-			elseif($identity->errorCode==XVauUserIdentity::ERROR_ACCESS_DENIED)
-				throw new CHttpException(403, 'You are not allowed to access this page.');
+			elseif($identity->errorCode==XVauUserIdentity::ERROR_ERROR_UNAUTHORIZED)
+				throw new CHttpException(403, 'You do not have the proper credential to access this page.');
 			else
 			{
 				if($this->enableLogging===true)
