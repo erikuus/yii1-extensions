@@ -22,7 +22,7 @@ class XDgsForm extends CFormModel
 
 	/**
 	 * @param string item reference code
-	 * @return boolean if item is public
+	 * @return boolean if parent is public
 	 */
 	public function isParentPublic($reference)
 	{
