@@ -24,6 +24,18 @@ class XDgsForm extends CFormModel
 	 * @param string item reference code
 	 * @return boolean if item is public
 	 */
+	public function isParentPublic($reference)
+	{
+		$reference=$this->quote($reference.'.%');
+		$sql = "SELECT COUNT(*) FROM  dgs.tbl_app WHERE refcode LIKE {$reference} AND status=".self::STATUS_PUBLIC;
+		$c = Yii::app()->kmooduldb->createCommand($sql)->queryScalar();
+		return $c > 0 ? true : false;
+	}
+
+	/**
+	 * @param string item reference code
+	 * @return boolean if item is public
+	 */
 	public function isItemPublic($reference)
 	{
 		$reference=$this->quote($reference);
