@@ -22,28 +22,30 @@
  *             'label'=>Yii::t('ui', 'Login'),
  *             'url'=>XVauHelper::loginUrl(),
  *             'visible'=>Yii::app()->user->isGuest
- *         )
+ *         ),
  *         array(
  *             'label'=>Yii::t('ui', 'Logout'),
  *             'url'=>XVauHelper::logoutUrl(),
  *             'visible'=>!Yii::app()->user->isGuest
- *         ),
+ *         )
  *     )
- * );
+ * ));
  * </pre>
  *
- * If you need you can specify different action and scope:
+ * If you need you can specify different VauID scope and login route:
  * <pre>
  * $this->widget('zii.widgets.CMenu',array(
  *     'items'=>array(
  *         array(
  *             'label'=>Yii::t('ui', 'Login'),
- *             'url'=>XVauHelper::loginUrl('/site/loginVau', array('v'=>2, 's'=>'user_role')),
+ *             'url'=>XVauHelper::loginUrl('user_role', '/site/loginVau'),
  *             'visible'=>Yii::app()->user->isGuest
  *         )
  *     )
- * );
+ * ));
  * </pre>
+ *
+ * Note that login route should point to action based on {@link XVauLoginAction}!
  *
  * @link http://www.ra.ee/apps/vauid/
  * @author Erik Uus <erik.uus@gmail.com>
@@ -53,12 +55,12 @@ class XVauHelper
 {
 	/**
 	 * @param string $route to application VAU login action. Defaults to '/site/vauLogin'.
-	 * @param array $params login url parameters. Defaults to array('v'=>2, 's'=>'user').
+	 * @param array $params login url parameters. Defaults to array().
 	 * @return string VAU login url
 	 */
-	public static function loginUrl($route='/site/vauLogin', $params=array('v'=>2, 's'=>'user'))
+	public static function loginUrl($scope='user',$route='/site/vauLogin',$params=array())
 	{
-		return 'http://www.ra.ee/vau/index.php/site/login?remoteUrl='.Yii::app()->createAbsoluteUrl($route, $params);
+		return 'http://www.ra.ee/vau/index.php/site/login?v=2&s='.$scope.'&remoteUrl='.Yii::app()->createAbsoluteUrl($route,$params);
 	}
 
 	/**
@@ -66,8 +68,8 @@ class XVauHelper
 	 * @param array $params logout url parameters. Mostly not needed.
 	 * @return string VAU logout url
 	 */
-	public static function logoutUrl($route='/site/logout', $params=array())
+	public static function logoutUrl($route='/site/logout',$params=array())
 	{
-		return 'http://www.ra.ee/vau/index.php/site/logout?remoteUrl='.Yii::app()->createAbsoluteUrl($route, $params);
+		return 'http://www.ra.ee/vau/index.php/site/logout?remoteUrl='.Yii::app()->createAbsoluteUrl($route,$params);
 	}
 }

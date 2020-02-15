@@ -101,8 +101,8 @@ class XVauLoginAction extends CAction
 				Yii::app()->user->login($identity);
 				$this->controller->redirect($this->redirectUrl ? $this->redirectUrl : Yii::app()->user->returnUrl);
 			}
-			elseif($identity->errorCode==XVauUserIdentity::ERROR_ERROR_UNAUTHORIZED)
-				throw new CHttpException(403, 'You do not have the proper credential to access this page.');
+			elseif($identity->errorCode==XVauUserIdentity::ERROR_UNAUTHORIZED)
+				throw new CHttpException(403,'You do not have the proper credential to access this page.');
 			else
 			{
 				if($this->enableLogging===true)
@@ -110,20 +110,20 @@ class XVauLoginAction extends CAction
 					switch($identity->errorCode)
 					{
 						case XVauUserIdentity::ERROR_INVALID_DATA:
-							Yii::log('Invalid VAU login request: '.$_POST['postedData'], CLogger::LEVEL_ERROR);
+							Yii::log('Invalid VAU login request: '.$_POST['postedData'],CLogger::LEVEL_ERROR);
 							break;
 						case XVauUserIdentity::ERROR_EXPIRED_DATA:
-							Yii::log('Expired VAU login request: '.$_POST['postedData'], CLogger::LEVEL_ERROR);
+							Yii::log('Expired VAU login request: '.$_POST['postedData'],CLogger::LEVEL_ERROR);
 							break;
 						case XVauUserIdentity::ERROR_SYNC_DATA:
-							Yii::log('Failed VAU user data sync: '.$_POST['postedData'], CLogger::LEVEL_ERROR);
+							Yii::log('Failed VAU user data sync: '.$_POST['postedData'],CLogger::LEVEL_ERROR);
 							break;
 					}
 				}
-				throw new CHttpException(400, 'Invalid request. Please do not repeat this request again.');
+				throw new CHttpException(400,'Invalid request. Please do not repeat this request again.');
 			}
 		}
 		else
-			throw new CHttpException(400, 'Invalid request. Please do not repeat this request again.');
+			throw new CHttpException(400,'Invalid request. Please do not repeat this request again.');
 	}
 }
