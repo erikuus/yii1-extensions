@@ -48,9 +48,9 @@ class XVauLoginAction extends CAction
 {
 	/**
 	 * @var string $securityManagerName the name of the  vauid security manager {@link XVauUserIdentity}.
-	 * Defaults to 'vauid'.
+	 * Defaults to 'vauSecurityManager'.
 	 */
-	public $securityManagerName='vauid';
+	public $securityManagerName='vauSecurityManager';
 	/**
 	 * @var string $redirectUrl the url user will be redirected after successful login.
 	 * If empty, Yii::app()->user->returnUrl will be used.

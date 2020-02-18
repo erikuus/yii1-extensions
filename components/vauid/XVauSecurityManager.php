@@ -31,7 +31,7 @@ class XVauSecurityManager extends CApplicationComponent
 	 */
 	public function decrypt($postedData)
 	{
-		return $this->decrypt(@$this->hex2bin($postedData));
+		return $this->lindecrypt(@$this->hex2bin($postedData));
 	}
 
 	/**
