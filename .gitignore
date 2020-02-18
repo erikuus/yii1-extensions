@@ -7,7 +7,6 @@
 ######################
 modules/au/
 modules/rbam/
-XVauUserIdentity.php
 # OS generated files #
 ######################
 Thumbs.db
