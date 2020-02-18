@@ -73,6 +73,8 @@ class XIsikukoodValidator extends CValidator
 			$year = "20" . $value[1] . $value[2];
 		else if(in_array($value[0], array(7, 8)))
 			$year = "21" . $value[1] . $value[2];
+		else
+			return false;
 
 		$date = $year . "-" . $value[3] . $value[4] . "-" . $value[5] . $value[6];
 
