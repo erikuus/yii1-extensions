@@ -3,9 +3,19 @@
 /**
  * XVauLoginAction class file.
  *
- * XVauLoginAction makes use of the {@link XVauUserIdentity} to authenticate user based on VauID 2.0 protocol
+ * XVauLoginAction makes use of {@link XVauSecurityManager} and {@link XVauUserIdentity} to authenticate user based on VauID 2.0 protocol
  *
- * For example set up 'vauLogin' action inside actions() method of SiteController:
+ * First configure security manager component.
+ * <pre>
+ * 'components'=>array(
+ *     'vauid'=> array(
+ *         'class'=>'ext.components.vauid.XVauSecurityManager',
+ *         'validationKey'=>'###'
+ *     )
+ * )
+ * </pre>
+ *
+ * Now set up 'vauLogin' action in application SiteController.
  * <pre>
  * public function actions()
  * {
@@ -17,50 +27,17 @@
  * }
  * </pre>
  *
- * By setting 'authOptions' you can restrict access and sync user data {@see XVauUserIdentity::authenticate()}:
- * <pre>
- * public function actions()
- * {
- *     return array(
- *         'vauLogin'=>array(
- *             'class'=>'ext.components.vauid.XVauLoginAction'
- *             'authOptions'=>array()
- *         )
- *     );
- * }
- * </pre>
- *
- * Note that you need to set login/logout links and login redirect action in your application as well.
- *
- * For that you are strongly encouraged to use following extensions:
- * <ul>
- * <li>{@link XVauHelper} for VAU login and logout links</li>
- * <li>{@link XVauRedirectLoginAction} for setting up login action</li>
- * <ul>
- *
- * But you can also set links as follows:
- * <pre>
- * $this->widget('zii.widgets.CMenu',array(
- *     'items'=>array(
- *         array(
- *             'label'=>Yii::t('ui', 'Login'),
- *             'url'=>'http://www.ra.ee/vau/index.php/site/login?v=2&s=user&remoteUrl='.$this->createAbsoluteUrl('/site/vauLogin'),
- *             'visible'=>Yii::app()->user->isGuest
- *         )
- *         array(
- *             'label'=>Yii::t('ui', 'Logout'),
- *             'url'=>'http://www.ra.ee/vau/index.php/site/logout?remoteUrl='.$this->createAbsoluteUrl('/site/logout'),
- *             'visible'=>!Yii::app()->user->isGuest
- *         ),
- * ));
- * </pre>
- *
- * And you can redirect your 'login' action to VAU login page as follows:
+ * Next redirect your login action as follows.
  * <pre>
  * public function actionLogin()
  * {
  *     $this->redirect('http://www.ra.ee/vau/index.php/site/login?v=2&s=user&remoteUrl='.$this->createAbsoluteUrl('/site/vauLogin'));
  * }
+ * </pre>
+ *
+ * Finally point logout link as follows.
+ * <pre>
+ * echo CHtml::link('Logout', 'http://www.ra.ee/vau/index.php/site/logout?remoteUrl='.Yii::app()->createAbsoluteUrl('site/logout'));?>
  * </pre>
  *
  * @link http://www.ra.ee/apps/vauid/
@@ -69,6 +46,11 @@
  */
 class XVauLoginAction extends CAction
 {
+	/**
+	 * @var string $securityManagerName the name of the  vauid security manager {@link XVauUserIdentity}.
+	 * Defaults to 'vauid'.
+	 */
+	public $securityManagerName='vauid';
 	/**
 	 * @var string $redirectUrl the url user will be redirected after successful login.
 	 * If empty, Yii::app()->user->returnUrl will be used.
@@ -89,12 +71,17 @@ class XVauLoginAction extends CAction
 	 */
 	public function run()
 	{
-		$controller=$this->getController();
-
 		if(isset($_POST['postedData']))
 		{
+			$securityManager=Yii::app()->getComponent($this->securityManagerName);
+
+			if($securityManager)
+				$jsonData=$securityManager->decrypt($_POST['postedData']);
+			else
+				throw new CException('The "zoomifyImagePath" value of "option" array have to be set.');
+
 			Yii::import('ext.components.vauid.XVauUserIdentity');
-			$identity=new XVauUserIdentity($_POST['postedData']);
+			$identity=new XVauUserIdentity($jsonData);
 			$identity->authenticate($this->authOptions);
 			if($identity->errorCode==XVauUserIdentity::ERROR_NONE)
 			{
