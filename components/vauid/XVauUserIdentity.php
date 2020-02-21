@@ -190,7 +190,7 @@ class XVauUserIdentity extends CBaseUserIdentity
 						}
 
 						// sync user data
-						if(($enableCreate && $user->isNewRecord)||$enableUpdate)
+						if(($enableCreate && $user->isNewRecord) || $enableUpdate)
 						{
 							$user->scenario=$scenario;
 
@@ -257,9 +257,9 @@ class XVauUserIdentity extends CBaseUserIdentity
 			return false;
 
 		$accessRulesRoles=$this->getValue($authOptions,'accessRules.roles',array());
-		$vauUserDataRoles=$this->getValue($vauUserData,'vauUserData.roles',array());
+		$vauUserDataRoles=$this->getValue($vauUserData,'roles',array());
 
-		if($accessRulesRoles!=array() && array_intersect($accessRulesRoles,$vauUserDataRoles)===array())
+		if($accessRulesRoles!==array() && array_intersect($accessRulesRoles,$vauUserDataRoles)===array())
 			return false;
 
 		return true;
