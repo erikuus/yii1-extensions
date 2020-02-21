@@ -25,13 +25,35 @@ class XVauSecurityManager extends CApplicationComponent
 	}
 
 	/**
-	 * Decryptes data posted back by VAU after successful login.
+	 * Encrypts data that VAU posts to remote site after successful login.
+	 * @param string the data to be encrypted
+	 * @return string encrypted data
+	 */
+	public function encrypt($data)
+	{
+		return bin2hex($this->linencrypt($data));
+	}
+
+	/**
+	 * Decryptes data posted by VAU after successful login.
 	 * @param string $postedData the encrypted data
 	 * @return string decrypted data
 	 */
 	public function decrypt($postedData)
 	{
 		return $this->lindecrypt(@$this->hex2bin($postedData));
+	}
+
+	/**
+	 * @param string the data to be crypted
+	 * @return string crypted data
+	 */
+	public function linencrypt($data)
+	{
+		$iv_size=mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256,MCRYPT_MODE_ECB);
+		$iv=mcrypt_create_iv($iv_size,MCRYPT_RAND);
+		$encrypted=mcrypt_encrypt(MCRYPT_RIJNDAEL_256,$this->_key,$data,MCRYPT_MODE_ECB,$iv);
+		return $encrypted;
 	}
 
 	/**
@@ -47,8 +69,8 @@ class XVauSecurityManager extends CApplicationComponent
 	}
 
 	/**
-	 * @param hexadecimal representation of data.
-	 * @return the binary representation of the given data.
+	 * @param hexadecimal representation of data
+	 * @return the binary representation of the given data
 	 */
 	protected function hex2bin($h)
 	{
