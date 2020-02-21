@@ -13,6 +13,7 @@
  */
 class XVauUserIdentity extends CBaseUserIdentity
 {
+	const ERROR_NONE=0;
 	const ERROR_INVALID_DATA=1;
 	const ERROR_EXPIRED_DATA=2;
 	const ERROR_SYNC_DATA=3;
