@@ -13,7 +13,6 @@
  */
 class XVauUserIdentity extends CBaseUserIdentity
 {
-	const ERROR_NONE=0;
 	const ERROR_INVALID_DATA=1;
 	const ERROR_EXPIRED_DATA=2;
 	const ERROR_SYNC_DATA=3;
@@ -170,7 +169,6 @@ class XVauUserIdentity extends CBaseUserIdentity
 						if(!$modelName || !$vauIdAttribute)
 							throw new CException('Model name and vauid have to be set in data mapping!');
 
-						// check if user with given id exists
 						$user=CActiveRecord::model($modelName)->findByAttributes(array(
 							$vauIdAttribute=>(int)$vauUserData['id']
 						));
@@ -182,36 +180,32 @@ class XVauUserIdentity extends CBaseUserIdentity
 						{
 							if($enableCreate)
 							{
-								$user=new $modelName($scenario);
+								$user=new $modelName();
 								$user->{$vauIdAttribute}=$vauUserData['id'];
+
+								foreach($syncAttributes as $key=>$attribute)
+									$user->{$attribute}=$this->getValue($vauUserData,$key);
+
+								if(!$user->save())
+									$this->errorCode=self::ERROR_SYNC_DATA;
 							}
 							else
 								$this->errorCode=self::ERROR_UNAUTHORIZED;
 						}
-
-						// sync user data
-						if(($enableCreate && $user->isNewRecord) || $enableUpdate)
+						elseif($enableUpdate)
 						{
-							$user->scenario=$scenario;
-
 							foreach($syncAttributes as $key=>$attribute)
 								$user->{$attribute}=$this->getValue($vauUserData,$key);
 
-							if($user->save())
-							{
-								// assign identity attributes
-								$this->id=$user->primaryKey;
-								$this->name=$userNameAttribute ? $user->{$userNameAttribute} : $vauUserData['fullname'];
-								$this->errorCode=self::ERROR_NONE;
-							}
-							else
+							if(!$user->save())
 								$this->errorCode=self::ERROR_SYNC_DATA;
 						}
-						else
+
+						if(!in_array($this->errorCode, array(self::ERROR_UNAUTHORIZED, self::ERROR_SYNC_DATA)))
 						{
 							// assign identity attributes
-							$this->id=$vauUserData['id'];
-							$this->name=$vauUserData['fullname'];
+							$this->id=$user->primaryKey;
+							$this->name=$userNameAttribute ? $user->{$userNameAttribute} : $vauUserData['fullname'];
 							$this->errorCode=self::ERROR_NONE;
 						}
 					}

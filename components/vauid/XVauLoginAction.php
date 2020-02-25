@@ -78,7 +78,7 @@ class XVauLoginAction extends CAction
 			if($securityManager)
 				$jsonData=$securityManager->decrypt($_POST['postedData']);
 			else
-				throw new CException('The "zoomifyImagePath" value of "option" array have to be set.');
+				throw new CException('The "securityManager" component have to be defined in configuration file.');
 
 			Yii::import('ext.components.vauid.XVauUserIdentity');
 			$identity=new XVauUserIdentity($jsonData);
@@ -97,14 +97,16 @@ class XVauLoginAction extends CAction
 					switch($identity->errorCode)
 					{
 						case XVauUserIdentity::ERROR_INVALID_DATA:
-							Yii::log('Invalid VAU login request: '.$_POST['postedData'],CLogger::LEVEL_ERROR);
+							Yii::log('Invalid VAU login request: '.$jsonData,CLogger::LEVEL_ERROR);
 							break;
 						case XVauUserIdentity::ERROR_EXPIRED_DATA:
-							Yii::log('Expired VAU login request: '.$_POST['postedData'],CLogger::LEVEL_ERROR);
+							Yii::log('Expired VAU login request: '.$jsonData,CLogger::LEVEL_ERROR);
 							break;
 						case XVauUserIdentity::ERROR_SYNC_DATA:
-							Yii::log('Failed VAU user data sync: '.$_POST['postedData'],CLogger::LEVEL_ERROR);
+							Yii::log('Failed VAU user data sync: '.$jsonData,CLogger::LEVEL_ERROR);
 							break;
+						default:
+							Yii::log('Unknown error code: '.$identity->errorCode, CLogger::LEVEL_ERROR);
 					}
 				}
 				throw new CHttpException(400,'Invalid request. Please do not repeat this request again.');
