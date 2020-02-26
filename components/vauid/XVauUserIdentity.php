@@ -180,7 +180,7 @@ class XVauUserIdentity extends CBaseUserIdentity
 						{
 							if($enableCreate)
 							{
-								$user=new $modelName();
+								$user=$scenario ? new $modelName($scenario) : new $modelName();
 								$user->{$vauIdAttribute}=$vauUserData['id'];
 
 								foreach($syncAttributes as $key=>$attribute)
@@ -194,6 +194,9 @@ class XVauUserIdentity extends CBaseUserIdentity
 						}
 						elseif($enableUpdate)
 						{
+							if($scenario)
+								$user->scenario=$scenario;
+
 							foreach($syncAttributes as $key=>$attribute)
 								$user->{$attribute}=$this->getValue($vauUserData,$key);
 
