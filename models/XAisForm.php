@@ -287,35 +287,30 @@ class XAisForm extends CFormModel
 	{
 		$arrReference=$this->getReferenceArray($reference);
 		$archiveIds=$this->getArchiveIds($arrReference['a']);
-		if($from && $to)
-		{
-			$sql = "
-				SELECT TOP $limit
-					ky.leidandmed,
-					ky.pealkiri,
-					ra.ky_aeg_list(ky.kood,'MOOD') AS piirdaatumid,
-					h.nimetus AS hoidla,
-					r.tahis AS riiul,
-					k.tahis AS kapp,
-					l.tahis AS laudi,
-					s.yksus AS yksus
-				FROM ra.kirjeldusyksus ky
-				KEY INNER JOIN ra.ky_sailik
-				KEY INNER JOIN ra.sailik s
-				LEFT OUTER JOIN ra.hoidla h ON s.hoidla=h.kood
-				LEFT OUTER JOIN ra.riiul r ON s.riiul=r.kood
-				LEFT OUTER JOIN ra.kapp k ON s.kapp=k.kood
-				LEFT OUTER JOIN ra.laudi l ON s.laudi=l.kood
-				WHERE ky.staatus='AKT'
-				AND ky.tyyp IN ('KOLL','AHV')
-				AND s.leidandmed LIKE '$reference.%'
-				AND s.yksus in ($archiveIds)
-			";
-			return Yii::app()->aisdb->cache(self::CACHE_DURATION)->createCommand($sql)->queryAll();
-		}
-		else
-			return array();
 
+		$sql = "
+			SELECT TOP $limit
+				ky.leidandmed,
+				ky.pealkiri,
+				ra.ky_aeg_list(ky.kood,'MOOD') AS piirdaatumid,
+				h.nimetus AS hoidla,
+				r.tahis AS riiul,
+				k.tahis AS kapp,
+				l.tahis AS laudi,
+				s.yksus AS yksus
+			FROM ra.kirjeldusyksus ky
+			KEY INNER JOIN ra.ky_sailik
+			KEY INNER JOIN ra.sailik s
+			LEFT OUTER JOIN ra.hoidla h ON s.hoidla=h.kood
+			LEFT OUTER JOIN ra.riiul r ON s.riiul=r.kood
+			LEFT OUTER JOIN ra.kapp k ON s.kapp=k.kood
+			LEFT OUTER JOIN ra.laudi l ON s.laudi=l.kood
+			WHERE ky.staatus='AKT'
+			AND ky.tyyp IN ('KOLL','AHV')
+			AND s.leidandmed LIKE '$reference.%'
+			AND s.yksus in ($archiveIds)
+		";
+		return Yii::app()->aisdb->cache(self::CACHE_DURATION)->createCommand($sql)->queryAll();
 	}
 
 	/**
