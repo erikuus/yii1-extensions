@@ -248,6 +248,77 @@ class XAisForm extends CFormModel
 	}
 
 	/**
+	 * Find items data alongside with storage info
+	 * @param string $reference item parent reference code
+	 * @param integer $limit range limit
+	 * @return array multiple item and storage data
+	 * Example:
+	 * array (
+	 *   [0] => array (
+	 *     [leidandmed] => EAA.1.1.1
+	 *     [pealkiri] => Karl IX poolt kinnitatud kaupade hinnakiri Rootsi riigi sadamais
+	 *     [piirdaatumid] => 1604-1609
+	 *     [hoidla] => EAA.Liivi:2-11
+	 *     [riiul] => LXXXVI
+	 *     [kapp] => I
+	 *     [laudi] => 7
+	 *   )
+	 *   [1] => array (
+	 *     [leidandmed] => EAA.1.1.2
+	 *     [pealkiri] => Kuningate kirjade ärkirjad linnade ...
+	 *     [piirdaatumid] => 16.09.1613-04.09.1707
+	 *     [hoidla] => EAA.Liivi:2-11
+	 *     [riiul] => LXXXVI
+	 *     [kapp] => I
+	 *     [laudi] => 7
+	 *   )
+	 *   [2] => array(
+	 *     [leidandmed] => EAA.1.1.3
+	 *     [pealkiri] => Kuningliku Kammerkolleegiumi, kindralkuberneri ja teiste määrused ...
+	 *     [piirdaatumid] => 14.06.1620-18.06.1707
+	 *     [hoidla] => EAA.Liivi:2-11
+	 *     [riiul] => LXXXVI
+	 *     [kapp] => I
+	 *     [laudi] => 7
+	 *   )
+	 * )
+	 */
+	public function findItemsWithStorage($reference, $limit=100)
+	{
+		$arrReference=$this->getReferenceArray($reference);
+		$archiveIds=$this->getArchiveIds($arrReference['a']);
+		if($from && $to)
+		{
+			$sql = "
+				SELECT TOP $limit
+					ky.leidandmed,
+					ky.pealkiri,
+					ra.ky_aeg_list(ky.kood,'MOOD') AS piirdaatumid,
+					h.nimetus AS hoidla,
+					r.tahis AS riiul,
+					k.tahis AS kapp,
+					l.tahis AS laudi,
+					s.yksus AS yksus
+				FROM ra.kirjeldusyksus ky
+				KEY INNER JOIN ra.ky_sailik
+				KEY INNER JOIN ra.sailik s
+				LEFT OUTER JOIN ra.hoidla h ON s.hoidla=h.kood
+				LEFT OUTER JOIN ra.riiul r ON s.riiul=r.kood
+				LEFT OUTER JOIN ra.kapp k ON s.kapp=k.kood
+				LEFT OUTER JOIN ra.laudi l ON s.laudi=l.kood
+				WHERE ky.staatus='AKT'
+				AND ky.tyyp IN ('KOLL','AHV')
+				AND s.leidandmed LIKE '$reference.%'
+				AND s.yksus in ($archiveIds)
+			";
+			return Yii::app()->aisdb->cache(self::CACHE_DURATION)->createCommand($sql)->queryAll();
+		}
+		else
+			return array();
+
+	}
+
+	/**
 	 * Find range of item data alongside with storage info
 	 * @param string $fromReference item reference code starting range
 	 * @param string $toReference item reference code limiting range
@@ -318,7 +389,6 @@ class XAisForm extends CFormModel
 		}
 		else
 			return array();
-
 	}
 
 	/**
