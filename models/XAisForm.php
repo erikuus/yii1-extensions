@@ -336,7 +336,7 @@ class XAisForm extends CFormModel
 		if($from && $to)
 		{
 			$sql = "
-				SELECT LIST(distinct ky.leidandmed)
+				SELECT LIST(ky.leidandmed)
 				FROM ra.kirjeldusyksus ky
 				KEY INNER JOIN ra.ky_sailik
 				KEY INNER JOIN ra.sailik s
@@ -366,8 +366,8 @@ class XAisForm extends CFormModel
 			$reference=mb_substr($reference, 0, -1).".%'";
 
 			$sql = "
-				SELECT list(distinct leidandmed)
-				FROM kirjeldusyksus
+				SELECT LIST(leidandmed)
+				FROM ra.kirjeldusyksus
 				WHERE leidandmed LIKE $reference;
 			";
 			return Yii::app()->aisdb->createCommand($sql)->queryAll();
