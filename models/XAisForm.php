@@ -345,7 +345,7 @@ class XAisForm extends CFormModel
 				AND s.leidandmed BETWEEN '$from' AND '$to'
 				AND s.yksus in ($archiveIds)
 			";
-			return Yii::app()->aisdb->createCommand($sql)->queryAll();
+			return Yii::app()->aisdb->createCommand($sql)->queryScalar();
 		}
 		else
 			return null;
@@ -370,7 +370,7 @@ class XAisForm extends CFormModel
 				FROM ra.kirjeldusyksus
 				WHERE leidandmed LIKE $reference;
 			";
-			return Yii::app()->aisdb->createCommand($sql)->queryAll();
+			return Yii::app()->aisdb->createCommand($sql)->queryScalar();
 		}
 		else
 			return null;
