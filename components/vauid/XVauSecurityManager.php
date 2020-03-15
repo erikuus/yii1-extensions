@@ -1,6 +1,6 @@
 <?php
 /**
- * XVauSecurityManager provides function to decrypt response data based on VauID 2.0 protocol.
+ * XVauSecurityManager provides functions to encrypt and decrypt data based on VauID 2.0 protocol.
  *
  * For usage refer to {@link XVauLoginAction}
  *
@@ -21,7 +21,7 @@ class XVauSecurityManager extends CApplicationComponent
 		if(!empty($value))
 			$this->_key=$value;
 		else
-			throw new CException(Yii::t('yii','XVauSecurityManager.validationKey cannot be empty.'));
+			throw new CException('XVauSecurityManager configuration must have "validationKey" value!');
 	}
 
 	/**
@@ -45,7 +45,7 @@ class XVauSecurityManager extends CApplicationComponent
 	}
 
 	/**
-	 * @param string the data to be crypted
+	 * @param string $data the data to be crypted
 	 * @return string crypted data
 	 */
 	public function linencrypt($data)
@@ -69,7 +69,7 @@ class XVauSecurityManager extends CApplicationComponent
 	}
 
 	/**
-	 * @param hexadecimal representation of data
+	 * @param string $h the hexadecimal representation of data
 	 * @return the binary representation of the given data
 	 */
 	protected function hex2bin($h)

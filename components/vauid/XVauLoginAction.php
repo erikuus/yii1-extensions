@@ -8,7 +8,7 @@
  * First configure security manager component.
  * <pre>
  * 'components'=>array(
- *     'vauid'=> array(
+ *     'vauSecurityManager'=> array(
  *         'class'=>'ext.components.vauid.XVauSecurityManager',
  *         'validationKey'=>'###'
  *     )
@@ -37,7 +37,7 @@
  *
  * Finally point logout link as follows.
  * <pre>
- * echo CHtml::link('Logout', 'http://www.ra.ee/vau/index.php/site/logout?remoteUrl='.Yii::app()->createAbsoluteUrl('site/logout'));?>
+ * echo CHtml::link('Logout', 'http://www.ra.ee/vau/index.php/site/logout?remoteUrl='.$this->createAbsoluteUrl('site/logout'));?>
  * </pre>
  *
  * @link http://www.ra.ee/apps/vauid/
@@ -47,7 +47,7 @@
 class XVauLoginAction extends CAction
 {
 	/**
-	 * @var string $securityManagerName the name of the  vauid security manager {@link XVauUserIdentity}.
+	 * @var string $securityManagerName the name of the security manager component.
 	 * Defaults to 'vauSecurityManager'.
 	 */
 	public $securityManagerName='vauSecurityManager';
@@ -58,7 +58,6 @@ class XVauLoginAction extends CAction
 	public $redirectUrl;
 	/**
 	 * @var array $authOptions the authentication options
-	 * @see XVauUserIdentity::authenticate()
 	 */
 	public $authOptions=array();
 	/**
@@ -78,7 +77,7 @@ class XVauLoginAction extends CAction
 			if($securityManager)
 				$jsonData=$securityManager->decrypt($_POST['postedData']);
 			else
-				throw new CException('The "securityManager" component have to be defined in configuration file.');
+				throw new CException('The "XVauSecurityManager" component have to be defined in configuration file.');
 
 			Yii::import('ext.components.vauid.XVauUserIdentity');
 			$identity=new XVauUserIdentity($jsonData);

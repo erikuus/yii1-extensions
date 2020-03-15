@@ -11,3 +11,7 @@ modules/rbam/
 ######################
 Thumbs.db
 *log.htm
+# Sublime generated files #
+######################
+*.sublime-project
+*.sublime-workspace
