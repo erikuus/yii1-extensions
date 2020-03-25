@@ -65,6 +65,21 @@ class XVauForm extends CFormModel
 		return $data;
 	}
 
+	/**
+	 * @param string item reference code
+	 * @return boolean whether item has public access
+	 */
+	public function checkItemPublicAccess($reference)
+	{
+		$reference=$this->quote($reference);
+		$id=Yii::app()->kmooduldb->createCommand("
+			SELECT id
+			FROM tbl_blacklist
+			WHERE refcode=$reference
+			LIMIT 1
+		")->queryScalar();
+		return $id ? false : true;
+	}
 
 	/**
 	 * @return string quoted and escaped
