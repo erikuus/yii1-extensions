@@ -247,7 +247,7 @@ class XVauUserIdentity extends CBaseUserIdentity
 		if($this->getValue($authOptions,'accessRules.safehost')===true && $vauUserData['safehost']!==true)
 			return false;
 
-		if($this->getValue($authOptions,'accessRules.safe')===true && $vauUserData['safelogin']!==true&&$vauUserData['safehost']!==true)
+		if($this->getValue($authOptions,'accessRules.safe')===true && $vauUserData['safelogin']!==true && $vauUserData['safehost']!==true)
 			return false;
 
 		if($this->getValue($authOptions,'accessRules.employee')===true && $vauUserData['type']!=1)
