@@ -5,7 +5,6 @@ class XDbCriteria extends CDbCriteria
 	 * Appends search condition with meta symbols to the existing condition.
 	 * @param string $column the column name (or a valid SQL expression)
 	 * @param string $keyword the search keyword. This interpretation of the keyword is affected by the next parameter.
-	 * @param boolean $escape whether the keyword should be escaped if it contains characters % or _.
 	 * @param string $operator the operator used to concatenate the new condition with the existing one.
 	 * @param string $like the LIKE operator. Defaults to 'LIKE'. You may also set this to be 'NOT LIKE'.
 	 * @param boolean whether to force contain wildcards
@@ -56,7 +55,7 @@ class XDbCriteria extends CDbCriteria
 			if($op==='<>')
 				return $this->addSearchCondition("LOWER($column)",$this->formatSearch($value),true,$operator,'NOT LIKE');
 		}
-		else if($op==='')
+		elseif($op==='')
 			$op='=';
 
 		$this->addCondition("LOWER($column)".$op.self::PARAM_PREFIX.self::$paramCount,$operator);
