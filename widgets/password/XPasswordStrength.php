@@ -40,10 +40,10 @@ class XPasswordStrength extends CInputWidget
 	 */
 	public $options=array();
 
-    /**
-     * Run this widget.
-     * This method registers necessary CSS and JS files and renders the needed JS and HTML code.
-     */
+	/**
+	 * Run this widget.
+	 * This method registers necessary CSS and JS files and renders the needed JS and HTML code.
+	 */
 	public function run()
 	{
 		list($name,$id)=$this->resolveNameID();
@@ -93,7 +93,7 @@ class XPasswordStrength extends CInputWidget
 		// register css file
 		if($this->cssFile===null)
 			$cs->registerCssFile($assets.'/password_strength.css');
-		else if($this->cssFile!==false)
+		elseif($this->cssFile!==false)
 			$cs->registerCssFile($this->cssFile);
 
 		// register js files

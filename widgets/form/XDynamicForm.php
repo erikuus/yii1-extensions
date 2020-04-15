@@ -1,4 +1,4 @@
- <?php
+<?php
 /**
  * XDynamicForm class file.
  *
@@ -123,7 +123,7 @@ class XDynamicForm extends CActiveForm
 	public function init()
 	{
 		Yii::app()->clientScript->registerCoreScript('jquery');
-		
+
 		if($this->enableRadioToggle)
 			$this->registerRadioClientScript();
 
@@ -218,7 +218,8 @@ SCRIPT;
 
 		$dataKeys=array_keys($data);
 		$indexRadioButtons=array();
-		foreach ($radioButtons as $i=>$radioButton) {
+		foreach($radioButtons as $i=>$radioButton) 
+		{
 			$index=$dataKeys[$i];
 			$indexRadioButtons[$index]=$radioButton;
 		}
@@ -244,7 +245,8 @@ SCRIPT;
 
 		$dataKeys=array_keys($data);
 		$indexCheckBoxes=array();
-		foreach ($checkBoxes as $i=>$checkBox) {
+		foreach($checkBoxes as $i=>$checkBox)
+		{
 			$index=$dataKeys[$i];
 			$indexCheckBoxes[$index]=$checkBox;
 		}

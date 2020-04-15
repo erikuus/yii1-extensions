@@ -238,7 +238,7 @@ class XDigiDoc extends CApplicationComponent
 
 		// add data files to the container in digidoc service session
 		$fileData=array();
-		foreach ($files as $pathToFile=>$mimeType)
+		foreach($files as $pathToFile=>$mimeType)
 		{
 			DocHelper::addDatafileViaDds($dds, $pathToFile, $mimeType);
 			$fileData[]=new FileSystemDataFile($pathToFile);
@@ -247,7 +247,7 @@ class XDigiDoc extends CApplicationComponent
 		// get the container from digidoc service
 		$getSignedDocResponse=$dds->GetSignedDoc(array('Sesscode' => SessionHelper::getDdsSessionCode()));
 		$containerData=$getSignedDocResponse['SignedDocData'];
-		if (strpos($containerData, 'SignedDoc')===false)
+		if(strpos($containerData, 'SignedDoc')===false)
 			$containerData = base64_decode($containerData);
 
 		// rewrite the local container with new content

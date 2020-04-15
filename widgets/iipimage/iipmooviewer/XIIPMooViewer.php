@@ -99,7 +99,7 @@ class XIIPMooViewer extends CWidget
 			$this->options['prefix']=$baseUrl.'/images/';
 
 		$id=$this->getId();
-		if (isset($this->htmlOptions['id']))
+		if(isset($this->htmlOptions['id']))
 			$id = $this->htmlOptions['id'];
 		else
 			$this->htmlOptions['id']=$id;

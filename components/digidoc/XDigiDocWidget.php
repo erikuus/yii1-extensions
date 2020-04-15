@@ -261,7 +261,8 @@ class XDigiDocWidget extends CWidget
 			$this->render('testEnvironmentInfo');
 
 		// display views
-		switch ($this->layout) {
+		switch($this->layout)
+		{
 			case 'modals':
 				$this->renderModals();
 				break;
