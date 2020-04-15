@@ -69,7 +69,7 @@ class XVauForm extends CFormModel
 	 * @param string item reference code
 	 * @return boolean whether item has public access
 	 */
-	public function checkItemPublicAccess($reference)
+	public function checkBlacklist($reference)
 	{
 		$reference=$this->quote($reference);
 		$id=Yii::app()->kmooduldb->createCommand("
@@ -78,7 +78,25 @@ class XVauForm extends CFormModel
 			WHERE refcode=$reference
 			LIMIT 1
 		")->queryScalar();
-		return $id ? false : true;
+		return $id ? true : false;
+	}
+
+	/**
+	 * @param string item reference code
+	 * @param integer user id
+	 * @return boolean whether user has access to item
+	 */
+	public function checkWhitelist($reference, $userId)
+	{
+		$reference=$this->quote($reference);
+		$id=Yii::app()->kmooduldb->createCommand("
+			SELECT id
+			FROM tbl_whitelist
+			WHERE refcode=$reference
+			AND rightholder_user_id=$userId
+			LIMIT 1
+		")->queryScalar();
+		return $id ? true : false;
 	}
 
 	/**
