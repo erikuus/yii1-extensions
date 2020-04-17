@@ -98,7 +98,7 @@ class XFileForm extends CFormModel
 
 		if($startPath)
 		{
-			if (is_dir($this->mntRoot.$startPath.$endPath1))
+			if(is_dir($this->mntRoot.$startPath.$endPath1))
 				return $this->mntRoot.$startPath.$endPath1;
 			elseif (is_dir($this->mntRoot.$startPath.$endPath2))
 				return $this->mntRoot.$startPath.$endPath2;
@@ -152,7 +152,7 @@ class XFileForm extends CFormModel
 
 	/**
 	 * Get full paths to files of given directory
-	 * @param string $dir full path to directory
+	 * @param string $dir the full path to directory
 	 * @param boolean $natsort whether to natsort returned paths
 	 * @return array full paths to files with allowed extension
 	 */
@@ -164,12 +164,12 @@ class XFileForm extends CFormModel
 		if($filenames)
 		{
 			$filenames=array_diff($filenames, array('.', '..'));
-			foreach ($filenames as $filename)
+			foreach($filenames as $filename)
 			{
 				$pathToFile=$dir.'/'.$filename;
-				if (is_file($pathToFile))
+				if(is_file($pathToFile))
 				{
-					if (in_array($this->getExtensionName($filename), $this->allowedExtensions))
+					if(in_array($this->getExtensionName($filename), $this->allowedExtensions))
 						$files[]=$pathToFile;
 				}
 			}
@@ -185,10 +185,33 @@ class XFileForm extends CFormModel
 			foreach ($files as $file)
 				$natsortFiles[$this->getPageNumber($file)]=$file;
 			uksort($natsortFiles, "strnatcmp");
-			return $natsortFiles;
+			$files=$natsortFiles;
 		}
-		else
-			return $files;
+
+		return $files;
+	}
+
+	/**
+	 * Get file data for bookreader
+	 * @param string $dir the full path to directory
+	 * @param boolean $natsort whether to natsort returned paths
+	 * @param string $imageServer the URL to script that serves image
+	 * @return array full paths to files with allowed extension
+	 */
+	public function getBookreaderData($dir, $natsort=true, $imageServer=null)
+	{
+		$files=$this->getFiles($dir, $natsort);
+		$bookreaderFiles=array();
+		foreach($files as $i=>$file)
+		{
+			list($width, $height)=getimagesize($file);
+			$bookreaderFiles[]=array(
+				'uri'=>$imageServer.$file,
+				'width'=>$width,
+				'height'=>$height
+			);
+		}
+		return array_chunk($bookreaderFiles, 2);
 	}
 
 	/**
@@ -279,9 +302,9 @@ class XFileForm extends CFormModel
 		$arrPgn = array();
 
 		$arrComma = explode(',', $strPgn);
-		foreach ($arrComma as $value)
+		foreach($arrComma as $value)
 		{
-			if (strpos($value, '/') !== false)
+			if(strpos($value, '/') !== false)
 			{
 				$arrDubl = explode('/', $value);
 				$arrPgn[] = trim($arrDubl[0]);
@@ -293,7 +316,7 @@ class XFileForm extends CFormModel
 				$intRangeStart = trim($arrRange[0]);
 				$intRangeEnd = trim($arrRange[1]);
 				$intRangeAmount = $intRangeEnd - $intRangeStart;
-				if (ctype_digit($intRangeStart) &&
+				if(ctype_digit($intRangeStart) &&
 					ctype_digit($intRangeEnd) &&
 					$intRangeAmount > 0 &&
 					$intRangeAmount < 200)
