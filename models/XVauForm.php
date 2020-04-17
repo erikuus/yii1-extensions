@@ -104,7 +104,7 @@ class XVauForm extends CFormModel
 	 */
 	protected function quote($str)
 	{
-		return Yii::app()->kmooduldb->quoteValue(strtolower($str));
+		return Yii::app()->kmooduldb->quoteValue(mb_strtolower($str));
 	}
 
 	/**
