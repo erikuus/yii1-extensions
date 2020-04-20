@@ -4,20 +4,25 @@
  *
  * The Internet Archive BookReader is used to view books from the Internet Archive online and can also be used to view other books.
  *
- * IMPORTANT!!! When using this widget start html page as follows:
- * <!doctype html>
- *
- * For users who have disabled javascript you should add:
- * <noscript>
- *     The BookReader requires JavaScript to be enabled.
- * </noscript>
- *
  * The following example shows how to use XBookReader widget:
- * <pre>
+ *
+ * <!DOCTYPE html>
+ * <html>
+ * <head>
+ *     <title></title>
+ *     <style>
+ *         html, body {width: 100%; height: 100%; margin: 0; padding: 0}
+ *         #BookReader {width: 100%; height: 100%; background-color: #fff}
+ *     </style>
+ * </head>
+ * <body>
  * $this->widget('ext.widgets.bookreader.XBookReader', array(
+ *    'enableMobileNav'=>true,
+ *    'enablePluginUrl'=>true,
+ * 	  'htmlOptions'=>array(
+ *        'id'=>'BookReader'
+ * 	  ),
  *    'options'=>array(
- *        'enableMobileNav'=>true,
- *        'enablePluginUrl'=>true,
  *        'data'=>array(
  *            array(
  *                array(
@@ -51,7 +56,7 @@
  *                )
  *            )
  *        ),
- *        'thumbnail'=>'//www.plato.com/00001.jpg',
+ *        'thumbnail'=>'//www.plato.com/00000.jpg',
  *        'bookTitle'=>'The works of Plato',
  *        'metadata'=>array(
  *            array(
@@ -69,7 +74,8 @@
  *        )
  *    )
  * ));
- * </pre>
+ * </body>
+ * </html>
  *
  * @link https://openlibrary.org/dev/docs/bookreader
  * @link https://github.com/internetarchive/bookreader
@@ -81,15 +87,83 @@ class XBookReader extends CWidget
 	/**
 	 * @var array the initial JavaScript options that should be passed to the BookReader
 	 * Possible options include the following:
-	 * <pre>
-	 * <b>data</b>: The list of images to be displayed in bookreader.
-	 *        This path does not need to be in the web server root directory.
-	 *        On Windows as on other systems this should be a UNIX style path such as "/path/to/image.tif"
-	 * <b>getNumLeafs</b>: function that returns total number of leafs, e.g. "js:function() {return 15;}"
-	 * <b>getPageWidth</b>: function that returns the width of a given page, e.g. "js:function(index) {return 1000;}"
-	 * <b>getPageHeight</b>: function that returns the height of a given page, e.g. "js:function(index) {return 1000;}"
-	 * <b>getPageNum</b>: function that returns page number, e.g. "js:function(index) {return index+1;}"
-	 * <b>getPageSide</b>: function that returns which side a given page should be displayed on. For example:
+	 * data: The list of images to be displayed in bookreader. For example:
+	 * array(
+	 *    array(
+	 *       array(
+	 *            'width'=>1920,
+	 *            'height'=>1200,
+	 *            'uri'=>'//www.plato.com/00001.jpg',
+	 *            'pageNum'=> 1' // optional
+	 *       )
+	 *    ),
+	 *    array(
+	 *       array(
+	 *            'width'=>1920,
+	 *            'height'=>1200,
+	 *            'uri'=>'//www.plato.com/00002.jpg'
+	 *       ),
+	 *       array(
+	 *            'width'=>1920,
+	 *            'height'=>1200,
+	 *            'uri'=>'//www.plato.com/00003.jpg'
+	 *       )
+	 *    )
+	 * )
+	 * bookTitle: book title displayed as text in the top left corner
+	 * enableBookTitleLink whether to enable book title link [default: true]
+	 * bookUrl: url of the link displayed in the top left corner
+	 * bookUrlText: label of the link displayed in the top left corner
+	 * bookUrlTitle: title of the link displayed in the top left corner
+	 * thumbnail: thumbnail is optional, but it is used in the info dialog
+	 * metadata: metadata is optional, but it is used in the info dialog. For example:
+	 *     array(
+	 *         array("label"=>"Title", "value"=>"Demo"),
+	 *         array("label"=>"Author", "value"=>"Erik Uus"),
+	 *         array("label"=>"Demo Info", "value"=>"This demo shows how to use BookReader.")
+	 *     ),
+	 *
+	 * enableMobileNav: whether the mobile drawer is displayed [default: true]
+	 * mobileNavTitle: the mobile drawer title
+	 * imagesBaseURL: path to UI images [default: "/assets/images/"]
+	 * ui: user interface mode [options: "full"|"embed"; default: "full"]
+	 * defaults: view modes that must be prefixed with 'mode/' [options: "1up"|"2up"|"thumb"; default: "2up"]
+	 * padding: the padding in 1up mode [default: 10]
+	 * onePage: the object to hold parameters related to 1up mode. For example:
+	 *     array(
+	 *         "autofit"=>"auto" // [options: "width"|"height"|"auto"|"none"]
+	 *     )
+	 * twoPage: the object to hold parameters related to 2up mode. For example:
+	 *     array(
+	 *         'coverInternalPadding'=>0,
+	 *         'coverExternalPadding'=>0,
+	 *         'bookSpineDivWidth'=>64,
+	 *         'autofit'=>'auto'
+	 *     )
+	 * uiAutoHide: whether nav/toolbar will autohide [default: false]
+	 * thumbRowBuffer: the number of rows to pre-cache out a view [default: 2]
+	 * thumbColumns: the number of tumbnail columns [default: 6]
+	 * thumbMaxLoading: the number of thumbnails to load at once [default: 4]
+	 * thumbPadding: the spacing between thumbnails [default: 10]
+	 * thumbPadding: the speed for flip animation [options: integer|"fast"|"slow"; default: "fast"]
+	 * showToolbar: whether to show toolbar [default: true]
+	 * showNavbar: whether to show navbar [default: true]
+	 * pageProgression: the page progression direction [options: "lr" | "rl"; default: "lr"]
+	 * protected: whether to block download [default: false]
+	 * reductionFactors:
+	 *     array(
+	 *         array("reduce"=>0.5, "autofit"=>null},
+	 *         array("reduce"=>1, "autofit"=>null},
+	 *         array("reduce"=>2, "autofit"=>null},
+	 *         array("reduce"=>3, "autofit"=>null},
+	 *         array("reduce"=>4, "autofit"=>null},
+	 *         array("reduce"=>6, "autofit"=>null}
+	 *     )
+	 * getNumLeafs: function that returns total number of leafs, e.g. "js:function() {return 15;}"
+	 * getPageWidth: function that returns the width of a given page, e.g. "js:function(index) {return 1000;}"
+	 * getPageHeight: function that returns the height of a given page, e.g. "js:function(index) {return 1000;}"
+	 * getPageNum: function that returns page number, e.g. "js:function(index) {return index+1;}"
+	 * getPageSide: function that returns which side a given page should be displayed on. For example:
 	 *     "js:function(index) {
 	 *         if(0==(index & 0x1)) {
 	 *             return 'R';
@@ -97,7 +171,7 @@ class XBookReader extends CWidget
 	 *             return 'L';
 	 *         }
 	 *     }"
-	 * <b>getPageURI</b>: function that loads images from server. For example:
+	 * getPageURI: function that loads images from server. For example:
 	 *     "js:function(index, reduce, rotate) {
 	 *         var leafStr = '000';
 	 *         var imgStr = (index+1).toString();
@@ -107,7 +181,7 @@ class XBookReader extends CWidget
 	 *     }",
 	 *     Note that reduce and rotate are ignored in this simple example, but we could reduce and load
 	 *     images from a different directory or pass the information to an image server.
-	 * <b>getSpreadIndices</b>: function that returns the left and right indices for the user-visible
+	 * getSpreadIndices: function that returns the left and right indices for the user-visible
 	 *     spread that contains the given index. The return values may be null if there is no facing
 	 *     page or the index is invalid. For example:
 	 *     "js:function(pindex) {
@@ -131,33 +205,18 @@ class XBookReader extends CWidget
 	 *         }
 	 *         return spreadIndices;
 	 *     }"
-	 * <b>getEmbedCode</b>: function that returns embed code for share dialog. For example:
+	 * getEmbedCode: function that returns embed code for share dialog. For example:
 	 *     "js:function(frameWidth, frameHeight, viewParams) {
 	 *         return "Embed code not supported for this book.";
 	 *     }"
-	 * <b>bookTitle</b>: book title displayed as text in the top left corner, if bookUrl is not set
-	 * <b>bookUrl</b>: url of the link displayed in the top left corner
-	 * <b>bookUrlText</b>: label of the link displayed in the top left corner
-	 * <b>bookUrlTitle</b>: title of the link displayed in the top left corner
-	 * <b>thumbnail</b>: thumbnail is optional, but it is used in the info dialog
-	 * <b>metadata</b>: metadata is optional, but it is used in the info dialog. For example:
-	 *     metadata: [
-	 *         {label: "Title", value: "Demo"},
-	 *         {label: "Author", value: "Erik Uus"},
-	 *         {label: "Demo Info", value: "This demo shows how to use BookReader."},
-	 *     ],
 	 *
-	 * <b>enableMobileNav</b>: whether the mobile drawer is displayed [default: true]
-	 * <b>mobileNavTitle</b>: the mobile drawer title
-	 * <b>imagesBaseURL</b>: path to UI images [default: "/assets/images/"]
-	 * <b>ui</b>: user interface mode [options: full|embed; default: "full"]
 	 * </pre>
-	 *
 	 */
 	public $options=array();
 	/**
 	 * @var array the extra JavaScript options that should be passed to the BookReader
-	 * For example array('mobileNavFullscreenOnly'=>true)
+	 * For example 'mobileNavFullscreenOnly'=>true    flipSpeed: 1000, flipDelay: 2000
+	 * defaults: 'mode/1up' Needs to be prefixed with 'mode/'. BookReader modes are: '1up', '2up', 'thumb'. BookReader defaults to 2up mode.
 	 * Defaults to array()
 	 */
 	public $extraOptions=array();
@@ -259,20 +318,20 @@ class XBookReader extends CWidget
 
 		$this->options['el']='js:selector';
 		$options=CJavaScript::encode($this->options);
-		$extraOptions=$this->extraOptions!==array() ? CJavaScript::encode($this->extraOptions) : '';
 
 		Yii::app()->getClientScript()->registerScript(__CLASS__.'#'.$id, "
-			instantiateBookReader('#$id', $extraOptions) {
-				selector = selector || '#BookReader';
-				extraOptions = extraOptions || {};
+			function instantiateBookReader(selector) {
 				var options = $options;
-				$.extend(options, extraOptions);
 				var br = new BookReader(options);
 				br.init();
 			}
+			instantiateBookReader('#$id');
 		", CClientScript::POS_END);
 
-		echo CHtml::openTag('div',$this->htmlOptions)."\n";
+		if($this->lang!='en')
+			$this->translate();
+
+		echo CHtml::openTag('div', $this->htmlOptions)."\n";
 	}
 
 	/**
@@ -281,9 +340,6 @@ class XBookReader extends CWidget
 	public function run()
 	{
 		echo CHtml::closeTag('div');
-
-		if($this->lang!='en')
-			$this->translate();
 	}
 
 	/**
@@ -291,7 +347,7 @@ class XBookReader extends CWidget
 	 */
 	protected function translate()
 	{
-		Yii::app()->getClientScript()->registerScript(__CLASS__, '
+		Yii::app()->getClientScript()->registerScript(__CLASS__.'#translate', '
 			$(".BRfloatHeadTitle").text("'.Yii::t('XBookReader.bookreader', 'About this book').'");
 			$(".info").text("'.Yii::t('XBookReader.bookreader', 'Info').'");
 			$(".share").text("'.Yii::t('XBookReader.bookreader', 'Share').'");
