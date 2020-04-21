@@ -199,23 +199,17 @@ class XFileForm extends CFormModel
 	public function getBookreaderData($dir, $natsort=true, $imageServer=null)
 	{
 		$files=$this->getFiles($dir, $natsort);
-		$bookreaderFiles=array();
-		$bookreaderFiles[]=array();
+		$data=array();
 		foreach($files as $file)
 		{
 			list($width, $height)=getimagesize($file);
-			$bookreaderFiles[]=array(
+			$data[]=array(
 				'uri'=>$imageServer.$file,
 				'width'=>$width,
 				'height'=>$height
 			);
 		}
-
-		$bookreaderFiles=array_chunk($bookreaderFiles, 2);
-		unset($bookreaderFiles[0][0]);
-		$bookreaderFiles[0]=array_values($bookreaderFiles[0]);
-
-		return $bookreaderFiles;
+		return array($data);
 	}
 
 	/**
