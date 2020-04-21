@@ -215,6 +215,8 @@ class XFileForm extends CFormModel
 
 		$bookreaderFiles=array_chunk($bookreaderFiles, 2);
 		unset($bookreaderFiles[0][0]);
+		$bookreaderFiles[0]=array_values($bookreaderFiles[0]);
+		
 		return $bookreaderFiles;
 	}
 
