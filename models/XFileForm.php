@@ -212,8 +212,10 @@ class XFileForm extends CFormModel
 				'height'=>$height
 			);
 		}
+
+		$bookreaderFiles=array_chunk($bookreaderFiles, 2);
 		unset($bookreaderFiles[0][0]);
-		return array_chunk($bookreaderFiles, 2);
+		return $bookreaderFiles;
 	}
 
 	/**
