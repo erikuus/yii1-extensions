@@ -202,7 +202,8 @@ class XFileForm extends CFormModel
 	{
 		$files=$this->getFiles($dir, $natsort);
 		$bookreaderFiles=array();
-		foreach($files as $i=>$file)
+		$bookreaderFiles[]=array();
+		foreach($files as $file)
 		{
 			list($width, $height)=getimagesize($file);
 			$bookreaderFiles[]=array(
@@ -211,6 +212,7 @@ class XFileForm extends CFormModel
 				'height'=>$height
 			);
 		}
+		unset($bookreaderFiles[0][0]);
 		return array_chunk($bookreaderFiles, 2);
 	}
 
