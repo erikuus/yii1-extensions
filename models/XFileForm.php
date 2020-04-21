@@ -160,17 +160,16 @@ class XFileForm extends CFormModel
 	{
 		$files=array();
 
-		if($handle=opendir($dir))
+		$filenames=@scandir($dir);
+		if($filenames)
 		{
-			while(false!==($filename=readdir($handle)))
+			$filenames=array_diff($filenames, array('.', '..'));
+			foreach($filenames as $filename)
 			{
-				if($filename!= '.' && $filename!='..')
-				{
-					$pathToFile=$dir.'/'.$filename;
+				$pathToFile=$dir.'/'.$filename;
 
-					if(in_array($this->getExtensionName($filename), $this->allowedExtensions))
-						$files[]=$pathToFile;
-				}
+				if(in_array($this->getExtensionName($filename), $this->allowedExtensions))
+					$files[]=$pathToFile;
 			}
 		}
 
