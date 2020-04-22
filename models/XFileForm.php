@@ -194,7 +194,7 @@ class XFileForm extends CFormModel
 	 * @param string $dir the full path to directory
 	 * @param boolean $natsort whether to natsort returned paths
 	 * @param string $imageServer the URL to script that serves image
-	 * @return array full paths to files with allowed extension
+	 * @return array image urls
 	 */
 	public function getBookreaderData($dir, $natsort=true, $imageServer=null)
 	{
@@ -213,8 +213,20 @@ class XFileForm extends CFormModel
 	}
 
 	/**
+	 * Get image dimensions
+	 * @param string $path the path to file
+	 * @param string $dimension [options "w"|"h"; default "w"]
+	 * @return array full paths to files with allowed extension
+	 */
+	public function getImageSize($path, $dimension='w')
+	{
+		list($width, $height)=getimagesize($file);
+		return $dimension='w' ? $width : $height;
+	}
+
+	/**
 	 * Convert directory name to code
-	 * @param string directory name (ex. "1-0-ii")
+	 * @param string $dir the directory name (ex. "1-0-ii")
 	 * @return string part of refcode (ex. "1-II")
 	 */
 	protected function dirToCode($dir)
@@ -224,7 +236,8 @@ class XFileForm extends CFormModel
 
 	/**
 	 * Convert code to directory name
-	 * @param string part of refcode (ex. "1-II")
+	 * @param string $code the part of refcode (ex. "1-II")
+	 * @param boolean $format whether to format code
 	 * @return string directory name (ex. "1-0-ii")
 	 */
 	protected function codeToDir($code, $format=false)
@@ -235,7 +248,7 @@ class XFileForm extends CFormModel
 
 	/**
 	 * Get filename from full path to file
-	 * @param string path to file (ex. "/mnt/saaga_laiendus/saaga/eelk/eaa1168/001/0000001/eaa1168_001_0000001_00001_m.png")
+	 * @param string $path the path to file (ex. "/mnt/saaga_laiendus/saaga/eelk/eaa1168/001/0000001/eaa1168_001_0000001_00001_m.png")
 	 * @return string the file name (ex. "eaa1168_001_0000001_00001_m.png")
 	 */
 	protected function getFilename($path)
@@ -248,7 +261,7 @@ class XFileForm extends CFormModel
 
 	/**
 	 * Get page segment of page from full path to file. If object string is present, it is also returned
-	 * @param string path to file (ex. "/mnt/saaga_laiendus/saaga/eelk/eaa1168/001/0000001/eaa1168_001_0000001_00001_m.png")
+	 * @param string $path the path to file (ex. "/mnt/saaga_laiendus/saaga/eelk/eaa1168/001/0000001/eaa1168_001_0000001_00001_m.png")
 	 * @return string page number (ex. "1_m")
 	 */
 	protected function getPageNumber($path)
