@@ -221,7 +221,7 @@ class XFileForm extends CFormModel
 	public function getImageSize($path, $dimension='w')
 	{
 		list($width, $height)=getimagesize($path);
-		return $dimension='w' ? $width : $height;
+		return $dimension=='w' ? $width : $height;
 	}
 
 	/**
