@@ -202,7 +202,7 @@ class XFileForm extends CFormModel
 	{
 		$files=$this->getFiles($dir, $natsort);
 
-		if($offset && $length)
+		if($offset!==null && $length!==null)
 			$files=array_slice($files, $offset, $length);
 
 		$data=array();
@@ -216,6 +216,17 @@ class XFileForm extends CFormModel
 			);
 		}
 		return array($data);
+	}
+
+	/**
+	 * Get number of files in directory
+	 * @param string $dir the full path to directory
+	 * @return integer number of files in directory
+	 */
+	public function getDirectorySize($dir)
+	{
+		$files=$this->getFiles($dir, false);
+		return count($files);
 	}
 
 	/**
