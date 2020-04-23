@@ -14,6 +14,17 @@ class XSaagaForm extends CFormModel
 	/**
 	 * Find descriptive unit of  Saaga
 	 * @param string unit reference code
+	 * @return string unit reference code
+	 */
+	public function findCustomUnit($reference)
+	{
+		$sql1 = "SELECT id, type, title, ref_code, display_time FROM  dgs_custom_unit WHERE ref_code=".$this->quote($reference);
+		return Yii::app()->saagadb->cache(self::CACHE_DURATION)->createCommand($sql)->queryRow();
+	}
+
+	/**
+	 * Find descriptive unit of  Saaga
+	 * @param string unit reference code
 	 * @param boolean $checkFondsOnly whether to check units on fond type only
 	 * @param boolean $checkItemsOnly whether to check units on item type only
 	 * @return string unit reference code
