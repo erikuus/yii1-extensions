@@ -194,11 +194,17 @@ class XFileForm extends CFormModel
 	 * @param string $dir the full path to directory
 	 * @param boolean $natsort whether to natsort returned paths
 	 * @param string $imageServer the URL to script that serves image
+	 * @param integer $offset the sequence will start at that offset in the array
+	 * @param integer $length  the sequence will start that far from the end of the array
 	 * @return array image urls
 	 */
-	public function getBookreaderData($dir, $natsort=true, $imageServer=null)
+	public function getBookreaderData($dir, $natsort=true, $imageServer=null, $offset=null, $length=null)
 	{
 		$files=$this->getFiles($dir, $natsort);
+
+		if($offset && $length)
+			$files=array_slice($files, $offset, $length);
+
 		$data=array();
 		foreach($files as $file)
 		{
