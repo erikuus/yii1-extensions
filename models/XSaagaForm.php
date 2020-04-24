@@ -18,7 +18,7 @@ class XSaagaForm extends CFormModel
 	 */
 	public function findCustomUnit($reference)
 	{
-		$sql1 = "SELECT id, type, title, ref_code, display_time FROM  dgs_custom_unit WHERE ref_code=".$this->quote($reference);
+		$sql = "SELECT id, type, title, ref_code, display_time FROM  dgs_custom_unit WHERE ref_code=".$this->quote($reference);
 		return Yii::app()->saagadb->cache(self::CACHE_DURATION)->createCommand($sql)->queryRow();
 	}
 
@@ -168,7 +168,7 @@ class XSaagaForm extends CFormModel
 			'forbidden'=>array(),
 		);
 
-		foreach ($references as $reference)
+		foreach($references as $reference)
 		{
 			$fond=$this->getReferenceFond($reference);
 
