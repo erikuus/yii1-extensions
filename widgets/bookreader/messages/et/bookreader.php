@@ -2,7 +2,7 @@
 return array(
   'Info' => 'Info',
   'Share' => 'Jaga',
-  'About this book' => 'Säiliku kohta',
+  'About this book' => 'Info',
   'Share this book' => 'Jaga seda raamatut',
   'Show/hide nav' => 'Näita/varja menüüd',
   'Flip left' => 'Eelmine',

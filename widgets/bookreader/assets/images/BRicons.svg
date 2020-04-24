@@ -35,15 +35,15 @@
             <g id="--magnify" transform="translate(613.000000, 12.000000)">
                 <circle id="Oval-3" stroke="#3C3C3C" stroke-width="2" cx="6.33216946" cy="7.12454189" r="5"></circle>
                 <path d="M11.199357,11.5959661 L15.5345696,15.9311788" id="Line-2" stroke="#3C3C3C" stroke-width="2" stroke-linecap="square"></path>
-                <text id="-" font-family="HelveticaNeue-Bold, Helvetica Neue" font-size="9" font-weight="bold" fill="#3C3C3C">
-                    <tspan x="4.59790934" y="9.53762315">-</tspan>
+                <text id="-" font-family="Verdana" font-size="9" font-weight="bold" fill="#3C3C3C">
+                    <tspan x="3.09790934" y="9.83762315">–</tspan>
                 </text>
             </g>
             <g id="+-magnify" transform="translate(693.000000, 12.000000)">
                 <circle id="Oval-3-Copy" stroke="#3C3C3C" stroke-width="2" cx="6.12427268" cy="7.12454189" r="5"></circle>
                 <path d="M10.9914602,11.5959661 L15.3266728,15.9311788" id="Line-2-Copy" stroke="#3C3C3C" stroke-width="2" stroke-linecap="square"></path>
-                <text id="+" font-family="HelveticaNeue-Bold, Helvetica Neue" font-size="9" font-weight="bold" fill="#3C3C3C">
-                    <tspan x="3.53835378" y="9.42508712">+</tspan>
+                <text id="+" font-family="Verdana" font-size="9" font-weight="bold" fill="#3C3C3C">
+                    <tspan x="2.1000000" y="10.2400000">+</tspan>
                 </text>
             </g>
             <g id="enter-full-screen-button" transform="translate(371.500000, 12.000000)" stroke="#3C3C3C" stroke-width="1.5">

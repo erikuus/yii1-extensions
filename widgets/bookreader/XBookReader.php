@@ -319,7 +319,7 @@ class XBookReader extends CWidget
 		$this->options['el']='js:selector';
 		$options=CJavaScript::encode($this->options);
 
-		Yii::app()->getClientScript()->registerScript(__CLASS__.'#'.$id, "
+		Yii::app()->getClientScript()->registerScript(__CLASS__.'Init'.$id, "
 			function instantiateBookReader(selector) {
 				var options = $options;
 				var br = new BookReader(options);
