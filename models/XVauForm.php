@@ -76,6 +76,7 @@ class XVauForm extends CFormModel
 			SELECT id
 			FROM tbl_blacklist
 			WHERE refcode=$reference
+			AND deleted IS FALSE
 			LIMIT 1
 		")->queryScalar();
 		return $id ? true : false;
@@ -94,6 +95,7 @@ class XVauForm extends CFormModel
 			FROM tbl_whitelist
 			WHERE refcode=$reference
 			AND rightholder_user_id=$userId
+			AND deleted IS FALSE
 			LIMIT 1
 		")->queryScalar();
 		return $id ? true : false;
