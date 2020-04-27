@@ -214,13 +214,6 @@ class XBookReader extends CWidget
 	 */
 	public $options=array();
 	/**
-	 * @var array the extra JavaScript options that should be passed to the BookReader
-	 * For example 'mobileNavFullscreenOnly'=>true    flipSpeed: 1000, flipDelay: 2000
-	 * defaults: 'mode/1up' Needs to be prefixed with 'mode/'. BookReader modes are: '1up', '2up', 'thumb'. BookReader defaults to 2up mode.
-	 * Defaults to array()
-	 */
-	public $extraOptions=array();
-	/**
 	 * @var array HTML attributes for the viewer container tag
 	 * Defaults to array()
 	 */
@@ -316,6 +309,9 @@ class XBookReader extends CWidget
 		if(!isset($this->options['ui']))
 			$this->options['ui']='full';
 
+		if(!isset($this->options['defaults']))
+			$this->options['defaults']='mode/1up';
+
 		$this->options['el']='js:selector';
 		$options=CJavaScript::encode($this->options);
 
@@ -356,13 +352,13 @@ class XBookReader extends CWidget
 			$(".BRnavCntl").attr("bt-xtitle","'.Yii::t('XBookReader.bookreader', 'Show/hide nav').'");
 			$(".book_left").attr("bt-xtitle","'.Yii::t('XBookReader.bookreader', 'Flip left').'");
 			$(".book_right").attr("bt-xtitle","'.Yii::t('XBookReader.bookreader', 'Flip right').'");
-			$(".onepg").attr("bt-xtitle","'.Yii::t('XBookReader.bookreader', 'Ühe lehekülje vaade').'");
-			$(".twopg").attr("bt-xtitle","'.Yii::t('XBookReader.bookreader', 'Kahe lehekülje vaade').'");
-			$(".thumb").attr("bt-xtitle","'.Yii::t('XBookReader.bookreader', 'Pisipildid').'");
-			$(".zoom_out").attr("bt-xtitle","'.Yii::t('XBookReader.bookreader', 'Vähenda').'");
-			$(".zoom_in").attr("bt-xtitle","'.Yii::t('XBookReader.bookreader', 'Suurenda').'");
+			$(".onepg").attr("bt-xtitle","'.Yii::t('XBookReader.bookreader', 'One-page view').'");
+			$(".twopg").attr("bt-xtitle","'.Yii::t('XBookReader.bookreader', 'Two-page view').'");
+			$(".thumb").attr("bt-xtitle","'.Yii::t('XBookReader.bookreader', 'Grid view').'");
+			$(".zoom_out").attr("bt-xtitle","'.Yii::t('XBookReader.bookreader', 'Zoom out').'");
+			$(".zoom_in").attr("bt-xtitle","'.Yii::t('XBookReader.bookreader', 'Zoom in').'");
 			$(".full").attr("bt-xtitle","'.Yii::t('XBookReader.bookreader', 'Toggle fullscreen').'");
-			$(".read").attr("bt-xtitle","'.Yii::t('XBookReader.bookreader', 'Loe valjusti').'");
+			$(".read").attr("bt-xtitle","'.Yii::t('XBookReader.bookreader', 'Read this book aloud').'");
 		', CClientScript::POS_READY);
 	}
 
