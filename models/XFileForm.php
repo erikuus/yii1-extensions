@@ -283,10 +283,11 @@ class XFileForm extends CFormModel
 	 */
 	protected function getPageNumber($path)
 	{
-		$parts = explode('_', $this->getFilename($path), 4);
-		$page = $parts[3]; // ex. 00001_m.png
+		$filename=$this->getFilename($path);
+		$parts=explode('_', $filename, 4);
+		$page=isset($parts[3]) ? $parts[3] : $filename; // ex. 00001_m.png
 
-		if(strstr($page,'.'))
+		if(strstr($page, '.'))
 			$page=strstr($page, '.', true); // ex. 00001_m
 
 		return $this->trimNull($page); // ex. 1_m
