@@ -169,6 +169,21 @@ class XDgsForm extends CFormModel
 	}
 
 	/**
+	 * @param string the path to directory
+	 * @return mixed string refcode or false if there is no value.
+	 */
+	public function getRefcodeByPath($directory)
+	{
+		$directory=$this->quote($directory);
+		return Yii::app()->kmooduldb->createCommand("
+			SELECT refcode
+			FROM dgs.tbl_mnt
+			WHERE directory=$directory
+			LIMIT 1
+		")->queryScalar();
+	}
+
+	/**
 	 * @return string quoted and escaped
 	 */
 	protected function quote($str)
