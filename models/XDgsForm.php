@@ -178,7 +178,7 @@ class XDgsForm extends CFormModel
 		return Yii::app()->kmooduldb->createCommand("
 			SELECT refcode
 			FROM dgs.tbl_mnt
-			WHERE directory=$directory
+			WHERE LOWER(directory)=$directory
 			LIMIT 1
 		")->queryScalar();
 	}
