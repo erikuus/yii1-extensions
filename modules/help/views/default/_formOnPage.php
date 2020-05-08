@@ -27,13 +27,19 @@
 						'modelAttribute'=>$model->localizeAttribute('content'),
 						'config'=>array(
 							'id'=>'Help_content_et',
-							'loadCSS'=>Yii::app()->baseUrl.'/css/'.Yii::app()->controller->module->editorCSS,
+							'loadCSS'=>is_array(Yii::app()->controller->module->editorCSS) ?
+								Yii::app()->controller->module->editorCSS :
+								Yii::app()->baseUrl.'/css/'.Yii::app()->controller->module->editorCSS,
 							'tools'=>Yii::app()->controller->module->editorTools,
-							'width'=>'945px',
+							'width'=>'900px',
 							'height'=>'500px',
-							'upImgUrl'=>Yii::app()->controller->module->editorUploadRoute ? Yii::app()->controller->createUrl(Yii::app()->controller->module->editorUploadRoute) : null,
+							'upImgUrl'=>Yii::app()->controller->module->editorUploadRoute ?
+								Yii::app()->controller->createUrl(Yii::app()->controller->module->editorUploadRoute) :
+								null,
 							'upImgExt'=>'jpg,jpeg,gif,png',
-							'upLinkUrl'=>Yii::app()->controller->module->editorUploadRoute ? Yii::app()->controller->createUrl(Yii::app()->controller->module->editorUploadRoute) : null,
+							'upLinkUrl'=>Yii::app()->controller->module->editorUploadRoute ?
+								Yii::app()->controller->createUrl(Yii::app()->controller->module->editorUploadRoute) :
+								null,
 							'upLinkExt'=>'zip,rar,txt,pdf',
 						)
 					));?>

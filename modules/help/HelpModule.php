@@ -59,7 +59,7 @@ class HelpModule extends CWebModule
 	 */
 	public $rightPortlets=array();
 	/**
-	 * @var css file for XHeditor widget
+	 * @var mixed css filename or array of paths to css files for XHeditor widget
 	 */
 	public $editorCSS;
 	/**
@@ -79,12 +79,12 @@ class HelpModule extends CWebModule
 	 */
 	public $rbac=false;
 
-	private $publicPages=array(
+	private $_publicPages=array(
 		'default/view',
 		'default/sview',
 	);
 
-	private $adminPages=array(
+	private $_adminPages=array(
 		'default/delete',
 		'install/index',
 		'install/create'
@@ -115,7 +115,7 @@ class HelpModule extends CWebModule
 			$route=$controller->id.'/'.$action->id;
 
 			// allow only admin user to install module and delete help texts
-			if(Yii::app()->user->name!='admin' && in_array($route,$this->adminPages))
+			if(Yii::app()->user->name!='admin' && in_array($route,$this->_adminPages))
 				throw new CHttpException(403,'You are not allowed to access this page.');
 
 			// allow authenticated users or users with given role access restricted pages
@@ -136,7 +136,7 @@ class HelpModule extends CWebModule
 	 */
 	protected function checkUserAccess($route)
 	{
-		if(Yii::app()->user->isGuest && !in_array($route,$this->publicPages))
+		if(Yii::app()->user->isGuest && !in_array($route,$this->_publicPages))
 			Yii::app()->user->loginRequired();
 		else
 			return true;
@@ -148,9 +148,9 @@ class HelpModule extends CWebModule
 	 */
 	protected function checkRoleAccess($route)
 	{
-		if(!Yii::app()->user->isGuest && !Yii::app()->user->checkAccess($this->rbac) && !in_array($route,$this->publicPages))
+		if(!Yii::app()->user->isGuest && !Yii::app()->user->checkAccess($this->rbac) && !in_array($route,$this->_publicPages))
 			throw new CHttpException(403,'You are not allowed to access this page.');
-		if(!Yii::app()->user->checkAccess($this->rbac) && !in_array($route,$this->publicPages))
+		if(!Yii::app()->user->checkAccess($this->rbac) && !in_array($route,$this->_publicPages))
 			Yii::app()->user->loginRequired();
 		else
 			return true;
