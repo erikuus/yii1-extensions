@@ -96,6 +96,7 @@ class XVauForm extends CFormModel
 			WHERE refcode=$reference
 			AND rightholder_user_id=$userId
 			AND deleted IS FALSE
+			AND (deadline IS NULL OR deadline>=NOW())
 			LIMIT 1
 		")->queryScalar();
 		return $id ? true : false;
