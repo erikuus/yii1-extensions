@@ -70,7 +70,7 @@
 						'model'=>$model,
 						'modelAttribute'=>'content_en',
 						'config'=>array(
-							'id'=>'Help_content_et',
+							'id'=>'Help_content_en',
 							'loadCSS'=>is_array(Yii::app()->controller->module->editorCSS) ?
 								Yii::app()->controller->module->editorCSS :
 								Yii::app()->baseUrl.'/css/'.Yii::app()->controller->module->editorCSS,
