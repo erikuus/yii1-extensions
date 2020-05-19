@@ -216,13 +216,13 @@ class XSelect2 extends CInputWidget
 		else
 			$this->htmlOptions['id']=$id;
 
-		if (isset($this->htmlOptions['placeholder']))
+		if(isset($this->htmlOptions['placeholder']))
 			$this->options['placeholder'] = $this->htmlOptions['placeholder'];
 
-		if (!isset($this->htmlOptions['multiple']))
+		if(!isset($this->htmlOptions['multiple']))
 		{
 			$data = array();
-			if (isset($this->options['placeholder']))
+			if(isset($this->options['placeholder']))
 				$data[] = '';
 			$this->data = $data + $this->data;
 		}
@@ -236,16 +236,16 @@ class XSelect2 extends CInputWidget
 	 */
 	public function run()
 	{
-		if (isset($this->options['ajax']))
+		if(isset($this->options['ajax']))
 		{
-			if ($this->hasModel())
+			if($this->hasModel())
 				echo CHtml::activeTextField($this->model, $this->attribute, $this->htmlOptions);
 			else
 				echo CHtml::textField($this->name, $this->value, $this->htmlOptions);
 		}
 		else
 		{
-			if (isset($this->htmlOptions['multiple']) && $this->htmlOptions['multiple']=='true')
+			if(isset($this->htmlOptions['multiple']) && $this->htmlOptions['multiple']=='true')
 			{
 				if($this->hasModel())
 					echo CHtml::activeListBox($this->model, $this->attribute, $this->data, $this->htmlOptions);
@@ -292,7 +292,7 @@ SCRIPT;
 		// register inline script
 		$script="jQuery('#{$id}').select2({$options}){$events};\n";
 
-		if ($this->sortable)
+		if($this->sortable)
 			$script.=$sortable;
 
 		if(Yii::app()->request->isAjaxRequest)
@@ -312,14 +312,14 @@ SCRIPT;
 		// register css file
 		if($this->cssFile===null)
 			$cs->registerCssFile($assets.'/select2.css');
-		else if($this->cssFile!==false)
+		elseif($this->cssFile!==false)
 			$cs->registerCssFile($this->cssFile);
 
 		// register js files
-		if ($this->sortable)
+		if($this->sortable)
 			$cs->registerCoreScript('jquery.ui');
 
-		if (YII_DEBUG)
+		if(YII_DEBUG)
 			$cs->registerScriptFile($assets. '/select2.js');
 		else
 			$cs->registerScriptFile($assets. '/select2.min.js');

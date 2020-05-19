@@ -77,7 +77,7 @@ class XGenerateDocNrBehavior extends CActiveRecordBehavior
 	public function addDocNrValidators()
 	{
 		$owner = $this->getOwner();
-		if ($owner->isNewRecord && $this->setOnCreate)
+		if($owner->isNewRecord && $this->setOnCreate)
 		{
 			$list = $owner->getValidatorList();
 			$list->add(CValidator::createValidator(
