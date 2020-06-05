@@ -186,7 +186,7 @@ class XAjaxUpload extends CWidget
 			$assets=Yii::app()->assetManager->publish(dirname(__FILE__).DIRECTORY_SEPARATOR.'assets');
 			$cs->registerCssFile($assets.'/fileuploader.css');
 		}
-		else if($this->cssFile!==false)
+		elseif($this->cssFile!==false)
 			$cs->registerCssFile($this->cssFile);
 
 		// register js file

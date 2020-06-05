@@ -87,70 +87,69 @@ class XBookReader extends CWidget
 	/**
 	 * @var array the initial JavaScript options that should be passed to the BookReader
 	 * Possible options include the following:
-	 * data: The list of images to be displayed in bookreader. For example:
-	 * array(
-	 *    array(
-	 *       array(
-	 *            'width'=>1920,
-	 *            'height'=>1200,
-	 *            'uri'=>'//www.plato.com/00001.jpg',
-	 *            'pageNum'=> 1' // optional
-	 *       )
-	 *    ),
-	 *    array(
-	 *       array(
-	 *            'width'=>1920,
-	 *            'height'=>1200,
-	 *            'uri'=>'//www.plato.com/00002.jpg'
-	 *       ),
-	 *       array(
-	 *            'width'=>1920,
-	 *            'height'=>1200,
-	 *            'uri'=>'//www.plato.com/00003.jpg'
-	 *       )
-	 *    )
-	 * )
-	 * bookTitle: book title displayed as text in the top left corner
-	 * enableBookTitleLink whether to enable book title link [default: true]
-	 * bookUrl: url of the link displayed in the top left corner
-	 * bookUrlText: label of the link displayed in the top left corner
-	 * bookUrlTitle: title of the link displayed in the top left corner
-	 * thumbnail: thumbnail is optional, but it is used in the info dialog
-	 * metadata: metadata is optional, but it is used in the info dialog. For example:
+	 * data - The list of images to be displayed in bookreader. For example:
+	 *     array(
+	 *         array(
+	 *             array(
+	 *                'width'=>1920,
+	 *                'height'=>1200,
+	 *                'uri'=>'//www.plato.com/00001.jpg',
+	 *                'pageNum'=> 1' // optional
+	 *             )
+	 *         ),
+	 *         array(
+	 *             array(
+	 *                'width'=>1920,
+	 *                'height'=>1200,
+	 *                'uri'=>'//www.plato.com/00002.jpg'
+	 *             ),
+	 *             array(
+	 *                'width'=>1920,
+	 *                'height'=>1200,
+	 *                'uri'=>'//www.plato.com/00003.jpg'
+	 *             )
+	 *         )
+	 *     )
+	 * bookTitle - book title displayed as text in the top left corner
+	 * enableBookTitleLink - whether to enable book title link [default: true]
+	 * bookUrl - url of the link displayed in the top left corner
+	 * bookUrlText - label of the link displayed in the top left corner
+	 * bookUrlTitle - title of the link displayed in the top left corner
+	 * thumbnail - thumbnail is optional, but it is used in the info dialog
+	 * metadata - metadata is optional, but it is used in the info dialog. For example:
 	 *     array(
 	 *         array("label"=>"Title", "value"=>"Demo"),
 	 *         array("label"=>"Author", "value"=>"Erik Uus"),
 	 *         array("label"=>"Demo Info", "value"=>"This demo shows how to use BookReader.")
-	 *     ),
-	 *
-	 * enableMobileNav: whether the mobile drawer is displayed [default: true]
-	 * mobileNavTitle: the mobile drawer title
-	 * imagesBaseURL: path to UI images [default: "/assets/images/"]
-	 * ui: user interface mode [options: "full"|"embed"; default: "full"]
-	 * defaults: view modes that must be prefixed with 'mode/' [options: "1up"|"2up"|"thumb"; default: "2up"]
-	 * padding: the padding in 1up mode [default: 10]
-	 * onePage: the object to hold parameters related to 1up mode. For example:
+	 *     )
+	 * enableMobileNav - whether the mobile drawer is displayed [default: true]
+	 * mobileNavTitle - the mobile drawer title
+	 * imagesBaseURL - path to UI images [default: "/assets/images/"]
+	 * ui - user interface mode [options: "full"|"embed"; default: "full"]
+	 * defaults - view modes that must be prefixed with 'mode/' [options: "1up"|"2up"|"thumb"; default: "2up"]
+	 * padding - the padding in 1up mode [default: 10]
+	 * onePage - the object to hold parameters related to 1up mode. For example:
 	 *     array(
 	 *         "autofit"=>"auto" // [options: "width"|"height"|"auto"|"none"]
 	 *     )
-	 * twoPage: the object to hold parameters related to 2up mode. For example:
+	 * twoPage - the object to hold parameters related to 2up mode. For example:
 	 *     array(
 	 *         'coverInternalPadding'=>0,
 	 *         'coverExternalPadding'=>0,
 	 *         'bookSpineDivWidth'=>64,
 	 *         'autofit'=>'auto'
 	 *     )
-	 * uiAutoHide: whether nav/toolbar will autohide [default: false]
-	 * thumbRowBuffer: the number of rows to pre-cache out a view [default: 2]
-	 * thumbColumns: the number of tumbnail columns [default: 6]
-	 * thumbMaxLoading: the number of thumbnails to load at once [default: 4]
-	 * thumbPadding: the spacing between thumbnails [default: 10]
-	 * thumbPadding: the speed for flip animation [options: integer|"fast"|"slow"; default: "fast"]
-	 * showToolbar: whether to show toolbar [default: true]
-	 * showNavbar: whether to show navbar [default: true]
-	 * pageProgression: the page progression direction [options: "lr" | "rl"; default: "lr"]
-	 * protected: whether to block download [default: false]
-	 * reductionFactors:
+	 * uiAutoHide - whether nav/toolbar will autohide [default: false]
+	 * thumbRowBuffer - the number of rows to pre-cache out a view [default: 2]
+	 * thumbColumns - the number of tumbnail columns [default: 6]
+	 * thumbMaxLoading - the number of thumbnails to load at once [default: 4]
+	 * thumbPadding - the spacing between thumbnails [default: 10]
+	 * thumbPadding - the speed for flip animation [options: integer|"fast"|"slow"; default: "fast"]
+	 * showToolbar - whether to show toolbar [default: true]
+	 * showNavbar - whether to show navbar [default: true]
+	 * pageProgression - the page progression direction [options: "lr" | "rl"; default: "lr"]
+	 * protected - whether to block download [default: false]
+	 * reductionFactors - for example:
 	 *     array(
 	 *         array("reduce"=>0.5, "autofit"=>null},
 	 *         array("reduce"=>1, "autofit"=>null},
@@ -159,11 +158,11 @@ class XBookReader extends CWidget
 	 *         array("reduce"=>4, "autofit"=>null},
 	 *         array("reduce"=>6, "autofit"=>null}
 	 *     )
-	 * getNumLeafs: function that returns total number of leafs, e.g. "js:function() {return 15;}"
-	 * getPageWidth: function that returns the width of a given page, e.g. "js:function(index) {return 1000;}"
-	 * getPageHeight: function that returns the height of a given page, e.g. "js:function(index) {return 1000;}"
-	 * getPageNum: function that returns page number, e.g. "js:function(index) {return index+1;}"
-	 * getPageSide: function that returns which side a given page should be displayed on. For example:
+	 * getNumLeafs - function that returns total number of leafs, e.g. "js:function() {return 15;}"
+	 * getPageWidth - function that returns the width of a given page, e.g. "js:function(index) {return 1000;}"
+	 * getPageHeight - function that returns the height of a given page, e.g. "js:function(index) {return 1000;}"
+	 * getPageNum - function that returns page number, e.g. "js:function(index) {return index+1;}"
+	 * getPageSide - function that returns which side a given page should be displayed on. For example:
 	 *     "js:function(index) {
 	 *         if(0==(index & 0x1)) {
 	 *             return 'R';
@@ -171,7 +170,7 @@ class XBookReader extends CWidget
 	 *             return 'L';
 	 *         }
 	 *     }"
-	 * getPageURI: function that loads images from server. For example:
+	 * getPageURI - function that loads images from server. For example:
 	 *     "js:function(index, reduce, rotate) {
 	 *         var leafStr = '000';
 	 *         var imgStr = (index+1).toString();
@@ -181,7 +180,7 @@ class XBookReader extends CWidget
 	 *     }",
 	 *     Note that reduce and rotate are ignored in this simple example, but we could reduce and load
 	 *     images from a different directory or pass the information to an image server.
-	 * getSpreadIndices: function that returns the left and right indices for the user-visible
+	 * getSpreadIndices - function that returns the left and right indices for the user-visible
 	 *     spread that contains the given index. The return values may be null if there is no facing
 	 *     page or the index is invalid. For example:
 	 *     "js:function(pindex) {
@@ -205,12 +204,10 @@ class XBookReader extends CWidget
 	 *         }
 	 *         return spreadIndices;
 	 *     }"
-	 * getEmbedCode: function that returns embed code for share dialog. For example:
+	 * getEmbedCode - function that returns embed code for share dialog. For example:
 	 *     "js:function(frameWidth, frameHeight, viewParams) {
 	 *         return "Embed code not supported for this book.";
 	 *     }"
-	 *
-	 * </pre>
 	 */
 	public $options=array();
 	/**
@@ -377,8 +374,11 @@ class XBookReader extends CWidget
 		$cs->registerMetaTag('width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no', 'viewport');
 		$cs->registerMetaTag('yes', 'apple-mobile-web-app-capable');
 
-		// js dependencies
-		$cs->registerScriptFile($baseUrl.'/jquery-1.10.1.js', CClientScript::POS_HEAD);
+		// register core script
+		$cs->scriptMap['jquery.js']=$baseUrl.'/jquery-1.10.1.js';
+		$cs->registerCoreScript('jquery');
+
+		// register js
 		$cs->registerScriptFile($baseUrl.'/jquery-ui-1.12.0.min.js', CClientScript::POS_HEAD);
 		$cs->registerScriptFile($baseUrl.'/jquery.browser.min.js', CClientScript::POS_HEAD);
 		$cs->registerScriptFile($baseUrl.'/dragscrollable-br.js', CClientScript::POS_HEAD);
