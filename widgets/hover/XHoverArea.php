@@ -97,7 +97,7 @@ class XHoverArea extends CWidget
 			$cssFile=CHtml::asset(dirname(__FILE__).DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'hover.css');
 			$cs->registerCssFile($cssFile);
 		}
-		else if($this->cssFile!==false)
+		elseif($this->cssFile!==false)
 			$cs->registerCssFile($this->cssFile);
 
 		// register inline javascript
