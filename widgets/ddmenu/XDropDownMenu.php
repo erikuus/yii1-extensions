@@ -43,7 +43,8 @@ class XDropDownMenu extends CMenu
 		echo '<br style="clear:both;" />';
 	}
 
-	protected function registerClientScript() {
+	protected function registerClientScript()
+	{
 		$assets = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'vendors';
 		$baseUrl = Yii::app()->getAssetManager()->publish($assets);
 
