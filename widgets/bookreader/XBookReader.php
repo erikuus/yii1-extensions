@@ -374,11 +374,9 @@ class XBookReader extends CWidget
 		$cs->registerMetaTag('width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no', 'viewport');
 		$cs->registerMetaTag('yes', 'apple-mobile-web-app-capable');
 
-		// register core script
-		$cs->scriptMap['jquery.js']=$baseUrl.'/jquery-1.10.1.js';
-		$cs->registerCoreScript('jquery');
-
 		// register js
+		$cs->scriptMap['jquery.js']=false;
+		$cs->registerScriptFile($baseUrl.'/jquery-1.10.1.js', CClientScript::POS_HEAD);
 		$cs->registerScriptFile($baseUrl.'/jquery-ui-1.12.0.min.js', CClientScript::POS_HEAD);
 		$cs->registerScriptFile($baseUrl.'/jquery.browser.min.js', CClientScript::POS_HEAD);
 		$cs->registerScriptFile($baseUrl.'/dragscrollable-br.js', CClientScript::POS_HEAD);
