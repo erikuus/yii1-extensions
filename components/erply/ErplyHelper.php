@@ -136,11 +136,11 @@ class ErplyHelper
 		$entities=array(
 			'AS','TÜ','UÜ','OÜ','TÜH','MTÜ','SA','FIE',
 			'AKTSIASELTS','TÄISÜHING','USALDUSÜHING','OSAÜHING','TULUNDUSÜHISTU','MITTETULUNDUSÜHING','SIHTASUTUS',
-    		'Aktsiaselts','Täisühing','Usaldusühing','Osaühing','Tulundusühistu','Mittetulundusühing','Sihtasutus',
-    		'aktsiaselts','täisühing','usaldusühing','osaühing','tulundusühistu','mittetulundusühing','sihtasutus',
+			'Aktsiaselts','Täisühing','Usaldusühing','Osaühing','Tulundusühistu','Mittetulundusühing','Sihtasutus',
+			'aktsiaselts','täisühing','usaldusühing','osaühing','tulundusühistu','mittetulundusühing','sihtasutus',
 		);
 
-		foreach ($entities as $entity)
+		foreach($entities as $entity)
 		{
 			if(strstr($name, $entity))
 				return $entity;
@@ -168,7 +168,6 @@ class ErplyHelper
 	}
 
 	/**
-	 * Set the expiration date to one hour ago
 	 * @param string the method key
 	 * @param string the param key
 	 * @param string the fallback key
