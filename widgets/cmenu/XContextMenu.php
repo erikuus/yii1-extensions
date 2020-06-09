@@ -250,6 +250,11 @@ class XContextMenu extends CWidget
 	 *
 	 */
 	public $options=array();
+	/**
+	 * @var boolean whether to register jquery-1.8.2.min.js
+	 * Defaults to false
+	 */
+	public $jquery=false;
 
 	/**
 	 * Initializes the widget.
@@ -316,9 +321,12 @@ class XContextMenu extends CWidget
 		// register scripts
 		$cs=Yii::app()->clientScript;
 
-		// register core script
-		$cs->scriptMap['jquery.js']=$assets.'/jquery-1.8.2.min.js';
-		$cs->registerCoreScript('jquery');
+		// register jquery
+		if($this->jquery)
+		{
+			$cs->scriptMap['jquery.js']=false;
+			$cs->registerScriptFile($assets.'/jquery-1.8.2.min.js', CClientScript::POS_HEAD);
+		}
 
 		// register widget css file
 		if($this->cssFile===null)
