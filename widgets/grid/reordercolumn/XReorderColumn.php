@@ -88,7 +88,8 @@ class XReorderColumn extends CGridColumn
 	/**
 	 * Register client script.
 	 */
-	protected function registerReorderColumnClientScript() {
+	protected function registerReorderColumnClientScript()
+	{
 		$gridId = $this->grid->getId();
 		$script = <<<SCRIPT
 		jQuery(".{$this->cssClass}").live("click", function(e){
@@ -110,7 +111,7 @@ SCRIPT;
 	 */
 	protected function renderDataCellContent($row, $data)
 	{
-		if ($this->reorderVisible===true || $this->evaluateExpression($this->reorderVisible, array('row'=>$row,'data'=>$data)))
+		if($this->reorderVisible===true || $this->evaluateExpression($this->reorderVisible, array('row'=>$row,'data'=>$data)))
 		{
 			$this->renderReorderLink($data->primaryKey, 'up', $this->_upIcon);
 			$this->renderReorderLink($data->primaryKey, 'down', $this->_downIcon);

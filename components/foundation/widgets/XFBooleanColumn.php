@@ -57,11 +57,11 @@ class XFBooleanColumn extends CGridColumn
 	/**
 	 * @var string the true icon (defaults to 'fi-check').
 	 */
-	public $trueIcon='fi-check';
+	public $trueIconCssClass='fi-check';
 	/**
 	 * @var string the false icon (defaults to 'fi-minus').
 	 */
-	public $falseIcon='fi-minus';
+	public $falseIconCssClass='fi-minus';
 	/**
 	 * @var array the HTML options for the cell tags.
 	 */
@@ -102,8 +102,8 @@ SCRIPT;
 
 		$link = CHtml::normalizeUrl($this->callbackUrl);
 		$icon = !empty($value) ?
-			'<i class="true '.$this->trueIcon.'"></i>' :
-			'<i class="false '.$this->falseIcon.'"></i>';
+			'<i class="true '.$this->trueIconCssClass.'"></i>' :
+			'<i class="false '.$this->falseIconCssClass.'"></i>';
 
 		echo CHtml::link($icon, $link, array('class'=>$this->_booleanClass));
 	}
@@ -112,7 +112,7 @@ SCRIPT;
 	{
 		if($this->grid->enableSorting && $this->sortable && $this->name!==null)
 			echo $this->grid->dataProvider->getSort()->link($this->name,$this->header);
-		else if($this->name!==null && $this->header===null)
+		elseif($this->name!==null && $this->header===null)
 		{
 			if($this->grid->dataProvider instanceof CActiveDataProvider)
 				echo CHtml::encode($this->grid->dataProvider->model->getAttributeLabel($this->name));
