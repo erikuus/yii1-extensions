@@ -23,6 +23,19 @@ class DefaultController extends Controller
 	}
 
 	/**
+	 * @return array actions
+	 */
+	public function actions()
+	{
+		return array(
+			'reorder'=>array(
+				'class'=>'ext.actions.XReorderAction',
+				'modelName'=>'Lookup'
+			),
+		);
+	}
+
+	/**
 	 * Default action.
 	 */
 	public function actionIndex()
@@ -167,25 +180,5 @@ class DefaultController extends Controller
 			echo CActiveForm::validate($model);
 			Yii::app()->end();
 		}
-	}
-
-	/**
-	 * Moves model up or down.
-	 */
-	public function actionMove()
-	{
-		if(Yii::app()->request->isPostRequest)
-		{
-			// we only allow movement via POST request
-			$model=$this->loadModel();
-
-			if(isset($_GET['move']) && $_GET['move']=='up')
-				$model->moveUp();
-
-			if(isset($_GET['move']) && $_GET['move']=='down')
-				$model->moveDown();
-		}
-		else
-			throw new CHttpException(400);
 	}
 }

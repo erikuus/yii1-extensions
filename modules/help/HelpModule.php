@@ -78,6 +78,10 @@ class HelpModule extends CWebModule
 	 * users are allowed to access all but admin pages.
 	 */
 	public $rbac=false;
+	/**
+	 * @var string button column class for admin view.
+	 */
+	public $buttonColumnClass='CButtonColumn';
 
 	private $_publicPages=array(
 		'default/view',

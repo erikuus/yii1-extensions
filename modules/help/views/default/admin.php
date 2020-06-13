@@ -26,7 +26,7 @@ $this->breadcrumbs=array(
 		'title_et',
 		'title_en',
 		array(
-			'class'=>'CButtonColumn',
+			'class'=>$this->module->buttonColumnClass,
 			'template'=>'{update} {delete}',
 			'updateButtonUrl'=>'$this->grid->controller->createReturnableUrl("update",array("id"=>$data->id))',
 			'deleteButtonUrl'=>'$this->grid->controller->createReturnableUrl("delete",array("id"=>$data->id))',

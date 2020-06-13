@@ -32,6 +32,21 @@ class Lookup extends CActiveRecord
 			: Yii::app()->controller->module->lookupTable;
 	}
 
+
+	/**
+	 * @return behaviors
+	 */
+	public function behaviors()
+	{
+		return array(
+			'ReorderBehavior' => array(
+				'class'=>'ext.behaviors.XReorderBehavior',
+				'groupId'=>'type',
+				'sort'=>'position',
+			),
+		);
+	}
+
 	// METHODS TO BE USED FROM WITHIN APPLICATION:
 
 	/**
@@ -165,32 +180,6 @@ class Lookup extends CActiveRecord
 			);
 		}
 		return $menu;
-	}
-
-	/**
-	 * Move up.
-	 */
-	public function moveUp()
-	{
-		$this->position=$this->position-1;
-		$this->update(array('position'));
-
-		$model=$this->find("position=$this->position AND type='$this->type' AND id!=$this->id");
-		$model->position=$model->position+1;
-		$model->update(array('position'));
-	}
-
-	/**
-	 * Move down.
-	 */
-	public function moveDown()
-	{
-		$this->position=$this->position+1;
-		$this->update(array('position'));
-
-		$model=$this->find("position=$this->position AND type='$this->type' AND id!=$this->id");
-		$model->position=$model->position-1;
-		$model->update(array('position'));
 	}
 
 	/**

@@ -91,9 +91,17 @@ class LookupModule extends CWebModule
 	* assets) are used.
 	*/
 	public $baseScriptUrl;
+	/**
+	 * @var string button column class for admin view.
+	 */
+	public $buttonColumnClass='CButtonColumn';
+	/**
+	 * @var string reoder column class for admin view.
+	 */
+	public $reorderColumnClass='ext.widgets.grid.reordercolumn.XReorderColumn';
 
-	private $publicPages=array();
-	private $adminPages=array(
+	private $_publicPages=array();
+	private $_adminPages=array(
 		'default/delete',
 		'install/index',
 		'install/create'
@@ -111,9 +119,8 @@ class LookupModule extends CWebModule
 		));
 
 		// publish module assets
-		if (!is_string($this->baseScriptUrl)) {
+		if(!is_string($this->baseScriptUrl))
 			$this->baseScriptUrl=Yii::app()->getAssetManager()->publish(Yii::getPathOfAlias('lookup.assets'));
-		}
 	}
 
 	/**
@@ -129,7 +136,7 @@ class LookupModule extends CWebModule
 			$route=$controller->id.'/'.$action->id;
 
 			// allow only admin user to delete lookup items
-			if(Yii::app()->user->name!='admin' && in_array($route,$this->adminPages))
+			if(Yii::app()->user->name!='admin' && in_array($route,$this->_adminPages))
 				throw new CHttpException(403,'You are not allowed to access this page.');
 
 			// allow authenticated users or users with given role access restricted pages
@@ -139,8 +146,7 @@ class LookupModule extends CWebModule
 				$this->checkRoleAccess($route);
 
 			// allow only admin user to add lookup items of new type
-			if (isset($_GET['type']) && $this->safeTypes!==array() && !in_array($_GET['type'],$this->safeTypes) &&
-			Yii::app()->user->name!='admin')
+			if(isset($_GET['type']) && $this->safeTypes!==array() && !in_array($_GET['type'],$this->safeTypes) && Yii::app()->user->name!='admin')
 				throw new CHttpException(403,'You are not allowed to access this page.');
 
 			return true;
@@ -155,7 +161,7 @@ class LookupModule extends CWebModule
 	 */
 	protected function checkUserAccess($route)
 	{
-		if(Yii::app()->user->isGuest && !in_array($route,$this->publicPages))
+		if(Yii::app()->user->isGuest && !in_array($route,$this->_publicPages))
 			Yii::app()->user->loginRequired();
 		else
 			return true;
@@ -167,9 +173,9 @@ class LookupModule extends CWebModule
 	 */
 	protected function checkRoleAccess($route)
 	{
-		if(!Yii::app()->user->isGuest && !Yii::app()->user->checkAccess($this->rbac) && !in_array($route,$this->publicPages))
+		if(!Yii::app()->user->isGuest && !Yii::app()->user->checkAccess($this->rbac) && !in_array($route,$this->_publicPages))
 			throw new CHttpException(403,'You are not allowed to access this page.');
-		if(!Yii::app()->user->checkAccess($this->rbac) && !in_array($route,$this->publicPages))
+		if(!Yii::app()->user->checkAccess($this->rbac) && !in_array($route,$this->_publicPages))
 			Yii::app()->user->loginRequired();
 		else
 			return true;
