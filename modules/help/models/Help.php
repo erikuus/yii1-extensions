@@ -89,9 +89,11 @@ class Help extends CActiveRecord
 	 */
 	public function buildEditLink($id, $urlMethod='createReturnableUrl')
 	{
-		$icon=CHtml::image(Yii::app()->baseUrl.'/images/update.png', Yii::t('HelpModule.ui','Edit'));
+		$icon=CHtml::image(Yii::app()->baseUrl.'/images/update.png');
 		$url=Yii::app()->controller->{$urlMethod}('/help/default/updateOnPage',array('id'=>$id));
-		return CHtml::link($icon, $url);
+		return CHtml::link($icon, $url, array(
+			'title'=>Yii::t('HelpModule.ui','Edit')
+		));
 	}
 
 	// METHODS TO BE USED FROM WITHIN APPLICATION:

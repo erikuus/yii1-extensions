@@ -79,6 +79,11 @@ class HelpModule extends CWebModule
 	 */
 	public $rbac=false;
 	/**
+	 * @var boolean whether to display edit-on-page link
+	 * Defaults to true
+	 */
+	public $editOnPage=true;
+	/**
 	 * @var string button column class for admin view.
 	 */
 	public $buttonColumnClass='CButtonColumn';
