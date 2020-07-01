@@ -87,11 +87,11 @@ require_once dirname(__FILE__).'/vendor/NTLMSoapClient.php';
 
 class XPinal extends CApplicationComponent
 {
- 	/**
- 	 * @var boolean whether to register NTLM sream wrapper
- 	 * If wsdl and xsd files are behind NTLM Authentication we
- 	 * need to register NTLM sream wrapper for SoapClient to work.
- 	 */
+	/**
+	 * @var boolean whether to register NTLM sream wrapper
+	 * If wsdl and xsd files are behind NTLM Authentication we
+	 * need to register NTLM sream wrapper for SoapClient to work.
+	 */
 	public $registerWrapper=true;
 
 	/**

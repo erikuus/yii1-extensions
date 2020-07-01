@@ -65,7 +65,6 @@ class XErply extends CApplicationComponent
 	/**
 	 * Initializes the component.
 	 * This method checks if required values are set
-	 * and constructs soap client object
 	 */
 	public function init()
 	{

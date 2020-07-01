@@ -50,7 +50,7 @@ class XIsikukoodValidator extends CValidator
 		}
 		if(($s1%11) < 10)
 			$sum = $s1%11;
-		else if(($s2%11) < 10)
+		elseif(($s2%11) < 10)
 			$sum = $s2%11;
 		else
 			$sum = 0;
@@ -67,11 +67,11 @@ class XIsikukoodValidator extends CValidator
 	{
 		if(in_array($value[0], array(1, 2)))
 			$year = "18" . $value[1] . $value[2];
-		else if(in_array($value[0], array(3, 4)))
+		elseif(in_array($value[0], array(3, 4)))
 			$year = "19" . $value[1] . $value[2];
-		else if(in_array($value[0], array(5, 6)))
+		elseif(in_array($value[0], array(5, 6)))
 			$year = "20" . $value[1] . $value[2];
-		else if(in_array($value[0], array(7, 8)))
+		elseif(in_array($value[0], array(7, 8)))
 			$year = "21" . $value[1] . $value[2];
 		else
 			return false;
