@@ -92,7 +92,7 @@ class XVauBookmark extends CWidget
 	 */
 	protected function getText($label, $image, $title)
 	{
-		return $label ? CHtml::encode($label) : CHtml::image($image,$title,array('title'=>$title,'style'=>'margin-left: 3px'));
+		return $label ? $label : CHtml::image($image,$title,array('title'=>$title,'style'=>'margin-left: 3px'));
 	}
 
 	/**
