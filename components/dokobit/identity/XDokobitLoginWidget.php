@@ -15,7 +15,7 @@
  *
  * <pre>
  * 'components'=>array(
- *     'dokobit'=> array(
+ *     'dokobitIdentity'=> array(
  *         'class'=>'ext.components.dokobit.identity.XDokobitIdentity',
  *         'apiAccessToken'=>'testid_AabBcdEFgGhIJjKKlmOPrstuv',
  *         'apiBaseUrl'=>'https://id-sandbox.dokobit.com/api/authentication/'
@@ -33,6 +33,8 @@
  *     return array(
  *         'dokobitLogin'=>array(
  *             'class'=>'ext.components.dokobit.identity.XDokobitLoginAction',
+ *             'successUrl'=>$this->createUrl('index'),
+ *             'failureUrl'=>$this->createUrl('login')
  *             'authOptions'=>array(
  *                 'modelName'=>'Kasutaja',
  *                 'scenarioName'=>'dokobit',
@@ -43,10 +45,10 @@
  *                 'enableCreate'=>true,
  *                 'enableUpdate'=>true,
  *                 'syncAttributes'=>array(
- *                     'eesnimi'=>'name',
- *                     'perekonnanimi'=>'surname',
- *                     'autentimise_meetod'=>'authentication_method',
- *                     'telefon'=>'phone'
+ *                     'name'=>'eesnimi',
+ *                     'surname'=>'perekonnanimi',
+ *                     'authentication_method'=>'autentimise_meetod',
+ *                     'phone'=>'telefon'
  *                 ),
  *             )
  *         )
@@ -59,17 +61,23 @@
  * <pre>
  * public function actionLogin()
  * {
- *     $sessionData=Yii::app()->dokobit->createSession(array(
- *         'return_url'=>$this->createUrl('dokobitLogin')
+ *     // create dokobit session
+ *     $dokobitSessionData=Yii::app()->dokobitIdentity->createSession(array(
+ *         'return_url'=>$this->createAbsoluteUrl('dokobitLogin')
  *     ));
  *
- *     $sessionData=CJSON::decode($userData);
+ *     // decode data
+ *     $dokobitSessionData=CJSON::decode($dokobitSessionData);
  *
- *     if($sessionData['status']!='ok')
- *         throw new CHttpException(401);
+ *     // check data, get token
+ *     $dokobitSessionToken=null;
+ *     if($dokobitSessionData['status']=='ok')
+ *         $dokobitSessionToken=$dokobitSessionData['session_token'];
+ *     else
+ *         Yii::app()->user->setFlash('failure', Yii::t('ui', 'Mobile ID, Smart Card and Smart-ID authentication methods are unavailable!'));
  *
  *     $this->render('login', array(
- *         'sessionToken'=>$sessionData['session_token']
+ *         'dokobitSessionToken'=>$dokobitSessionToken
  *     ));
  * }
  * </pre>
@@ -77,7 +85,7 @@
  * And inside login view call widget.
  *
  * <pre>
- * $this->widget('ext.components.dokobit.identity.XDokobitLoginAction', array(
+ * $this->widget('ext.components.dokobit.identity.XDokobitLoginWidget', array(
  *     'sessionToken'=>$sessionToken,
  *     'options'=>array(
  *         'locale'=>'et',
@@ -123,29 +131,39 @@ class XDokobitLoginWidget extends CWidget
 	 * Defaults to 'https://id-sandbox.dokobit.com/js/dokobit-integration.min.js'
 	 */
 	public $jsUrl='https://id-sandbox.dokobit.com/js/dokobit-integration.min.js';
+	/**
+	 * @var boolean whether the widget is visible
+	 * Defaults to true
+	 */
+	public $visible=true;
 
 	/**
 	 * Initializes the widget
 	 */
 	public function init()
 	{
-		// checks if required values are set
-		if(!$this->sessionToken)
-			throw new CException('"sessionToken" has to be set!');
+		if($this->visible)
+		{
+			// checks if required values are set
+			if(!$this->sessionToken)
+				throw new CException('"sessionToken" has to be set!');
 
-		// finalize options
-		$this->options['sessionToken']=$this->sessionToken;
+			// finalize options
+			$this->options['sessionToken']=$this->sessionToken;
 
-		// finalize html options
-		if(isset($this->htmlOptions['id']))
-			$this->options['container']='#'.$this->htmlOptions['id'];
+			// finalize html options
+			if(isset($this->htmlOptions['id']))
+				$this->options['container']='#'.$this->htmlOptions['id'];
+			else
+				$this->htmlOptions['id']='Dokobit-identity-container';
 
-		// register client scripts
-		$this->registerClientScript();
-		$this->registerClientScriptFiles();
+			// register client scripts
+			$this->registerClientScript();
+			$this->registerClientScriptFiles();
 
-		// render container open tag
-		echo CHtml::openTag('div', $this->htmlOptions)."\n";
+			// render container open tag
+			echo CHtml::openTag('div', $this->htmlOptions)."\n";
+		}
 	}
 
 	/**
@@ -153,7 +171,8 @@ class XDokobitLoginWidget extends CWidget
 	 */
 	public function run()
 	{
-		echo CHtml::closeTag('div');
+		if($this->visible)
+			echo CHtml::closeTag('div');
 	}
 
 	/**

@@ -8,7 +8,7 @@
  * Configuration example:
  * <pre>
  * 'components'=>array(
- *     'dokobit'=> array(
+ *     'dokobitIdentity'=> array(
  *         'class'=>'ext.components.dokobit.identity.XDokobitIdentity',
  *         'apiAccessToken'=>'testid_AabBcdEFgGhIJjKKlmOPrstuv',
  *         'apiBaseUrl'=>'https://id-sandbox.dokobit.com/api/authentication/'
@@ -132,8 +132,12 @@ class XDokobitIdentity extends CApplicationComponent
 		curl_setopt($ch, CURLOPT_POST, $post);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
 
+		$fields='';
 		if($post && $params!==array())
-			curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
+		{
+			$fields=http_build_query($params);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
+		}
 
 		$requestHeaders=array(
 			'Content-type: application/x-www-form-urlencoded',

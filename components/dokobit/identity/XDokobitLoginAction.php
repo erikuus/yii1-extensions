@@ -23,7 +23,9 @@
  * {
  *     return array(
  *         'dokobitLogin'=>array(
- *             'class'=>'ext.components.dokobit.identity.XDokobitLoginAction'
+ *             'class'=>'ext.components.dokobit.identity.XDokobitLoginAction',
+ *             'successUrl'=>$this->createUrl('index'),
+ *             'failureUrl'=>$this->createUrl('login')
  *         )
  *     );
  * }
@@ -44,10 +46,13 @@ class XDokobitLoginAction extends CAction
 	 */
 	public $componentName='dokobitIdentity';
 	/**
-	 * @var string $redirectUrl the url user will be redirected after successful login
-	 * If empty, Yii::app()->user->returnUrl will be used
+	 * @var string $successUrl the location this action redirects after login success
 	 */
-	public $redirectUrl;
+	public $successUrl;
+	/**
+	 * @var string $failureUrl the location this action redirects after login failure
+	 */
+	public $failureUrl;
 	/**
 	 * @var array $authOptions the authentication options
 	 * @see XDokobitUserIdentity::authenticate
@@ -62,9 +67,9 @@ class XDokobitLoginAction extends CAction
 	 * @var string $flashKey the key identifying the flash message
 	 * Defaults to dokobit
 	 */
-	public $flashKey='dokobit';
+	public $flashKey='dokobit.login.error';
 	/**
-	 * @var boolean $log whether to log errors
+	 * @var boolean $log whether to log
 	 * Defaults to false
 	 */
 	public $log=false;
@@ -105,41 +110,52 @@ class XDokobitLoginAction extends CAction
 			// get dokobit component
 			$dokobitIdentity=Yii::app()->getComponent($this->componentName);
 
+			// get dokobit user data
 			if($dokobitIdentity)
 				$userData=$dokobitIdentity->getUserData($_GET['session_token']);
 			else
-				throw new CException('The "XDokobitIdentity" component have to be defined in configuration file.');
+				throw new CHttpException(500,'Dokobit Identity Component not found.');
 
+			// authenticate user (create and update on demand)
 			Yii::import('ext.components.dokobit.identity.XDokobitUserIdentity');
 			$identity=new XDokobitUserIdentity($userData);
 			$identity->authenticate($this->authOptions);
 			if($identity->errorCode==XDokobitUserIdentity::ERROR_NONE)
 			{
+				// login user into application
 				Yii::app()->user->login($identity);
-				$this->controller->redirect($this->redirectUrl ? $this->redirectUrl : Yii::app()->user->returnUrl);
+				$this->controller->redirect($this->successUrl);
 			}
 			elseif($identity->errorCode==XDokobitUserIdentity::ERROR_UNAUTHORIZED)
 				throw new CHttpException(403,'You do not have the proper credential to access this page.');
 			else
 			{
-				$this->flash(Yii::t('XDokobitLoginAction.identity', 'Login failed!'));
+				// log errors
 				switch($identity->errorCode)
 				{
 					case XDokobitUserIdentity::ERROR_INVALID_DATA:
 						$this->log('Invalid user data: '.$userData);
+						$this->flash(Yii::t('XDokobitLoginAction.identity', 'Authentication failed!'));
 						break;
 					case XDokobitUserIdentity::ERROR_INVALID_STATUS:
 						$this->log('Invalid user status: '.$userData);
+						$this->flash(Yii::t('XDokobitLoginAction.identity', 'Authentication failed! User information not received.'));
 						break;
 					case XDokobitUserIdentity::ERROR_EXPIRED_CERTIFICATE:
 						$this->log('Expired certificate: '.$userData);
+						$this->flash(Yii::t('XDokobitLoginAction.identity', 'Login failed! Certificate has expired.'));
 						break;
 					case XDokobitUserIdentity::ERROR_SYNC_DATA:
 						$this->log('Failed data sync: '.$userData);
+						$this->flash(Yii::t('XDokobitLoginAction.identity', 'Login failed! Authentication was successfull, but data synchronization failed.'));
 						break;
 					default:
 						$this->log('Unknown error code: '.$identity->errorCode);
+						$this->flash(Yii::t('XDokobitLoginAction.identity', 'Login failed!'));
 				}
+
+				// set failure message and redirect
+				$this->controller->redirect($this->failureUrl);
 			}
 		}
 		else

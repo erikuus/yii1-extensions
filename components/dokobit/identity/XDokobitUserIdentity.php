@@ -132,10 +132,10 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 	 *     'enableCreate'=>true,
 	 *     'enableUpdate'=>true,
 	 *     'syncAttributes'=>array(
-	 *         'eesnimi'=>'name',
-	 *         'perekonnanimi'=>'surname',
-	 *         'autentimise_meetod'=>'authentication_method',
-	 *         'telefon'=>'phone'
+	 *         'name'=>'eesnimi',
+	 *         'surname'=>'perekonnanimi',
+	 *         'authentication_method'=>'autentimise_meetod',
+	 *         'phone'=>'telefon'
 	 *     ),
 	 * )
 	 * </pre>
@@ -150,7 +150,7 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 		if(json_last_error()==JSON_ERROR_NONE)
 		{
 			// validate that dokobit user data status is ok
-			if($userData['status']!='ok')
+			if($userData['status']=='ok')
 			{
 				// validate that certificate is not expired
 				if($this->validateCerificate($userData))
@@ -165,10 +165,10 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 						$codeAttributeName=$this->getValue($options,'codeAttributeName');
 						$countryCodeAttributeName=$this->getValue($options,'countryCodeAttributeName');
 						$usernameAttributeName=$this->getValue($options,'usernameAttributeName');
+						$birthdayAttributeName=$this->getValue($options,'birthdayAttributeName');
 						$enableCreate=$this->getValue($options,'enableCreate');
 						$enableUpdate=$this->getValue($options,'enableUpdate');
 						$syncAttributes=$this->getValue($options,'syncAttributes');
-						$birthdayFromCode=$this->getValue($options,'birthdayFromCode');
 
 						// check required
 						if(!$modelName || !$codeAttributeName || !$countryCodeAttributeName)
@@ -198,7 +198,11 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 									$user->{$birthdayAttributeName}=$this->getBirthdayFromCode($userData['code']);
 
 								foreach($syncAttributes as $key=>$attribute)
-									$user->{$attribute}=$this->getValue($userData,$key);
+								{
+									$value=$this->getValue($userData,$key);
+									if($value)
+										$user->{$attribute}=$value;
+								}
 
 								if(!$user->save())
 									$this->errorCode=self::ERROR_SYNC_DATA;
@@ -217,7 +221,11 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 								$user->{$birthdayAttributeName}=$this->getBirthdayFromCode($userData['code']);
 
 							foreach($syncAttributes as $key=>$attribute)
-								$user->{$attribute}=$this->getValue($userData,$key);
+							{
+								$value=$this->getValue($userData,$key);
+								if($value)
+									$user->{$attribute}=$value;
+							}
 
 							if(!$user->save())
 								$this->errorCode=self::ERROR_SYNC_DATA;
