@@ -3,11 +3,16 @@
 /**
  * XDokobitLoginAction class file.
  *
- * XDokobitLoginAction makes use of {@link XDokobitIdentity} and {@link XDokobitUserIdentity} to login
- * user into application using the data of authenticated user returned by Dokobit Identity Gateway API.
+ * XDokobitLoginAction authorizes user and logs him/her into application using the data of authenticated user
+ * returned by Dokobit Identity Gateway API.
+ *
+ * XDokobitLoginAction is meant to be used together with {@link XDokobitIdentity}, {@link XDokobitUserIdentity}
+ * and {@link XDokobitLoginWidget}. These classes provide a unified solution that enables to authenticate user by
+ * Dokobit Identity Gateway and based on the data of authenticated user to authorize him/her to log into application.
  *
  * First configure dokobit identity component:
- * <pre>
+ *
+ * ```
  * 'components'=>array(
  *     'dokobitIdentity'=> array(
  *         'class'=>'ext.components.dokobit.identity.XDokobitIdentity',
@@ -15,10 +20,13 @@
  *         'apiBaseUrl'=>'https://id-sandbox.dokobit.com/api/authentication/'
  *     )
  * )
- * </pre>
+ * ```
  *
- * Then set up action in application controller:
- * <pre>
+ * Then define dokobit login action in controller. After successful authentication Dokobit Identity Gateway will
+ * redirect user to this action. This action authorizes and logs user into application using the data of authenticated
+ * user returned by Dokobit Identity Gateway API.
+ *
+ * ```
  * public function actions()
  * {
  *     return array(
@@ -29,9 +37,108 @@
  *         )
  *     );
  * }
- * </pre>
+ * ```
  *
- * Please refer to {@link XDokobitLoginWidget} for complete usage information.
+ * Note that in the above example after successful authentication only user session will be started in the application
+ * with Yii::app()->user->id being set to <code>@<country_code>. This minimalist configuration is useful only for limited
+ * cases, where there are no user data stored in application database. In most cases you need define authOption to authorize
+ * athenticated user against database.
+ *
+ * Example 2:
+ *
+ * ```
+ * public function actions()
+ * {
+ *     return array(
+ *         'dokobitLogin'=>array(
+ *             'class'=>'ext.components.dokobit.identity.XDokobitLoginAction',
+ *             'successUrl'=>$this->createUrl('index'),
+ *             'failureUrl'=>$this->createUrl('login')
+ *             'authOptions'=>array(
+ *                 'modelName'=>'User',
+ *                 'codeAttributeName'=>'user_id_number',
+ *                 'countryCodeAttributeName'=>'user_country_code',
+ *                 'usernameAttributeName'=>'username',
+ *             )
+ *         )
+ *     );
+ * }
+ * ```
+ *
+ * In the above example user is authorized against application database. "User" is the name of model that reads and writes
+ * data form and to user table. Authenticated user is authorized to log into application only if there is a row in user table
+ * where user_id_number=<code> and user_country_code=<country_code>. Yii::app()->user->id will be set to primary key value and
+ * Yii::app()->user->name will be assigned the value of username column/attribute.
+ *
+ * However, there are cases when new user must be created in the application from the data of authenticated user returned
+ * by Dokobit Identity Gateway API. In these cases 'enableCreate' should be set to true.
+ *
+ * Example 3:
+ *
+ * ```
+ * public function actions()
+ * {
+ *     return array(
+ *         'dokobitLogin'=>array(
+ *             'class'=>'ext.components.dokobit.identity.XDokobitLoginAction',
+ *             'successUrl'=>$this->createUrl('index'),
+ *             'failureUrl'=>$this->createUrl('login')
+ *             'authOptions'=>array(
+ *                 'modelName'=>'User',
+ *                 'codeAttributeName'=>'user_id_number',
+ *                 'countryCodeAttributeName'=>'user_country_code',
+ *                 'usernameAttributeName'=>'username',
+ *                 'enableCreate'=>true,
+ *                 'syncAttributes'=>array(
+ *                     'name'=>'firstname',
+ *                     'surname'=>'lastname',
+ *                     'phone'=>'phone'
+ *                 )
+ *             )
+ *         )
+ *     );
+ * }
+ * ```
+ *
+ * In the above example, if there is no row in the aplication user table where user_id_number=<code> and user_country_code=<country_code>,
+ * new user is inserted based on the data of authenticated user returned by Dokobit Identity Gateway API and according to the data mapping
+ * given in 'authOptions'.
+ *
+ * But you may need to keep application data in sync with authenticated user data that may change in some cases
+ * (for example name change in case of marriage).
+ *
+ * Example 4:
+ *
+ * ```
+ * public function actions()
+ * {
+ *     return array(
+ *         'dokobitLogin'=>array(
+ *             'class'=>'ext.components.dokobit.identity.XDokobitLoginAction',
+ *             'successUrl'=>$this->createUrl('index'),
+ *             'failureUrl'=>$this->createUrl('login')
+ *             'authOptions'=>array(
+ *                 'modelName'=>'User',
+ *                 'codeAttributeName'=>'user_id_number',
+ *                 'countryCodeAttributeName'=>'user_country_code',
+ *                 'usernameAttributeName'=>'username',
+ *                 'enableCreate'=>true,
+ *                 'enableUpdate'=>true,
+ *                 'syncAttributes'=>array(
+ *                     'name'=>'firstname',
+ *                     'surname'=>'lastname',
+ *                     'phone'=>'phone'
+ *                 )
+ *             )
+ *         )
+ *     );
+ * }
+ * ```
+ *
+ * In the above example, every time user is authorized and logged into application, application database (user table) is updated with
+ * the data of authenticated user returned by Dokobit Identity Gateway API and according to the data mapping given in 'authOptions'.
+ *
+ * Please refer to README.md for complete usage information.
  *
  * @link https://id-sandbox.dokobit.com/api/doc Documentation
  * @link https://support.dokobit.com/category/537-developer-guide Developer guide

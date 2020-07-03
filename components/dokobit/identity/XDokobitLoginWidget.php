@@ -1,64 +1,18 @@
 <?php
 
 /**
- * XDokobitLoginWidget class file
+ * XDokobitLoginWidget class file.
  *
- * XDokobitLoginWidget embeds Dokobit Identity Gateway UI that allows to authenticate user without leaving website
+ * XDokobitLoginWidget embeds Dokobit Identity Gateway UI that allows to authenticate user without leaving website.
  *
  * XDokobitLoginWidget is meant to be used together with {@link XDokobitIdentity}, {@link XDokobitUserIdentity} and
- * {@link XDokobitLoginAction}. Together these classes provide a solution that enables to authenticate user by
- * Dokobit Identity Gateway and based on the data of authenticated user to log him/her into application.
+ * {@link XDokobitLoginAction}. These classes provide a unified solution that enables to authenticate user by Dokobit
+ * Identity Gateway and based on the data of authenticated user to authorize him/her to log into application.
  *
- * The following shows how to use XDokobitLoginWidget.
+ * First define controller action that starts Dokobit Identity Gateway session and passes session token to the view
+ * that embeds XDokobitLoginWidget.
  *
- * First configure dokobit component.
- *
- * <pre>
- * 'components'=>array(
- *     'dokobitIdentity'=> array(
- *         'class'=>'ext.components.dokobit.identity.XDokobitIdentity',
- *         'apiAccessToken'=>'testid_AabBcdEFgGhIJjKKlmOPrstuv',
- *         'apiBaseUrl'=>'https://id-sandbox.dokobit.com/api/authentication/'
- *     )
- * )
- * </pre>
- *
- * Then define dokobit login action in controller. After successful identification Dokobit Identity Gateway
- * will redirect user to this action. This action logs user into application using the data of
- * authenticated user returned by Dokobit Identity Gateway API.
- *
- * <pre>
- * public function actions()
- * {
- *     return array(
- *         'dokobitLogin'=>array(
- *             'class'=>'ext.components.dokobit.identity.XDokobitLoginAction',
- *             'successUrl'=>$this->createUrl('index'),
- *             'failureUrl'=>$this->createUrl('login')
- *             'authOptions'=>array(
- *                 'modelName'=>'Kasutaja',
- *                 'scenarioName'=>'dokobit',
- *                 'codeAttributeName'=>'isikukood',
- *                 'countryCodeAttributeName'=>'riigikood',
- *                 'usernameAttributeName'=>'kasutajanimi',
- *                 'birthdayAttributeName'=>'birthday',
- *                 'enableCreate'=>true,
- *                 'enableUpdate'=>true,
- *                 'syncAttributes'=>array(
- *                     'name'=>'eesnimi',
- *                     'surname'=>'perekonnanimi',
- *                     'authentication_method'=>'autentimise_meetod',
- *                     'phone'=>'telefon'
- *                 ),
- *             )
- *         )
- *     );
- * }
- * </pre>
- *
- * Now define application login action that starts Dokobit Identity Gateway session.
- *
- * <pre>
+ * ```
  * public function actionLogin()
  * {
  *     // create dokobit session
@@ -80,11 +34,11 @@
  *         'dokobitSessionToken'=>$dokobitSessionToken
  *     ));
  * }
- * </pre>
+ * ```
  *
- * And inside login view call widget.
+ * Inside this view call widget that displays Dokobit Identity Gateway UI.
  *
- * <pre>
+ * ```
  * $this->widget('ext.components.dokobit.identity.XDokobitLoginWidget', array(
  *     'sessionToken'=>$sessionToken,
  *     'options'=>array(
@@ -92,7 +46,9 @@
  *         'primaryColor'=>'#0088cc'
  *     )
  * ));
- * </pre>
+ * ```
+ *
+ * Please refer to README.md for complete usage information.
  *
  * @link https://id-sandbox.dokobit.com/api/doc Documentation
  * @link https://support.dokobit.com/category/537-developer-guide Developer guide

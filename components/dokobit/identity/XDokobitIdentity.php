@@ -3,10 +3,15 @@
 /**
  * XDokobitIdentity class file.
  *
- * XDokobitIdentity is an application component that enables to use Dokobit Identity Gateway API.
+ * XDokobitIdentity is an application component that enables to request Dokobit Identity Gateway API.
+ *
+ * XDokobitIdentity is meant to be used together with {@link XDokobitUserIdentity}, {@link XDokobitLoginAction}
+ * and {@link XDokobitLoginWidget}. These classes provide a unified solution that enables to authenticate user by
+ * Dokobit Identity Gateway and based on the data of authenticated user to authorize him/her to log into application.
  *
  * Configuration example:
- * <pre>
+ *
+ * ```
  * 'components'=>array(
  *     'dokobitIdentity'=> array(
  *         'class'=>'ext.components.dokobit.identity.XDokobitIdentity',
@@ -14,9 +19,9 @@
  *         'apiBaseUrl'=>'https://id-sandbox.dokobit.com/api/authentication/'
  *     )
  * )
- * </pre>
+ * ```
  *
- * Please refer to {@link XDokobitLoginWidget} for complete usage information.
+ * Please refer to README.md for complete usage information.
  *
  * @link https://id-sandbox.dokobit.com/api/doc Documentation
  * @link https://support.dokobit.com/category/537-developer-guide Developer guide
