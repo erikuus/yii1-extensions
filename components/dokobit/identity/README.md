@@ -6,19 +6,15 @@ Allows to integrate Dokobit Identity Gateway into PHP application based on Yii 1
 Class files
 -----------
 
-Dokobit Identity Gateway Extensions for Yii PHP framework consists of following class files.
+Dokobit Identity Gateway Extensions for Yii PHP framework consists of following class files:
 
-**XDokobitIdentity**
-XDokobitIdentity is an application component that enables to request Dokobit Identity Gateway API.
+- **XDokobitIdentity** is an application component that enables to request Dokobit Identity Gateway API.
 
-**XDokobitUserIdentity**
-XDokobitUserIdentity class authorizes application user on the data of authenticated user returned by Dokobit Identity Gateway API.
+- **XDokobitUserIdentity** authorizes application user on the data of authenticated user returned by Dokobit Identity Gateway API.
 
-**XDokobitLoginAction**
-XDokobitLoginAction authorizes user and logs him/her into application using the data of authenticated user returned by Dokobit Identity Gateway API.
+- **XDokobitLoginAction** logs user into application on the data of authenticated user returned by Dokobit Identity Gateway API.
 
-**XDokobitLoginWidget**
-XDokobitLoginWidget embeds Dokobit Identity Gateway UI that allows to authenticate user without leaving website.
+- **XDokobitLoginWidget** embeds Dokobit Identity Gateway UI that allows to authenticate user without leaving website.
 
 Configuration
 -------------
