@@ -3,14 +3,50 @@
 /**
  * XDokobitUserIdentity class file.
  *
- * XDokobitUserIdentity class authenticates application user on the data of authenticated
- * user returned by Dokobit Identity Gateway API
+ * XDokobitUserIdentity class authorizes application user on the data of authenticated user returned by
+ * Dokobit Identity Gateway API.
  *
- * Note that you can set synchronisation options {@link authenticate()} so that the data of
- * authenticated user returned by Dokobit Identity Gateway API will be saved to application
- * database through active record.
+ * XDokobitUserIdentity is meant to be used together with {@link XDokobitIdentity}, {@link XDokobitLoginAction}
+ * and {@link XDokobitLoginWidget}. These classes provide a unified solution that enables to authenticate user by
+ * Dokobit Identity Gateway and based on the data of authenticated user to authorize him/her to log into application.
  *
- * Please refer to {@link XDokobitLoginWidget} for complete usage information.
+ * First configure dokobit identity component:
+ *
+ * ```
+ * 'components'=>array(
+ *     'dokobitIdentity'=> array(
+ *         'class'=>'ext.components.dokobit.identity.XDokobitIdentity',
+ *         'apiAccessToken'=>'testid_AabBcdEFgGhIJjKKlmOPrstuv',
+ *         'apiBaseUrl'=>'https://id-sandbox.dokobit.com/api/authentication/'
+ *     )
+ * )
+ * ```
+ *
+ * Then set up login action in application controller:
+ *
+ * ```
+ * public function actionDokobitLogin()
+ * {
+ *     $userData=Yii::app()->dokobitIdentity->getUserData($_GET['session_token']);
+ *
+ *     Yii::import('ext.components.dokobit.identity.XDokobitUserIdentity');
+ *     $identity=new XDokobitUserIdentity($userData);
+ *     $identity->authenticate();
+ *
+ *     if($identity->errorCode==XDokobitUserIdentity::ERROR_NONE)
+ *     {
+ *         Yii::app()->user->login($identity);
+ *         $this->redirect(array('success'));
+ *     }
+ *     else
+ *         $this->redirect(array('failure'));
+ * }
+ * ```
+ *
+ * Note that you can set synchronisation options {@link self::authenticate()} so that the data of authenticated user
+ * returned by Dokobit Identity Gateway API will be saved to application database through active record.
+ *
+ * Please refer to README.md for complete usage information.
  *
  * @link https://id-sandbox.dokobit.com/api/doc Documentation
  * @link https://support.dokobit.com/category/537-developer-guide Developer guide
@@ -155,7 +191,7 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 				// validate that certificate is not expired
 				if($this->validateCerificate($userData))
 				{
-					// authenticate user against application database and
+					// authorize authenticated user against application database and
 					// sync dokobit and application user data if required
 					if($options!==array())
 					{
@@ -300,7 +336,27 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 		else
 			return null;
 
-		return $year.'-'.$code[3].$code[4].'-'.$code[5].$code[6];
+		$birthday=$year.'-'.$code[3].$code[4].'-'.$code[5].$code[6];
+
+		return $this->validateDate($birthday) ? $birthday : null;
+	}
+
+	/**
+	 * @param string $dateVar
+	 * @return boolean
+	 */
+	protected function validateDate($dateVar)
+	{
+		if($dateVar)
+		{
+			if(strtotime($dateVar) === false)
+				return false;
+
+			$date = date_parse($dateVar);
+			if(!checkdate($date["month"], $date["day"], $date["year"]))
+				return false;
+		}
+		return true;
 	}
 
 	/**
