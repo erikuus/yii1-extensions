@@ -121,7 +121,7 @@ class XDateSelect extends CInputWidget
 	// Specifies how year select element is rendered
 	public $yearTemplate='{select}';
 
-	private $monthNamesLocale;
+	private $_monthNamesLocale;
 
 	public function init()
 	{
@@ -129,7 +129,7 @@ class XDateSelect extends CInputWidget
 
 		list($name)=$this->resolveNameID();
 
-		$this->monthNamesLocale=Yii::app()->getLocale()->getMonthNames('wide',true);
+		$this->_monthNamesLocale=Yii::app()->getLocale()->getMonthNames('wide',true);
 		$this->time=$this->model[$this->attribute];
 
 		if(!isset($this->prefix) or empty($this->prefix))
@@ -278,7 +278,7 @@ class XDateSelect extends CInputWidget
 
 			for($i=1;$i<=12;$i++)
 			{
-				$month_names[$i]=$this->monthNamesLocale[$i]; //strftime($this->monthFormat, mktime(0, 0, 0, $i, 1, 2000));
+				$month_names[$i]=$this->_monthNamesLocale[$i]; //strftime($this->monthFormat, mktime(0, 0, 0, $i, 1, 2000));
 				$month_values[$i]=strftime($this->monthValueFormat,mktime(0,0,0,$i,1,2000));
 			}
 
