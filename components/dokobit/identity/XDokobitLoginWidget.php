@@ -67,9 +67,9 @@ class XDokobitLoginWidget extends CWidget
 	 * Possible options include the following:
 	 * - callback: function which will be called after successful authentication
 	 * - host: host for API requests
-	 * - locale	String	en	Interface language [options "en", "lt", "lv", "et", "is", "ru"; defaults to "en"]
+	 * - locale: Interface language [options "en", "lt", "lv", "et", "is", "ru"; defaults to "en"]
 	 * - container:	selector of the main html element containing plugin [defaults to "#Dokobit-identity-container"]
-	 * - useValidator: Enable/disable default validator on form fields [defaults to true]
+	 * - useValidator: enable/disable default validator on form fields [defaults to true]
 	 * - debug: enable/disable debugging mode [defaults to false]
 	 * - logo: path for custom logo.
 	 * - customBackground: custom background color for main container and input fields

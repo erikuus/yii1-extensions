@@ -59,9 +59,9 @@ class XDokobitIdentity extends CApplicationComponent
 	 * Optional params include the following:
 	 * - return_url: required if origin_host not set. Url to which user will be redirect after successful authentication
 	 * - origin_host: required if return_url not set. Schema and host of your authentication page
-	 * - code:	personal code to prefill Mobile ID or Smart-ID form data
+	 * - code: personal code to prefill Mobile ID or Smart-ID form data
 	 * - country_code: country code to prefill Smart-ID form data
-	 * - phone:	phone number to prefill Mobile ID form data
+	 * - phone: phone number to prefill Mobile ID form data
 	 * - authentication_methods: authentications methods displayed for user, for example array(mobile, smartid, smartcard)
 	 *
 	 * Example of returned data:
