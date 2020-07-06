@@ -12,7 +12,7 @@
  *
  * First configure dokobit identity component:
  *
- * ```
+ * ```php
  * 'components'=>array(
  *     'dokobitIdentity'=> array(
  *         'class'=>'ext.components.dokobit.identity.XDokobitIdentity',
@@ -26,7 +26,7 @@
  * redirect user to this action. This action authorizes and logs user into application using the data of authenticated
  * user returned by Dokobit Identity Gateway API.
  *
- * ```
+ * ```php
  * public function actions()
  * {
  *     return array(
@@ -46,7 +46,7 @@
  *
  * Example 2:
  *
- * ```
+ * ```php
  * public function actions()
  * {
  *     return array(
@@ -75,7 +75,7 @@
  *
  * Example 3:
  *
- * ```
+ * ```php
  * public function actions()
  * {
  *     return array(
@@ -109,7 +109,7 @@
  *
  * Example 4:
  *
- * ```
+ * ```php
  * public function actions()
  * {
  *     return array(
@@ -148,7 +148,7 @@
 class XDokobitLoginAction extends CAction
 {
 	/**
-	 * @var string $componentName the name of the dokobit component
+	 * @var string $componentName the name of the dokobit identity component
 	 * Defaults to 'dokobitIdentity'.
 	 */
 	public $componentName='dokobitIdentity';
@@ -172,7 +172,7 @@ class XDokobitLoginAction extends CAction
 	public $flash=true;
 	/**
 	 * @var string $flashKey the key identifying the flash message
-	 * Defaults to dokobit
+	 * Defaults to 'dokobit.login.error'
 	 */
 	public $flashKey='dokobit.login.error';
 	/**
@@ -190,6 +190,8 @@ class XDokobitLoginAction extends CAction
 	 * @var string $logCategory the category for log message
 	 * Defaults to 'ext.components.dokobit.identity.XDokobitLoginAction'
 	 * For example to log errors into separate file use configuration as follows:
+	 *
+	 * ```php
 	 * 'components'=>array(
 	 *     'log'=>array(
 	 *         'class'=>'CLogRouter',
@@ -203,6 +205,7 @@ class XDokobitLoginAction extends CAction
 	 *         )
 	 *     )
 	 * )
+	 * ```
 	 */
 	public $logCategory='ext.components.dokobit.identity.XDokobitLoginAction';
 
@@ -214,7 +217,7 @@ class XDokobitLoginAction extends CAction
 		// get dokobit indentity api session token
 		if(isset($_GET['session_token']))
 		{
-			// get dokobit component
+			// get dokobit identity component
 			$dokobitIdentity=Yii::app()->getComponent($this->componentName);
 
 			// get dokobit user data

@@ -12,7 +12,7 @@
  * First define controller action that starts Dokobit Identity Gateway session and passes session token to the view
  * that embeds XDokobitLoginWidget.
  *
- * ```
+ * ```php
  * public function actionLogin()
  * {
  *     // create dokobit session
@@ -38,7 +38,7 @@
  *
  * Inside this view call widget that displays Dokobit Identity Gateway UI.
  *
- * ```
+ * ```php
  * $this->widget('ext.components.dokobit.identity.XDokobitLoginWidget', array(
  *     'sessionToken'=>$sessionToken,
  *     'options'=>array(

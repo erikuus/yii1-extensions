@@ -12,7 +12,7 @@
  *
  * First configure dokobit identity component:
  *
- * ```
+ * ```php
  * 'components'=>array(
  *     'dokobitIdentity'=> array(
  *         'class'=>'ext.components.dokobit.identity.XDokobitIdentity',
@@ -24,7 +24,7 @@
  *
  * Then set up login action in application controller:
  *
- * ```
+ * ```php
  * public function actionDokobitLogin()
  * {
  *     $userData=Yii::app()->dokobitIdentity->getUserData($_GET['session_token']);
@@ -65,6 +65,7 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 	 * @var array $userData the data of authenticated user returned
 	 * by Dokobit Identity Gateway API call /api/authentication/{token}/status
 	 * For example:
+	 * ```json
 	 * {
 	 *    "status":"ok",
 	 *    "certificate":{
@@ -93,6 +94,7 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 	 *    "authentication_method":"smartid",
 	 *    "date_authenticated":"2019-05-06T12:15:34+03:00"
 	 * }
+	 * ```
 	 */
 	protected $userData;
 	/**
@@ -141,6 +143,7 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 	 * database through active record.
 	 *
 	 * Possible options include the following:
+	 *
 	 * - modelName: the name of the model that stores user data in the application
 	 * - scenarioName: the name of the scenario that is used to save user data
 	 * - codeAttributeName: the name of the model attribute that must match api user code
@@ -157,7 +160,8 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 	 *   Gateway API onto user model attributes in the application
 	 *
 	 * For example:
-	 * <pre>
+	 *
+	 * ```php
 	 * array(
 	 *     'modelName'=>'Kasutaja',
 	 *     'scenarioName'=>'dokobit',
@@ -174,7 +178,8 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 	 *         'phone'=>'telefon'
 	 *     ),
 	 * )
-	 * </pre>
+	 * ```
+	 *
 	 * @return boolean whether authentication succeeds.
 	 */
 	public function authenticate($options=array())

@@ -11,7 +11,7 @@
  *
  * Configuration example:
  *
- * ```
+ * ```php
  * 'components'=>array(
  *     'dokobitIdentity'=> array(
  *         'class'=>'ext.components.dokobit.identity.XDokobitIdentity',
@@ -65,11 +65,13 @@ class XDokobitIdentity extends CApplicationComponent
 	 * - authentication_methods: authentications methods displayed for user, for example array(mobile, smartid, smartcard)
 	 *
 	 * Example of returned data:
+	 * ```json
 	 * {
-	 *    "status":"ok",
-	 *    "session_token":"02f922c9917231ea8acbbbcf63796924af548c801d75772f2b1701b413462c61",
-	 *    "url":"https://id-sandbox.dokobit.com/auth/02f922c9917231ea8acbbbcf63796924af548c801d75772f2b1701b413462c61"
+	 *     "status":"ok",
+	 *     "session_token":"02f922c9917231ea8acbbbcf63796924af548c801d75772f2b1701b413462c61",
+	 *     "url":"https://id-sandbox.dokobit.com/auth/02f922c9917231ea8acbbbcf63796924af548c801d75772f2b1701b413462c61"
 	 * }
+	 * ```
 	 *
 	 * @param array $params optional request params
 	 * @return json response
@@ -84,34 +86,36 @@ class XDokobitIdentity extends CApplicationComponent
 	 * Returns data of authenticated user by session token
 	 *
 	 * Example of returned data:
+	 * ```json
 	 * {
-	 *    "status":"ok",
-	 *    "certificate":{
-	 *        "name":"/C=LT/SN=SMART-ID/GN=DEMO/serialNumber=PNOLT-10101010005/CN=SMART-ID,DEMO,PNOLT-10101010005/OU=AUTHENTICATION",
-	 *        "subject":{
-	 *            "country":"LT",
-	 *            "surname":"SMART-ID",
-	 *            "name":"DEMO",
-	 *            "serial_number":"PNOLT-10101010005",
-	 *            "common_name":"SMART-ID,DEMO,PNOLT-10101010005",
-	 *            "organisation_unit":"AUTHENTICATION"
-	 *        },
-	 *        "issuer":{
-	 *            "country":"EE",
-	 *            "organisation":"AS Sertifitseerimiskeskus",
-	 *            "common_name":"TEST of EID-SK 2016"
-	 *        },
-	 *        "valid_from":"2017-08-30T15:08:15+03:00",
-	 *        "valid_to":"2020-08-30T15:08:15+03:00",
-	 *        "value":"LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUd6RENDQkxTZ0F3SUJBZ0lRTnIrZS9 ..."
-	 *    },
-	 *    "code":"10101010005",
-	 *    "country_code":"lt",
-	 *    "name":"DEMO",
-	 *    "surname":"SMART-ID",
-	 *    "authentication_method":"smartid",
-	 *    "date_authenticated":"2019-05-06T12:15:34+03:00"
+	 *     "status":"ok",
+	 *     "certificate":{
+	 *         "name":"/C=LT/SN=SMART-ID/GN=DEMO/serialNumber=PNOLT-10101010005/CN=SMART-ID,DEMO,PNOLT-10101010005/OU=AUTHENTICATION",
+	 *         "subject":{
+	 *             "country":"LT",
+	 *             "surname":"SMART-ID",
+	 *             "name":"DEMO",
+	 *             "serial_number":"PNOLT-10101010005",
+	 *             "common_name":"SMART-ID,DEMO,PNOLT-10101010005",
+	 *             "organisation_unit":"AUTHENTICATION"
+	 *         },
+	 *         "issuer":{
+	 *             "country":"EE",
+	 *             "organisation":"AS Sertifitseerimiskeskus",
+	 *             "common_name":"TEST of EID-SK 2016"
+	 *         },
+	 *         "valid_from":"2017-08-30T15:08:15+03:00",
+	 *         "valid_to":"2020-08-30T15:08:15+03:00",
+	 *         "value":"LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUd6RENDQkxTZ0F3SUJBZ0lRTnIrZS9 ..."
+	 *     },
+	 *     "code":"10101010005",
+	 *     "country_code":"lt",
+	 *     "name":"DEMO",
+	 *     "surname":"SMART-ID",
+	 *     "authentication_method":"smartid",
+	 *     "date_authenticated":"2019-05-06T12:15:34+03:00"
 	 * }
+	 * ```
 	 *
 	 * @param string $sessionToken the session token
 	 * @return json response
@@ -135,7 +139,7 @@ class XDokobitIdentity extends CApplicationComponent
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_POST, $post);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
 		$fields='';
 		if($post && $params!==array())
