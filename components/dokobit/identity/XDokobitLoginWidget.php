@@ -59,7 +59,7 @@ class XDokobitLoginWidget extends CWidget
 {
 	/**
 	 * @var string $sessionToken the Dokobit Identity Gateway API session token
-	 * @see XDokobitIdentity::createSession
+	 * @see XDokobitIdentity::createSession()
 	 */
 	public $sessionToken;
 	/**

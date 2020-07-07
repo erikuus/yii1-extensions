@@ -135,7 +135,7 @@ class XDokobitIdentity extends CApplicationComponent
 	 */
 	protected function request($url, $params=array(), $post=false)
 	{
-		$ch = curl_init();
+		$ch=curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_POST, $post);

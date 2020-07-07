@@ -162,7 +162,7 @@ class XDokobitLoginAction extends CAction
 	public $failureUrl;
 	/**
 	 * @var array $authOptions the authentication options
-	 * @see XDokobitUserIdentity::authenticate
+	 * @see XDokobitUserIdentity::authenticate()
 	 */
 	public $authOptions=array();
 	/**
