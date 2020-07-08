@@ -8,8 +8,7 @@
  * XDokobitIframeWidget is meant to be used together with {@link XDokobitDownloadAction} and {@link XDokobitDocuments}.
  * These classes provide a unified solution that enables to digitally sign documents through Dokobit Documents Gateway.
  *
- * First define controller action that requests Dokobit Document Gateway API to upload files and passes signing token to the view
- * that embeds XDokobitLoginWidget.
+ * First define controller action that uploads and prepare files for signing using Dokobit Documents Gateway API.
  *
  * ```php
  * public function actionSign()
@@ -74,25 +73,29 @@
  *                     'downloadAction'=>'dokobitDownload', // should be defined in controller
  *                     'callbackToken'=>'abcdefghijklmnoprstuvw' // some application specific data
  *                 ));
+ *
+ *                 Yii::app()->end();
  *             }
  *             else
- *                 echo "Signing could not be created!";
+ *                 Yii::app()->user->setFlash('failed','Signing could not be created!');
  *         }
  *         else
- *             echo "File could not be uploaded!";
+ *             Yii::app()->user->setFlash('failed','File could not be uploaded!');
  * 	   }
  *     else
- *         echo "File could not be uploaded!";
+ *         Yii::app()->user->setFlash('failed','File could not be uploaded!');
+ *
+ *     $this->redirect(array('failure'));
  * }
  * ```
  *
- * Inside this view call widget that displays Dokobit Identity Gateway Iframe.
+ * Inside 'sign' view call widget that displays Dokobit Identity Gateway Iframe.
  *
  * ```php
  * $this->widget('ext.components.dokobit.documents.XDokobitIframeWidget', array(
  *     'signingUrl'=>$signingUrl,
  *     'signingToken'=>$signingToken,
- *     'downloadAction'=>$dokobitDownload,
+ *     'downloadAction'=>$downloadAction,
  *     'callbackToken'=>$callbackToken
  * ));
  * ```
@@ -108,12 +111,12 @@ class XDokobitIframeWidget extends CWidget
 {
 	/**
 	 * @var string $signingUrl the url to Dokobit Documents Gateway signing page
-	 * @see XDokobitIdentity::getSigningUrl()
+	 * @see XDokobitDocuments::getSigningUrl()
 	 */
 	public $signingUrl;
 	/**
 	 * @var string $signingToken the token returned by Dokobit Documents Gateway API create signing request
-	 * @see XDokobitIdentity::createSigning()
+	 * @see XDokobitDocuments::createSigning()
 	 */
 	public $signingToken;
 	/**
@@ -201,8 +204,11 @@ class XDokobitIframeWidget extends CWidget
 	 */
 	protected function registerClientScript()
 	{
-		$downloadUrl=$this->controller->createUrl($this->downloadAction, array('signing_token'=>$this->signingToken));
-		$postParams=CJavaScript::encode(array('callback_token'=>$this->callbackToken));
+		$downloadUrl=$this->controller->createUrl($this->downloadAction);
+		$postParams=CJavaScript::encode(array(
+			'signing_token'=>$this->signingToken,
+			'callback_token'=>$this->callbackToken
+		));
 
 		Yii::app()->clientScript->registerScript(__CLASS__, "
 			Isign.onSignSuccess = function() {
