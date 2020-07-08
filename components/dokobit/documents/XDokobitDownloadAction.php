@@ -40,15 +40,18 @@
  *
  * ```js
  * Isign.onSignSuccess = function() {
- *     $.post("path/to/dokobitDownload?signing_token=123456789", {callback_token: "abcdefghijklmnoprstuvw"}, function(data) {
+ *     $.post("path/to/dokobitDownload", {
+ *         signing_token: "abcdefghij",
+ *         callback_token: "klmnoprstuvw"
+ *     }, function(data) {
  *         $("#result").html(data);
  *     });
  * };
  * ```
  *
- * Required params
- * - $_GET[signing_token]: token returned by Dokobit Documents Gateway API create signing request.
- * - $_POST[callback_token]: token that will be passed through to success or failure callback method.
+ * Required post params
+ * - signing_token: the token returned by Dokobit Documents Gateway API create signing request
+ * - callback_token: the token that will be passed through to success or failure callback method
  *
  * Please refer to README.md for complete usage information.
  *
@@ -122,7 +125,7 @@ class XDokobitDownloadAction extends CAction
 	public function run()
 	{
 		// check required params
-		if(isset($_GET['signing_token']) && isset($_POST['signing_token']))
+		if(isset($_POST['signing_token']) && isset($_POST['callback_token']))
 		{
 			// get dokobit documents component
 			$dokobitDocuments=Yii::app()->getComponent($this->componentName);
@@ -136,9 +139,9 @@ class XDokobitDownloadAction extends CAction
 			// download file
 			$data=$this->downloadFile($downloadUrl);
 			if($data)
-				$this->controller->{$this->successCallback}($_POST['callback_token'], $data);
+				$this->controller->{$this->successCallback}($_GET['signing_token'],$_POST['callback_token'],$data);
 			else
-				$this->controller->{$this->failureCallback}($_POST['callback_token']);
+				$this->controller->{$this->failureCallback}($_GET['signing_token'],$_POST['callback_token']);
 		}
 		else
 			throw new CHttpException(400,'Invalid request. Please do not repeat this request again.');
