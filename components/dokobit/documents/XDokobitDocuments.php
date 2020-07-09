@@ -15,7 +15,7 @@
  *     'dokobitDocuments'=> array(
  *         'class'=>'ext.components.dokobit.documents.XDokobitDocuments',
  *         'apiAccessToken'=>'testgw_AabBcdEFgGhIJjKKlmOPrstuv',
- *         'apiBaseUrl'=>'https://gateway-sandbox.dokobit.com/api/'
+ *         'baseUrl'=>'https://gateway-sandbox.dokobit.com'
  *     )
  * )
  * ```
@@ -34,9 +34,42 @@ class XDokobitDocuments extends CApplicationComponent
 	 */
 	public $apiAccessToken;
 	/**
-	 * @var string $apiUrl the Dokobit Documents Gateway API base url
+	 * @var string $baseUrl the Dokobit Documents Gateway base url
 	 */
-	public $apiBaseUrl;
+	public $baseUrl;
+	/**
+	 * @var boolean $log whether to log
+	 * Defaults to false
+	 */
+	public $log=false;
+	/**
+	 * @var string $logLevel the level for log message
+	 * Must be one of the following: [trace|info|profile|warning|error]
+	 * Defaults to 'error'
+	 */
+	public $logLevel='error';
+	/**
+	 * @var string $logCategory the category for log message
+	 * Defaults to 'ext.components.dokobit.documents.XDokobitDownloadAction'
+	 * For example to log errors into separate file use configuration as follows:
+	 *
+	 * ```php
+	 * 'components'=>array(
+	 *     'log'=>array(
+	 *         'class'=>'CLogRouter',
+	 *         'routes'=>array(
+	 *             array(
+	 *                 'class'=>'CFileLogRoute',
+	 *                 'levels'=>'error',
+	 *                 'logFile'=>'dokobit_error.log',
+	 *                 'categories'=>'ext.components.dokobit.documents.XDokobitDocuments',
+	 *             )
+	 *         )
+	 *     )
+	 * )
+	 * ```
+	 */
+	public $logCategory='ext.components.dokobit.documents.XDokobitDocuments';
 
 	/**
 	 * Initializes the component.
@@ -47,8 +80,44 @@ class XDokobitDocuments extends CApplicationComponent
 		if(!$this->apiAccessToken)
 			throw new CException('"apiAccessToken" has to be set!');
 
-		if(!$this->apiBaseUrl)
-			throw new CException('"apiBaseUrl" has to be set!');
+		if(!$this->baseUrl)
+			throw new CException('"baseUrl" has to be set!');
+	}
+
+	/**
+	 * Upload multiple files to Dokobit Documents Gateway server.
+	 * Note that this helper method sends base64 encoded file contents instead of urls.
+	 * @param array $files the list of paths to files to be uploaded
+	 * @return array the list of uploaded file tokens
+	 */
+	public function uploadFiles($files)
+	{
+		$uploadedFiles=array();
+
+		foreach($files as $file)
+		{
+			$uploadFile=array(
+				'name'=>basename($file),
+				'digest'=>sha1_file($file),
+				'content'=>base64_encode(file_get_contents($file))
+			);
+
+			$uploadResponse=$this->uploadFile(array(
+				'file'=>$uploadFile
+			));
+
+			if($uploadResponse['status']!='ok')
+			{
+				$this->log('Failed to upload file: '.var_export($uploadResponse, true));
+				return false;
+			}
+
+			// Note that there is no need to check file status here
+			// as we are sending content instead of url
+
+			array_push($uploadedFiles, array('token'=>$uploadResponse['token']));
+		}
+		return $uploadedFiles;
 	}
 
 	/**
@@ -199,7 +268,7 @@ class XDokobitDocuments extends CApplicationComponent
 	 */
 	public function getSigningUrl($signingToken, $signerAccessToken)
 	{
-		return $this->apiBaseUrl.'/signing/'.$signingToken.'?access_token='.$signerAccessToken;
+		return $this->baseUrl.'/signing/'.$signingToken.'?access_token='.$signerAccessToken;
 	}
 
 	/**
@@ -209,7 +278,7 @@ class XDokobitDocuments extends CApplicationComponent
 	 */
 	public function getDownloadUrl($signingToken)
 	{
-		return $this->apiBaseUrl.'/signing/'.$signingToken.'/download?access_token='.$this->apiAccessToken;
+		return $this->baseUrl.'/api/signing/'.$signingToken.'/download?access_token='.$this->apiAccessToken;
 	}
 
 	/**
@@ -219,7 +288,7 @@ class XDokobitDocuments extends CApplicationComponent
 	 */
 	protected function getRequestUrlByAction($action)
 	{
-		return $this->apiBaseUrl.$action.'.json?access_token='.$this->apiAccessToken;
+		return $this->baseUrl.'/api/'.$action.'.json?access_token='.$this->apiAccessToken;
 	}
 
 	/**
@@ -253,5 +322,15 @@ class XDokobitDocuments extends CApplicationComponent
 		$response=curl_exec($ch);
 		$result=json_decode($response, true);
 		return $result;
+	}
+
+	/**
+	 * Log message
+	 * @param string $message
+	 */
+	protected function log($message)
+	{
+		if($this->log===true)
+			Yii::log($message, $this->logLevel, $this->logCategory);
 	}
 }

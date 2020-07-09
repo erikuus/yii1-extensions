@@ -132,16 +132,16 @@ class XDokobitDownloadAction extends CAction
 
 			// get download url by signing token
 			if($dokobitDocuments)
-				$downloadUrl=$dokobitDocuments->getDownloadUrl($_GET['signing_token']);
+				$downloadUrl=$dokobitDocuments->getDownloadUrl($_POST['signing_token']);
 			else
 				throw new CHttpException(500,'Dokobit Documents Component not found.');
 
 			// download file
 			$data=$this->downloadFile($downloadUrl);
 			if($data)
-				$this->controller->{$this->successCallback}($_GET['signing_token'],$_POST['callback_token'],$data);
+				$this->controller->{$this->successCallback}($_POST['signing_token'],$_POST['callback_token'],$data);
 			else
-				$this->controller->{$this->failureCallback}($_GET['signing_token'],$_POST['callback_token']);
+				$this->controller->{$this->failureCallback}($_POST['signing_token'],$_POST['callback_token']);
 		}
 		else
 			throw new CHttpException(400,'Invalid request. Please do not repeat this request again.');

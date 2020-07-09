@@ -54,11 +54,11 @@
  *             // create signing
  *             $signingResponse=Yii::app()->dokobitDocuments->createSigning(array(
  *                 'type'=>'asice',
- *                 'name'=>'agreement,
+ *                 'name'=>'agreement',
  *                 'language'=>'et',
  *                 'signers'=>$signers,
  *                 'files'=>$files,
- *             );
+ *             ));
  *
  *             if($signingResponse['status']=='ok')
  *             {
@@ -176,10 +176,8 @@ class XDokobitIframeWidget extends CWidget
 				throw new CException('"signingUrl", "signingToken" and "downloadAction" have to be set!');
 
 			// finalize html options
-			if(isset($this->htmlOptions['id']))
-				$this->options['container']='#'.$this->htmlOptions['id'];
-			else
-				$this->htmlOptions['id']='isign-gateway';
+			$this->htmlOptions['id']='isign-gateway';
+			$this->htmlOptions['src']=$this->signingUrl;
 
 			// register client scripts
 			$this->registerClientScript();
@@ -214,6 +212,7 @@ class XDokobitIframeWidget extends CWidget
 			Isign.onSignSuccess = function() {
 				$.post('$downloadUrl', $postParams, function(data) {
   					$('$this->resultContainerSelector').html(data);
+  					window.scrollTo(0,0);
 				});
 			};
 		", CClientScript::POS_END);
