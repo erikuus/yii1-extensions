@@ -12,7 +12,7 @@
  *
  * ```php
  * 'components'=>array(
- *     'dokobitDocuments'=> array(
+ *     'dokobitDocuments'=>array(
  *         'class'=>'ext.components.dokobit.documents.XDokobitDocuments',
  *         'apiAccessToken'=>'testgw_AabBcdEFgGhIJjKKlmOPrstuv',
  *         'baseUrl'=>'https://gateway-sandbox.dokobit.com'
@@ -50,7 +50,7 @@ class XDokobitDocuments extends CApplicationComponent
 	public $logLevel='error';
 	/**
 	 * @var string $logCategory the category for log message
-	 * Defaults to 'ext.components.dokobit.documents.XDokobitDownloadAction'
+	 * Defaults to 'ext.components.dokobit.documents.XDokobitDocuments'
 	 * For example to log errors into separate file use configuration as follows:
 	 *
 	 * ```php
@@ -85,7 +85,7 @@ class XDokobitDocuments extends CApplicationComponent
 	}
 
 	/**
-	 * Upload multiple files to Dokobit Documents Gateway server.
+	 * Uploads multiple files to Dokobit Documents Gateway server.
 	 * Note that this helper method sends base64 encoded file contents instead of urls.
 	 * @param array $files the list of paths to files to be uploaded
 	 * @return array the list of uploaded file tokens
@@ -121,7 +121,7 @@ class XDokobitDocuments extends CApplicationComponent
 	}
 
 	/**
-	 * Upload file to Dokobit Documents Gateway server.
+	 * Uploads file to Dokobit Documents Gateway server.
 	 *
 	 * Required params:
 	 * - file[name]: file name
@@ -172,7 +172,7 @@ class XDokobitDocuments extends CApplicationComponent
 	}
 
 	/**
-	 * Delete uploaded file from Dokobit Documents Gateway server.
+	 * Deletes uploaded file from Dokobit Documents Gateway server.
 	 *
 	 * Example of returned data:
 	 *
@@ -193,7 +193,7 @@ class XDokobitDocuments extends CApplicationComponent
 	}
 
 	/**
-	 * Create new signing
+	 * Creates new signing.
 	 *
 	 * Required params:
 	 * - type: signed document format [options: pdf|pdflt|bdoc|edoc|asice|adoc|adoc.cedoc|adoc.bedoc|adoc.gedoc|adoc.ggedoc|mdoc|mdoc.cedoc|mdoc.bedoc|mdoc.gedoc|mdoc.ggedoc]
@@ -252,7 +252,7 @@ class XDokobitDocuments extends CApplicationComponent
 	 *
 	 * @link https://gateway-sandbox.dokobit.com/api/doc#_api_signing_create
 	 * @param array $params request params
-	 * @return json response
+	 * @return array response
 	 */
 	public function createSigning($params)
 	{
@@ -261,7 +261,7 @@ class XDokobitDocuments extends CApplicationComponent
 	}
 
 	/**
-	 * Get Dokobit Documents Gateway signing page url
+	 * Gets Dokobit Documents Gateway signing page url.
 	 * @param string $signingToken the token returned by create signing request
 	 * @param string $signerAccessToken the signer token returned by create signing request
 	 * @return string gateway signing page url
@@ -272,7 +272,7 @@ class XDokobitDocuments extends CApplicationComponent
 	}
 
 	/**
-	 * Get Dokobit Documents Gateway download url
+	 * Gets Dokobit Documents Gateway download url.
 	 * @param string $signingToken the token returned by create signing request
 	 * @return string url to download signed document file
 	 */
@@ -282,7 +282,7 @@ class XDokobitDocuments extends CApplicationComponent
 	}
 
 	/**
-	 * Get API request URL by action path
+	 * Gets API request URL by action path.
 	 * @param string $action the api action
 	 * @return string gateway api request url
 	 */
@@ -292,7 +292,7 @@ class XDokobitDocuments extends CApplicationComponent
 	}
 
 	/**
-	 * Send Dokobit Documents Gateway API request
+	 * Sends Dokobit Documents Gateway API request.
 	 * @param string $url the api request url
 	 * @param array $params request params
 	 * @param boolean $post whether to do a post request
@@ -325,7 +325,7 @@ class XDokobitDocuments extends CApplicationComponent
 	}
 
 	/**
-	 * Log message
+	 * Logs message.
 	 * @param string $message
 	 */
 	protected function log($message)

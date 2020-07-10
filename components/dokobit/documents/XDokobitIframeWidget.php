@@ -3,12 +3,12 @@
 /**
  * XDokobitIframeWidget class file.
  *
- * XDokobitIframeWidget embeds Dokobit Documents Gateway Iframe that allows to sign documents without leaving website.
+ * XDokobitIframeWidget embeds Dokobit Documents Gateway iframe and javascript that allow to sign documents without leaving website.
  *
- * XDokobitIframeWidget is meant to be used together with {@link XDokobitDownloadAction} and {@link XDokobitDocuments}.
+ * XDokobitIframeWidget is meant to be used together with {@link XDokobitDocuments} and {@link XDokobitDownloadAction}.
  * These classes provide a unified solution that enables to digitally sign documents through Dokobit Documents Gateway.
  *
- * First define controller action that uploads and prepare files for signing using Dokobit Documents Gateway API.
+ * First define controller action that uploads and prepares files for signing:
  *
  * ```php
  * public function actionSign()
@@ -70,8 +70,8 @@
  *                 $this->render('sign', array(
  *                     'signingUrl'=>$signingUrl,
  *                     'signingToken'=>$signingToken,
- *                     'downloadAction'=>'dokobitDownload', // should be defined in controller
- *                     'callbackToken'=>'abcdefghijklmnoprstuvw' // some application specific data
+ *                     'callbackUrl'=>$this->createUrl('dokobitDownload'),
+ *                     'callbackToken'=>'abcdefghijklmnoprstuvw'
  *                 ));
  *
  *                 Yii::app()->end();
@@ -89,13 +89,13 @@
  * }
  * ```
  *
- * Inside 'sign' view call widget that displays Dokobit Identity Gateway Iframe.
+ * Inside 'sign' view call widget that embeds iframe and javascript:
  *
  * ```php
  * $this->widget('ext.components.dokobit.documents.XDokobitIframeWidget', array(
  *     'signingUrl'=>$signingUrl,
  *     'signingToken'=>$signingToken,
- *     'downloadAction'=>$downloadAction,
+ *     'callbackUrl'=>$callbackUrl,
  *     'callbackToken'=>$callbackToken
  * ));
  * ```
@@ -120,10 +120,10 @@ class XDokobitIframeWidget extends CWidget
 	 */
 	public $signingToken;
 	/**
-	 * @var string $downloadAction the url to the download action
+	 * @var string $callbackUrl the url to the download action that is called after successful signing
 	 * @see XDokobitDownloadAction
 	 */
-	public $downloadAction;
+	public $callbackUrl;
 	/**
 	 * @var string $callbackToken the token that will be passed through to download action
 	 * @see XDokobitDownloadAction
@@ -154,10 +154,14 @@ class XDokobitIframeWidget extends CWidget
 	 */
 	public $jsUrl='https://gateway-sandbox.dokobit.com/js/isign.frame.js';
 	/**
-	 * @var string $resultContainerSelector the jquer
+	 * @var string $resultContainerSelector the jquery selector for tag ...
 	 * Defaults to '#result'
 	 */
 	public $resultContainerSelector='#result';
+	/**
+	 * @var string $failureMessage the message displayed to user when ajax call to download action throws exception
+	 */
+	public $failureMessage;
 	/**
 	 * @var boolean whether the widget is visible
 	 * Defaults to true
@@ -165,31 +169,34 @@ class XDokobitIframeWidget extends CWidget
 	public $visible=true;
 
 	/**
-	 * Initializes the widget
+	 * Initializes the widget.
 	 */
 	public function init()
 	{
 		if($this->visible)
 		{
-			// checks if required values are set
-			if(!$this->signingUrl || !$this->signingToken || !$this->downloadAction)
-				throw new CException('"signingUrl", "signingToken" and "downloadAction" have to be set!');
+			// check if required values are set
+			if(!$this->signingUrl || !$this->signingToken)
+				throw new CException('"signingUrl" and "signingToken" have to be set!');
 
 			// finalize html options
 			$this->htmlOptions['id']='isign-gateway';
 			$this->htmlOptions['src']=$this->signingUrl;
 
 			// register client scripts
-			$this->registerClientScript();
-			$this->registerClientScriptFiles();
+			if($this->callbackUrl)
+			{
+				$this->registerClientScript();
+				$this->registerClientScriptFiles();
+			}
 
-			// render container open tag
+			// render iframe open tag
 			echo CHtml::openTag('iframe', $this->htmlOptions)."\n";
 		}
 	}
 
 	/**
-	 * Renders the close tag of the iframe
+	 * Renders the close tag of the iframe.
 	 */
 	public function run()
 	{
@@ -198,28 +205,30 @@ class XDokobitIframeWidget extends CWidget
 	}
 
 	/**
-	 * Register necessary inline client script.
+	 * Registers inline client script.
 	 */
 	protected function registerClientScript()
 	{
-		$downloadUrl=$this->controller->createUrl($this->downloadAction);
-		$postParams=CJavaScript::encode(array(
+		$callbackParams=CJavaScript::encode(array(
 			'signing_token'=>$this->signingToken,
 			'callback_token'=>$this->callbackToken
 		));
 
 		Yii::app()->clientScript->registerScript(__CLASS__, "
 			Isign.onSignSuccess = function() {
-				$.post('$downloadUrl', $postParams, function(data) {
+				$.post('$this->callbackUrl', $callbackParams, function(data) {
   					$('$this->resultContainerSelector').html(data);
-  					window.scrollTo(0,0);
+					window.scrollTo(0,0);
+				}).fail(function() {
+    				$('#result').html('$this->failureMessage');
+					window.scrollTo(0,0);
 				});
 			};
 		", CClientScript::POS_END);
 	}
 
 	/**
-	 * Publish and register necessary client script files.
+	 * Registers client script files.
 	 */
 	protected function registerClientScriptFiles()
 	{
