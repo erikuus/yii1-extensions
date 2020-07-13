@@ -8,88 +8,72 @@
  * XDokobitIframeWidget is meant to be used together with {@link XDokobitDocuments} and {@link XDokobitDownloadAction}.
  * These classes provide a unified solution that enables to digitally sign documents through Dokobit Documents Gateway.
  *
- * First define controller action that uploads and prepares files for signing:
+ * First configure dokobit documents component:
+ *
+ * ```php
+ * 'components'=>array(
+ *     'dokobitDocuments'=>array(
+ *         'class'=>'ext.components.dokobit.documents.XDokobitDocuments',
+ *         'apiAccessToken'=>'testgw_AabBcdEFgGhIJjKKlmOPrstuv',
+ *         'baseUrl'=>'https://gateway-sandbox.dokobit.com'
+ *     )
+ * )
+ * ```
+ *
+ * Then code action that initializes signing:
  *
  * ```php
  * public function actionSign()
  * {
- *     // set signer
- *     $signers=array();
+ *     $model=$this->loadModel($id);
  *
- *     $signer=array(
- *         'id'=>Yii::app()->user->id,
- *         'name'=>Yii::app()->user->firstname,
- *         'surname'=> Yii::app()->user->lastname
- *     );
+ *     // upload files to dokobit server
+ *     $uploadedFiles=Yii::app()->dokobitDocuments->uploadFiles($model->filePaths);
  *
- *     array_push($signers, $signer);
+ *     if($uploadedFiles)
+ *     {
+ *          // set session user as signer
+ *          $signer=array(
+ *              'id'=>Yii::app()->user->id,
+ *              'name'=>Yii::app()->user->firstname,
+ *              'surname'=> Yii::app()->user->lastname
+ *          );
  *
- *     // upload file
- *     $files=array();
+ *          // create signing
+ *          $signingResponse=Yii::app()->dokobitDocuments->createSigning(array(
+ *              'type'=>'asice',
+ *              'name'=>$model->documentName,
+ *              'files'=>$uploadedFiles,
+ *              'signers'=>array($signer),
+ *              'language'=>Yii::app()->language,
+ *          ));
  *
- *     $file=array(
- *         'name'=>'agreement.pdf',
- *         'digest'=>sha1_file('agreement.pdf'),
- *         'content'=>base64_encode(file_get_contents('agreement.pdf'))
- *     );
+ *          if($signingResponse['status']=='ok')
+ *          {
+ *              // get signing token and url
+ *              $signingToken=$signingResponse['token'];
+ *              $signerAccessToken=$signingResponse['signers'][Yii::app()->user->id];
+ *              $signingUrl=Yii::app()->dokobitDocuments->getSigningUrl($signingToken, $signerAccessToken);
  *
- *     $uploadResponse=Yii::app()->dokobitDocuments->uploadFile(array(
- *         'file'=>$file
- *     ));
+ *              // set callback url to dokobit download action
+ *              $callbackUrl=>$this->createUrl('dokobitDownload');
  *
- * 	   if($uploadResponse['status']=='ok')
- * 	   {
- *         $statusResponse=null;
- *         while($statusResponse===null || $statusResponse['status']=='pending')
- *         {
- *             $statusResponse=Yii::app()->dokobitDocuments->checkFileStatus($uploadResponse['token']);
- *             sleep(2);
- *         }
+ * 				// set callback token if you need to pass some data to callback functions after download
+ *              $callbackToken=>$this->generateToken();
  *
- *         if($statusResponse['status']=='uploaded')
- *         {
- *             $file['token']=$uploadResponse['token'];
- *             array_push($files, $file);
- *
- *             // create signing
- *             $signingResponse=Yii::app()->dokobitDocuments->createSigning(array(
- *                 'type'=>'asice',
- *                 'name'=>'agreement',
- *                 'language'=>'et',
- *                 'signers'=>$signers,
- *                 'files'=>$files,
- *             ));
- *
- *             if($signingResponse['status']=='ok')
- *             {
- *                 $signingToken=$signingResponse['token'];
- *                 $signerAccessToken=$signingResponse['signers'][Yii::app()->user->id];
- *                 $signingUrl=Yii::app()->dokobitDocuments->getSigningUrl($signingToken, $signerAccessToken);
- *
- *                 // render view
- *                 $this->render('sign', array(
- *                     'signingUrl'=>$signingUrl,
- *                     'signingToken'=>$signingToken,
- *                     'callbackUrl'=>$this->createUrl('dokobitDownload'),
- *                     'callbackToken'=>'abcdefghijklmnoprstuvw'
- *                 ));
- *
- *                 Yii::app()->end();
- *             }
- *             else
- *                 Yii::app()->user->setFlash('failed','Signing could not be created!');
- *         }
- *         else
- *             Yii::app()->user->setFlash('failed','File could not be uploaded!');
- * 	   }
- *     else
- *         Yii::app()->user->setFlash('failed','File could not be uploaded!');
- *
- *     $this->redirect(array('failure'));
+ *              // render sign action
+ *              $this->render('sign', array(
+ *                  'signingUrl'=>$signingUrl,
+ *                  'signingToken'=>$signingToken,
+ *                  'callbackUrl'=>$callbackUrl,
+ *                  'callbackToken'=>$callbackToken
+ *              ));
+ *          }
+ *     }
  * }
  * ```
  *
- * Inside 'sign' view call widget that embeds iframe and javascript:
+ * Inside 'sign' view embed iframe widget:
  *
  * ```php
  * $this->widget('ext.components.dokobit.documents.XDokobitIframeWidget', array(
@@ -154,7 +138,7 @@ class XDokobitIframeWidget extends CWidget
 	 */
 	public $jsUrl='https://gateway-sandbox.dokobit.com/js/isign.frame.js';
 	/**
-	 * @var string $resultContainerSelector the jquery selector for tag ...
+	 * @var string $resultContainerSelector the jquery selector for tag that will catch ajax response from download action
 	 * Defaults to '#result'
 	 */
 	public $resultContainerSelector='#result';

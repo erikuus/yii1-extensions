@@ -21,7 +21,7 @@
  * )
  * ```
  *
- * Then define dokobit download action in controller:
+ * Then define dokobit download action:
  *
  * ```php
  * public function actions()
@@ -29,8 +29,8 @@
  *     return array(
  *         'dokobitDownload'=>array(
  *             'class'=>'ext.components.dokobit.documents.XDokobitDownloadAction',
- *             'successCallback'=>'handleSuccess',
- *             'failureCallback'=>'handleFailure'
+ *             'successCallback'=>'handleDownloadSuccess',
+ *             'failureCallback'=>'handleDownloadFailure'
  *         )
  *     );
  * }
