@@ -12,7 +12,7 @@ Dokobit Documents Gateway Extensions for Yii PHP framework consists of following
 
 - **XDokobitDocuments** is an application component that enables to request Dokobit Documents Gateway API.
 
-- **XDokobitDownloadAction** downloads signed document file from Dokobit Documents Gateway server and passes downloaded file data to callback function.
+- **XDokobitDownloadAction** downloads signed file from Dokobit server and passes downloaded file data to callback function.
 
 - **XDokobitIframeWidget** embeds Dokobit Documents Gateway iframe and javascript that allow to sign documents without leaving website.
 
@@ -104,8 +104,8 @@ $this->widget('ext.components.dokobit.documents.XDokobitIframeWidget', array(
 ```
 
 This widget creates
-- iframe that displays Dokobit Documents Gateway page where application user can sign document
-- javascript that posts ajax request to download action after successful signing within iframe
+- iframe that displays Dokobit Documents Gateway page where application user can sign document;
+- javascript that posts ajax request to download action after successful signing within iframe.
 
 **Download action**
 
@@ -132,11 +132,11 @@ Following is an example of success callback function.
 public function handleDownloadSuccess($callbackToken, $data)
 {
     // validate callback token
-    if($this->validateToken($callbackToken))
+    if(!$this->validateToken($callbackToken))
         throw new CHttpException(400,'Invalid request. Please do not repeat this request again.');
 
-    // find model
-    $application=Application::model()->findbyPk($this->getIdFromToken());
+    // find application
+    $application=Application::model()->findbyPk($this->getIdFromToken($callbackToken));
     if($application===null)
         throw new CHttpException(404,'The requested page does not exist.');
 
@@ -151,9 +151,9 @@ public function handleDownloadSuccess($callbackToken, $data)
         if($file->save())
             echo 'Application successfully submitted!';
         else
-            echo 'User successfully added a signature, but saving file info into database failed!';
+            echo 'Signing was successful, but saving file info into database failed!';
     }
     else
-        echo 'User successfully added a signature, but saving file contents failed!';
+        echo 'Signing was successful, but saving file contents failed!';
 }
 ```
