@@ -161,6 +161,16 @@ class XDokobitLoginAction extends CAction
 	 */
 	public $failureUrl;
 	/**
+	 * @var string $successCallback the name of controller method this action calls after login success
+	 * This method is called only if $successUrl is not defined
+	 */
+	public $successCallback;
+	/**
+	 * @var string $failureCallback the name of controller method this action calls after login failure
+	 * This method is called only if $failureUrl is not defined
+	 */
+	public $failureCallback;
+	/**
 	 * @var array $authOptions the authentication options
 	 * @see XDokobitUserIdentity::authenticate()
 	 */
@@ -234,7 +244,12 @@ class XDokobitLoginAction extends CAction
 			{
 				// login user into application
 				Yii::app()->user->login($identity);
-				$this->controller->redirect($this->successUrl);
+
+				// redirect or callback on success
+				if($this->successUrl)
+					$this->controller->redirect($this->successUrl);
+				else
+					$this->controller->{$this->successCallback}();
 			}
 			elseif($identity->errorCode==XDokobitUserIdentity::ERROR_UNAUTHORIZED)
 				throw new CHttpException(403,'You do not have the proper credential to access this page.');
@@ -264,8 +279,11 @@ class XDokobitLoginAction extends CAction
 						$this->flash(Yii::t('XDokobitLoginAction.identity', 'Login failed!'));
 				}
 
-				// set failure message and redirect
-				$this->controller->redirect($this->failureUrl);
+				// redirect or callback on failure
+				if($this->failureUrl)
+					$this->controller->redirect($this->failureUrl);
+				else
+					$this->controller->{$this->failureCallback}();
 			}
 		}
 		else
