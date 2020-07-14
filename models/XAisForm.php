@@ -457,7 +457,7 @@ class XAisForm extends CFormModel
 			'EFA'=>'122',
 			'HAMA'=>'112',
 			'LAMA'=>'115',
-			'LVMA'=>'117,220',
+			'LVMA'=>'117,220,222',
 			'SAMA'=>'119',
 			'VAMA'=>'213',
 			'TLA'=>'124',
