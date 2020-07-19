@@ -39,9 +39,9 @@ class XDokobitDocuments extends CApplicationComponent
 	public $baseUrl;
 	/**
 	 * @var boolean $log whether to log
-	 * Defaults to false
+	 * Defaults to true
 	 */
-	public $log=false;
+	public $log=true;
 	/**
 	 * @var string $logLevel the level for log message
 	 * Must be one of the following: [trace|info|profile|warning|error]
