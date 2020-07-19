@@ -249,7 +249,7 @@ class XDokobitLoginAction extends CAction
 				if($this->successUrl)
 					$this->controller->redirect($this->successUrl);
 				else
-					$this->controller->{$this->successCallback}();
+					$this->controller->{$this->successCallback}($userData);
 			}
 			elseif($identity->errorCode==XDokobitUserIdentity::ERROR_UNAUTHORIZED)
 				throw new CHttpException(403,'You do not have the proper credential to access this page.');
