@@ -30,7 +30,7 @@ First configure dokobit component.
     'dokobitIdentity'=> array(
         'class'=>'ext.components.dokobit.identity.XDokobitIdentity',
         'apiAccessToken'=>'testid_AabBcdEFgGhIJjKKlmOPrstuv',
-        'apiBaseUrl'=>'https://id-sandbox.dokobit.com/api/authentication/'
+        'baseUrl'=>'https://id-sandbox.dokobit.com'
     )
 )
 ```

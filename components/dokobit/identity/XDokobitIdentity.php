@@ -16,7 +16,7 @@
  *     'dokobitIdentity'=> array(
  *         'class'=>'ext.components.dokobit.identity.XDokobitIdentity',
  *         'apiAccessToken'=>'testid_AabBcdEFgGhIJjKKlmOPrstuv',
- *         'apiBaseUrl'=>'https://id-sandbox.dokobit.com/api/authentication/'
+ *         'baseUrl'=>'https://id-sandbox.dokobit.com'
  *     )
  * )
  * ```
@@ -35,9 +35,9 @@ class XDokobitIdentity extends CApplicationComponent
 	 */
 	public $apiAccessToken;
 	/**
-	 * @var string $apiUrl the Dokobit Identity Gateway API base url
+	 * @var string $baseUrl the Dokobit Identity Gateway base url
 	 */
-	public $apiBaseUrl;
+	public $baseUrl;
 
 	/**
 	 * Initializes the component.
@@ -48,8 +48,8 @@ class XDokobitIdentity extends CApplicationComponent
 		if(!$this->apiAccessToken)
 			throw new CException('"apiAccessToken" has to be set!');
 
-		if(!$this->apiBaseUrl)
-			throw new CException('"apiBaseUrl" has to be set!');
+		if(!$this->baseUrl)
+			throw new CException('"baseUrl" has to be set!');
 	}
 
 	/**
@@ -78,7 +78,7 @@ class XDokobitIdentity extends CApplicationComponent
 	 */
 	public function createSession($params)
 	{
-		$url=$this->apiBaseUrl.'create?access_token='.$this->apiAccessToken;
+		$url=$this->baseUrl.'/api/authentication/create?access_token='.$this->apiAccessToken;
 		return $this->request($url, $params, true);
 	}
 
@@ -122,7 +122,7 @@ class XDokobitIdentity extends CApplicationComponent
 	 */
 	public function getUserData($sessionToken)
 	{
-		$url=$this->apiBaseUrl.$sessionToken.'/status?access_token='.$this->apiAccessToken;
+		$url=$this->baseUrl.'/api/authentication/'.$sessionToken.'/status?access_token='.$this->apiAccessToken;
 		return $this->request($url);
 	}
 
