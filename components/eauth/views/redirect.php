@@ -2,7 +2,7 @@
 <html>
 <head>
 	<script type="text/javascript">
-		<?php 
+		<?php
 			$code = 'if (window.opener) {';
 			$code .= 'window.close();';
 			if ($redirect) {

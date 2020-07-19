@@ -16,8 +16,8 @@ require_once dirname(dirname(__FILE__)) . '/EOAuth2Service.php';
  *
  * @package application.extensions.eauth.services
  */
-class FacebookOAuthService extends EOAuth2Service {
-
+class FacebookOAuthService extends EOAuth2Service
+{
 	protected $name = 'facebook';
 	protected $title = 'Facebook';
 	protected $type = 'OAuth';
@@ -31,7 +31,8 @@ class FacebookOAuthService extends EOAuth2Service {
 		'access_token' => 'https://graph.facebook.com/oauth/access_token',
 	);
 
-	protected function fetchAttributes() {
+	protected function fetchAttributes()
+	{
 		$info = (object)$this->makeSignedRequest('https://graph.facebook.com/me');
 
 		$this->attributes['id'] = $info->id;
@@ -39,32 +40,25 @@ class FacebookOAuthService extends EOAuth2Service {
 		$this->attributes['url'] = $info->link;
 	}
 
-	protected function getCodeUrl($redirect_uri) {
-		if (strpos($redirect_uri, '?') !== false) {
+	protected function getCodeUrl($redirect_uri)
+	{
+		if(strpos($redirect_uri, '?') !== false)
+		{
 			$url = explode('?', $redirect_uri);
 			$url[1] = preg_replace('#[/]#', '%2F', $url[1]);
 			$redirect_uri = implode('?', $url);
 		}
 
-// Erik Uus: Not needed as parent::getCodeUrl sets this
-//		$this->setState('redirect_uri', $redirect_uri);
-
 		$url = parent::getCodeUrl($redirect_uri);
-		if (isset($_GET['js'])) {
+
+		if(isset($_GET['js']))
 			$url .= '&display=popup';
-		}
 
 		return $url;
 	}
 
-// This method adds the redirect_uri= parameter to the query string and then calls the parent::getTokenUrl,
-// which also adds the same parameter to the query string.
-
-//	protected function getTokenUrl($code) {
-//		return parent::getTokenUrl($code) . '&redirect_uri=' . urlencode($this->getState('redirect_uri'));
-//	}
-
-	protected function getAccessToken($code) {
+	protected function getAccessToken($code)
+	{
 		$response = $this->makeRequest($this->getTokenUrl($code), array(), false);
 		// The response format of https://www.facebook.com/v2.3/oauth/access_token returned
 		// when you exchange a code for an access_token now return valid JSON instead of being URL encoded.
@@ -80,7 +74,8 @@ class FacebookOAuthService extends EOAuth2Service {
 	 *
 	 * @param array $token access token array.
 	 */
-	protected function saveAccessToken($token) {
+	protected function saveAccessToken($token)
+	{
 		$this->setState('auth_token', $token['access_token']);
 		$this->setState('expires', isset($token['expires']) ? time() + (int)$token['expires'] - 60 : 0);
 		$this->access_token = $token['access_token'];
@@ -92,14 +87,17 @@ class FacebookOAuthService extends EOAuth2Service {
 	 * @param stdClass $json the json response.
 	 * @return array the error array with 2 keys: code and message. Should be null if no errors.
 	 */
-	protected function fetchJsonError($json) {
-		if (isset($json->error)) {
+	protected function fetchJsonError($json)
+	{
+		if(isset($json->error))
+		{
 			return array(
 				'code' => $json->error->code,
 				'message' => $json->error->message,
 			);
 		}
-		else {
+		else
+		{
 			return null;
 		}
 	}

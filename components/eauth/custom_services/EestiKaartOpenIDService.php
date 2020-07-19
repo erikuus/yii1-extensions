@@ -10,9 +10,9 @@ require_once dirname(dirname(__FILE__)).'/services/EestiOpenIDService.php';
 
 class EestiKaartOpenIDService extends EestiOpenIDService
 {
-	protected $requiredAttributes = array(
-		'name' => array('fullname', 'namePerson'),
-		//'email' => array('email', 'contact/email'),
-		'birthday' => array('dob', 'birthDate'),
+	protected $requiredAttributes=array(
+		'name'=>array('fullname', 'namePerson'),
+		//'email'=>array('email', 'contact/email'),
+		'birthday'=>array('dob', 'birthDate'),
 	);
 }

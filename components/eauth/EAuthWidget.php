@@ -12,39 +12,34 @@
  *
  * @package application.extensions.eauth
  */
-class EAuthWidget extends CWidget {
-
+class EAuthWidget extends CWidget
+{
 	/**
 	 * @var string EAuth component name.
 	 */
-	public $component = 'eauth';
-
+	public $component='eauth';
 	/**
 	 * @var array the services.
 	 * @see EAuth::getServices()
 	 */
-	public $services = null;
-
+	public $services;
 	/**
-	 * @var array predefined services. If null then use all services. Default is null.
+	 * @var array predefined services. If not set then use all services.
 	 */
-	public $predefinedServices = null;
-
+	public $predefinedServices;
 	/**
 	 * @var boolean whether to use popup window for authorization dialog. Javascript required.
 	 */
-	public $popup = null;
-
+	public $popup;
 	/**
 	 * @var string the action to use for dialog destination. Default: the current route.
 	 */
-	public $action = null;
-
+	public $action;
 	/**
 	 * @var boolean include the CSS file. Default is true.
 	 * If this is set false, you are responsible to explicitly include the necessary CSS file in your page.
 	 */
-	public $cssFile = true;
+	public $cssFile=true;
 
 	/**
 	 * Initializes the widget.
@@ -52,44 +47,43 @@ class EAuthWidget extends CWidget {
 	 * and {@link CBaseController::beginWidget} after the widget's
 	 * properties have been initialized.
 	 */
-	public function init() {
+	public function init()
+	{
 		parent::init();
 
 		// EAuth component
 		$component = Yii::app()->getComponent($this->component);
 
 		// Some default properties from component configuration
-		if (!isset($this->services)) {
+		if(!isset($this->services))
 			$this->services = $component->getServices();
-		}
 
-		if (is_array($this->predefinedServices)) {
+		if(is_array($this->predefinedServices))
+		{
 			$_services = array();
-			foreach ($this->predefinedServices as $_serviceName) {
-				if (isset($this->services[$_serviceName])) {
+			foreach($this->predefinedServices as $_serviceName)
+			{
+				if(isset($this->services[$_serviceName]))
 					$_services[$_serviceName] = $this->services[$_serviceName];
-				}
 			}
 			$this->services = $_services;
 		}
 
-		if (!isset($this->popup)) {
+		if(!isset($this->popup))
 			$this->popup = $component->popup;
-		}
 
 		// Set the current route, if it is not set.
-		if (!isset($this->action)) {
+		if(!isset($this->action))
 			$this->action = Yii::app()->urlManager->parseUrl(Yii::app()->request);
-		}
 	}
 
 	/**
 	 * Executes the widget.
 	 * This method is called by {@link CBaseController::endWidget}.
 	 */
-	public function run() {
+	public function run()
+	{
 		parent::run();
-
 		$this->registerAssets();
 		$this->render('auth', array(
 			'id' => $this->getId(),
@@ -101,22 +95,26 @@ class EAuthWidget extends CWidget {
 	/**
 	 * Register CSS and JS files.
 	 */
-	protected function registerAssets() {
-		$cs = Yii::app()->clientScript;
+	protected function registerAssets()
+	{
+		$cs=Yii::app()->clientScript;
 		$cs->registerCoreScript('jquery');
 
-		$assets_path = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'assets';
-		$url = Yii::app()->assetManager->publish($assets_path, false, -1, YII_DEBUG);
-		if ($this->cssFile) $cs->registerCssFile($url . '/css/auth.css');
+		$assets_path=dirname(__FILE__) . DIRECTORY_SEPARATOR . 'assets';
+		$url=Yii::app()->assetManager->publish($assets_path, false, -1, YII_DEBUG);
+		if($this->cssFile)
+			$cs->registerCssFile($url . '/css/auth.css');
 
 		// Open the authorization dilalog in popup window.
-		if ($this->popup) {
+		if($this->popup)
+		{
 			$cs->registerScriptFile($url . '/js/auth.js', CClientScript::POS_END);
-			$js = '';
-			foreach ($this->services as $name => $service) {
+			$js='';
+			foreach($this->services as $name => $service)
+			{
 				$args = $service->jsArguments;
 				$args['id'] = $service->id;
-				$js .= '$(".auth-service.' . $service->id . ' a").eauth(' . json_encode($args) . ');' . "\n";
+				$js.= '$(".auth-service.' . $service->id . ' a").eauth(' . json_encode($args) . ');' . "\n";
 			}
 			$cs->registerScript('eauth-services', $js, CClientScript::POS_READY);
 		}
