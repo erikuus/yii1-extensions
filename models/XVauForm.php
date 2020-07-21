@@ -108,7 +108,6 @@ class XVauForm extends CFormModel
 	 */
 	public function checkWhitelistManager($userId)
 	{
-		$reference=$this->quote($reference);
 		$itemname=Yii::app()->kmooduldb->createCommand("
 			SELECT itemname
 			FROM tbl_auth_assignment
