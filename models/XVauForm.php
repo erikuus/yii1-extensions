@@ -103,6 +103,24 @@ class XVauForm extends CFormModel
 	}
 
 	/**
+	 * @param integer user id
+	 * @return boolean whether user has whitelist manager role
+	 */
+	public function checkWhitelistManager($userId)
+	{
+		$reference=$this->quote($reference);
+		$itemname=Yii::app()->kmooduldb->createCommand("
+			SELECT itemname
+			FROM tbl_auth_assignment
+			WHERE itemname='WhitelistManager'
+			AND userid=$userId
+			LIMIT 1
+		")->queryScalar();
+		return $itemname ? true : false;
+	}
+
+
+	/**
 	 * @return string quoted and escaped
 	 */
 	protected function quote($str)
