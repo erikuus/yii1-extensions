@@ -60,6 +60,7 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 	const ERROR_EXPIRED_CERTIFICATE=3;
 	const ERROR_SYNC_DATA=4;
 	const ERROR_UNAUTHORIZED=5;
+	const ERROR_UNAVAILABLE=6;
 
 	/**
 	 * @var array $userData the data of authenticated user returned
@@ -215,15 +216,14 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 						if(!$modelName || !$codeAttributeName || !$countryCodeAttributeName)
 							throw new CException('Model name, code and country code attribute names have to be set in options!');
 
-						// try to find user in application database
+						// try to find user in application database by codes
 						$user=CActiveRecord::model($modelName)->findByAttributes(array(
 							$codeAttributeName=>$userData['code'],
 							$countryCodeAttributeName=>$userData['country_code']
 						));
 
-						// if user was not found and create is enabled
-						// then create new user
-						if($user===null)
+						// in case of guest if user was not found by codes and create is enabled then create new user
+						if(Yii::app()->user->isGuest && $user===null)
 						{
 							if($enableCreate)
 							{
@@ -251,10 +251,24 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 							else
 								$this->errorCode=self::ERROR_UNAUTHORIZED;
 						}
-						// if user was found and update is enabled
-						// then update user information
+						// if update is enabled
 						elseif($enableUpdate)
 						{
+							// in case of active session
+							if(!Yii::app()->user->isGuest)
+							{
+								// if no user was found by codes then update current user
+								if($user===null)
+								{
+									$user=CActiveRecord::model($modelName)->findByPk(Yii::app()->user->id);
+									$user->{$codeAttributeName}=$userData['code'];
+									$user->{$countryCodeAttributeName}=$userData['country_code'];
+								}
+								else
+									$this->errorCode=self::ERROR_UNAVAILABLE;
+							}
+
+							// update user information
 							if($scenarioName)
 								$user->scenario=$scenarioName;
 
@@ -272,16 +286,20 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 								$this->errorCode=self::ERROR_SYNC_DATA;
 						}
 
-						// if there are no errors assign identity attributes
-						if(!in_array($this->errorCode, array(self::ERROR_UNAUTHORIZED, self::ERROR_SYNC_DATA)))
+						// if there are no errors
+						if(!in_array($this->errorCode, array(self::ERROR_UNAUTHORIZED, self::ERROR_SYNC_DATA, self::ERROR_UNAVAILABLE)))
 						{
-							$this->id=$user->primaryKey;
+							// in case of guest assign identity attributes
+							if(Yii::app()->user->isGuest)
+							{
+								$this->id=$user->primaryKey;
 
-							if($usernameAttributeName)
-								$this->name=$user->{$usernameAttributeName};
-							else
-								$this->name=$userData['name'].' '.$userData['surname'];
-
+								if($usernameAttributeName)
+									$this->name=$user->{$usernameAttributeName};
+								else
+									$this->name=$userData['name'].' '.$userData['surname'];
+							}
+							
 							$this->errorCode=self::ERROR_NONE;
 						}
 					}

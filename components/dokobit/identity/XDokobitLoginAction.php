@@ -242,8 +242,9 @@ class XDokobitLoginAction extends CAction
 			$identity->authenticate($this->authOptions);
 			if($identity->errorCode==XDokobitUserIdentity::ERROR_NONE)
 			{
-				// login user into application
-				Yii::app()->user->login($identity);
+				// login guest into application
+				if(Yii::app()->user->isGuest)
+					Yii::app()->user->login($identity);
 
 				// redirect or callback on success
 				if($this->successUrl)
@@ -273,6 +274,9 @@ class XDokobitLoginAction extends CAction
 					case XDokobitUserIdentity::ERROR_SYNC_DATA:
 						$this->log('Failed data sync: '.$userData);
 						$this->flash(Yii::t('XDokobitLoginAction.identity', 'Login failed! Authentication was successfull, but data synchronization failed.'));
+						break;
+					case XDokobitUserIdentity::ERROR_UNAVAILABLE:
+						$this->flash(Yii::t('XDokobitLoginAction.identity', 'Connecting failed! Personal identification code is already attached to another user account!'));
 						break;
 					default:
 						$this->log('Unknown error code: '.$identity->errorCode);
