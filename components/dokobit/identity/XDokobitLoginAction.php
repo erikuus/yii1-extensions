@@ -176,6 +176,11 @@ class XDokobitLoginAction extends CAction
 	 */
 	public $authOptions=array();
 	/**
+	 * @var string $userStateKey the key of user session variable that stores authentication method
+	 * Defaults to 'dokobit'
+	 */
+	public $userStateKey='dokobit';
+	/**
 	 * @var boolean $flash whether to display flash message on error
 	 * Defaults to true
 	 */
@@ -244,7 +249,12 @@ class XDokobitLoginAction extends CAction
 			{
 				// login guest into application
 				if(Yii::app()->user->isGuest)
+				{
 					Yii::app()->user->login($identity);
+					
+					if($this->userStateKey)
+						Yii::app()->user->setState($this->userStateKey, $identity->method);
+				}
 
 				// redirect or callback on success
 				if($this->successUrl)

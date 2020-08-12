@@ -99,13 +99,17 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 	 */
 	protected $userData;
 	/**
-	 * @var string $id the unique identifier for the identity.
+	 * @var string $id the unique identifier for the identity
 	 */
 	protected $id;
 	/**
-	 * @var string $name the display name for the identity.
+	 * @var string $name the display name for the identity
 	 */
 	protected $name;
+	/**
+	 * @var string $method the authentication method
+	 */
+	protected $method;
 
 	/**
 	 * Constructor
@@ -118,9 +122,9 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 	}
 
 	/**
-	 * Returns the unique identifier for the identity.
-	 * This method is required by {@link IUserIdentity}.
-	 * @return string the unique identifier for the identity.
+	 * Returns the unique identifier for the identity
+	 * This method is required by {@link IUserIdentity}
+	 * @return string the unique identifier for the identity
 	 */
 	public function getId()
 	{
@@ -128,13 +132,23 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 	}
 
 	/**
-	 * Returns the display name for the identity.
-	 * This method is required by {@link IUserIdentity}.
-	 * @return string the display name for the identity.
+	 * Returns the display name for the identity
+	 * This method is required by {@link IUserIdentity}
+	 * @return string the display name for the identity
 	 */
 	public function getName()
 	{
 		return $this->name;
+	}
+
+	/**
+	 * Returns the authentication method
+	 * This method is required by {@link XDokobitLoginAction}
+	 * @return string the authentication method ["sc"|"smartid"|"mobile"]
+	 */
+	public function getMethod()
+	{
+		return $this->method;
 	}
 
 	/**
@@ -197,6 +211,9 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 				// validate that certificate is not expired
 				if($this->validateCerificate($userData))
 				{
+					// assign identity authentication method
+					$this->method=$userData['authentication_method'];
+
 					// authorize authenticated user against application database and
 					// sync dokobit and application user data if required
 					if($options!==array())
@@ -299,7 +316,7 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 								else
 									$this->name=$userData['name'].' '.$userData['surname'];
 							}
-							
+
 							$this->errorCode=self::ERROR_NONE;
 						}
 					}
