@@ -83,7 +83,7 @@ class XVauHelpdesk extends CWidget
 	{
 		$script =
 <<<SCRIPT
-	jQuery(".{$this->_cssClass}").live("click", function(e){
+	jQuery(document).delegate(".{$this->_cssClass}","click", function(e){
 		e.preventDefault();
 		window.open(this.href,"","top=100,left=100,width=800,height=600,resizable=yes,location=no,menubar=no,scrollbars=yes,status=no,toolbar=no,fullscreen=no,dependent=no");
 	});
