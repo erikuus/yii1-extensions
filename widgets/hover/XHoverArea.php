@@ -103,12 +103,12 @@ class XHoverArea extends CWidget
 		// register inline javascript
 		$script =
 <<<SCRIPT
-	jQuery('.{$this->cssClass}').live('click',function(event) {
+	jQuery(document).delegate('.{$this->cssClass}','click',function(event) {
 		event.stopPropagation();
 		jQuery('.{$this->contentCssClass}:visible').hide();
 		jQuery(this).children('.{$this->contentCssClass}').toggle();
 	});
-	jQuery('html').live('click', function() {
+	jQuery(document).delegate('html','click', function() {
 		jQuery('.{$this->contentCssClass}:visible').hide();
 	});
 SCRIPT;
