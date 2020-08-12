@@ -76,12 +76,15 @@ class XStickyFooter extends CWidget
 		// register css files
 		if($this->cssFile===null)
 			$cs->registerCssFile($assets.'/stickyFooter.css');
-		else if($this->cssFile!==false)
+		elseif($this->cssFile!==false)
 			$cs->registerCssFile($assets.'/'.$this->cssFile);
 
-		// register javascript file
+		// register javascript file and init sticky
 		if($this->sticky)
+		{
 			$cs->registerScriptFile($assets.'/jquery.stickyFooter.js', CClientScript::POS_END);
+			$cs->registerScript(__CLASS__, "stickyFooter();", CClientScript::POS_END);
+		}
 	}
 
 	/**
