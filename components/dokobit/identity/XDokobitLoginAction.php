@@ -250,10 +250,10 @@ class XDokobitLoginAction extends CAction
 				// login guest into application
 				if(Yii::app()->user->isGuest)
 				{
-					Yii::app()->user->login($identity);
-					
 					if($this->userStateKey)
 						Yii::app()->user->setState($this->userStateKey, $identity->method);
+
+					Yii::app()->user->login($identity);
 				}
 
 				// redirect or callback on success
