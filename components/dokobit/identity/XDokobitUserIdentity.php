@@ -205,14 +205,22 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 		// validate json
 		if(json_last_error()==JSON_ERROR_NONE)
 		{
+			// set user data variables for convenience
+			$status=$this->getValue($userData,'status');
+			$code=$this->getValue($userData,'code');
+			$countryCode=$this->getValue($userData,'country_code');
+			$name=$this->getValue($userData,'name');
+			$surename=$this->getValue($userData,'surname');
+
 			// validate that dokobit user data status is ok
-			if($userData['status']=='ok')
+			// and both code and country code have some value
+			if($status=='ok' && $code && $countryCode)
 			{
 				// validate that certificate is not expired
 				if($this->validateCerificate($userData))
 				{
 					// assign identity authentication method
-					$this->method=$userData['authentication_method'];
+					$this->method=$this->getValue($userData,'authentication_method');
 
 					// authorize authenticated user against application database and
 					// sync dokobit and application user data if required
@@ -235,8 +243,8 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 
 						// try to find user in application database by codes
 						$user=CActiveRecord::model($modelName)->findByAttributes(array(
-							$codeAttributeName=>$userData['code'],
-							$countryCodeAttributeName=>$userData['country_code']
+							$codeAttributeName=>$code,
+							$countryCodeAttributeName=>$countryCode
 						));
 
 						// in case of guest if user was not found by codes and create is enabled then create new user
@@ -246,14 +254,14 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 							{
 								$user=$scenarioName ? new $modelName($scenarioName) : new $modelName();
 
-								$user->{$codeAttributeName}=$userData['code'];
-								$user->{$countryCodeAttributeName}=$userData['country_code'];
+								$user->{$codeAttributeName}=$code;
+								$user->{$countryCodeAttributeName}=$countryCode;
 
 								if($usernameAttributeName)
-									$user->{$usernameAttributeName}=$userData['code'].'@'.$userData['country_code'];
+									$user->{$usernameAttributeName}=$code.'@'.$countryCode;
 
-								if($birthdayAttributeName && $userData['country_code']=='ee')
-									$user->{$birthdayAttributeName}=$this->getBirthdayFromCode($userData['code']);
+								if($birthdayAttributeName && $countryCode=='ee')
+									$user->{$birthdayAttributeName}=$this->getBirthdayFromCode($code);
 
 								foreach($syncAttributes as $key=>$attribute)
 								{
@@ -278,8 +286,8 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 								if($user===null)
 								{
 									$user=CActiveRecord::model($modelName)->findByPk(Yii::app()->user->id);
-									$user->{$codeAttributeName}=$userData['code'];
-									$user->{$countryCodeAttributeName}=$userData['country_code'];
+									$user->{$codeAttributeName}=$code;
+									$user->{$countryCodeAttributeName}=$countryCode;
 								}
 								else
 									$this->errorCode=self::ERROR_UNAVAILABLE;
@@ -289,8 +297,8 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 							if($scenarioName)
 								$user->scenario=$scenarioName;
 
-							if($birthdayAttributeName && $userData['country_code']=='ee')
-								$user->{$birthdayAttributeName}=$this->getBirthdayFromCode($userData['code']);
+							if($birthdayAttributeName && $countryCode=='ee')
+								$user->{$birthdayAttributeName}=$this->getBirthdayFromCode($code);
 
 							foreach($syncAttributes as $key=>$attribute)
 							{
@@ -314,7 +322,7 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 								if($usernameAttributeName)
 									$this->name=$user->{$usernameAttributeName};
 								else
-									$this->name=$userData['name'].' '.$userData['surname'];
+									$this->name=$name.' '.$surname;
 							}
 
 							$this->errorCode=self::ERROR_NONE;
@@ -324,8 +332,8 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 					{
 						// if synchronisation is not set in options
 						// just assign identity attributes for user session
-						$this->id=$userData['code'].'@'.$userData['country_code'];
-						$this->name=$userData['name'].' '.$userData['surname'];
+						$this->id=$code.'@'.$countryCode;
+						$this->name=$name.' '.$surname;
 						$this->errorCode=self::ERROR_NONE;
 					}
 				}
