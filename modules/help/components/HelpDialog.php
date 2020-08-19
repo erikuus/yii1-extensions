@@ -23,6 +23,10 @@ class HelpDialog extends CWidget
 	 * @var array options for CJuiDialog
 	 */
 	public $options=array();
+	/**
+	 * @var array htmlOptions for tag representing the CJuiDialog.
+	 */
+	public $htmlOptions=array();
 
 	/**
 	 * Initializes the widget.
@@ -63,7 +67,8 @@ SCRIPT;
 					'modal'=>true,
 				),
 				$this->options
-			)
+			),
+			'htmlOptions'=>$this->htmlOptions
 		));
 		$this->endWidget('zii.widgets.jui.CJuiDialog');
 	}
