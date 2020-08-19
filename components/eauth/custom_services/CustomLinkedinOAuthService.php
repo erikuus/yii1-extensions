@@ -10,30 +10,26 @@ require_once dirname(dirname(__FILE__)).'/services/LinkedinOAuthService.php';
 
 class CustomLinkedinOAuthService extends LinkedinOAuthService
 {
-	protected $scope = 'r_liteprofile r_emailaddress';
+	protected $scope='r_liteprofile r_emailaddress';
 
 	protected function fetchAttributes()
 	{
-		$info = $this->makeSignedRequest('https://api.linkedin.com/v1/people/~:(id,first-name,last-name,public-profile-url,email-address)', array(), false); // json format not working :(
-		$info = $this->parseInfo($info);
+		$info=(object)$this->makeSignedRequest('https://api.linkedin.com/v2/me');
 
-		$this->attributes['id'] = $info['id'];
+		$this->attributes['id']=$info->id;
 
-		if(isset($info['first-name']) && isset($info['last-name']))
-			$this->attributes['name'] = $info['first-name'].' '.$info['last-name'];
+		if(isset($info->localizedFirstName) && isset($info->localizedLastName))
+			$this->attributes['name']=$info->localizedFirstName.' '.$info->localizedLastName;
 
-		if(isset($info['public-profile-url']))
-			$this->attributes['url'] = $info['public-profile-url'];
+		if(isset($info->localizedFirstName))
+			$this->attributes['firstname']=$info->localizedFirstName;
 
-		if(isset($info['first-name']))
-			$this->attributes['firstname'] = $info['first-name'];
+		if(isset($info->localizedLastName))
+			$this->attributes['lastname']=$info->localizedLastName;
 
-		if(isset($info['last-name']))
-			$this->attributes['lastname'] = $info['last-name'];
+		$info=(object)$this->makeSignedRequest('https://api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))');
 
-		if(isset($info['email-address']))
-			$this->attributes['email'] = $info['email-address'];
-
-		$this->attributes['info'] = $info;
+		if(isset($info->elements[0]->{'handle~'}->emailAddress))
+			$this->attributes['email']=$info->elements[0]->{'handle~'}->emailAddress;
 	}
 }
