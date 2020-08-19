@@ -18,53 +18,48 @@ require_once dirname(dirname(__FILE__)) . '/EOAuth2Service.php';
  */
 class FacebookOAuthService extends EOAuth2Service
 {
-	protected $name = 'facebook';
-	protected $title = 'Facebook';
-	protected $type = 'OAuth';
-	protected $jsArguments = array('popup' => array('width' => 585, 'height' => 290));
+	protected $name='facebook';
+	protected $title='Facebook';
+	protected $type='OAuth';
+	protected $jsArguments=array('popup' => array('width' => 585, 'height' => 290));
 
-	protected $client_id = '';
-	protected $client_secret = '';
-	protected $scope = '';
-	protected $providerOptions = array(
-		'authorize' => 'https://www.facebook.com/v2.8/dialog/oauth',
-		'access_token' => 'https://graph.facebook.com/oauth/access_token',
+	protected $client_id;
+	protected $client_secret;
+	protected $scope;
+	protected $providerOptions=array(
+		'authorize'=>'https://www.facebook.com/v2.8/dialog/oauth',
+		'access_token'=>'https://graph.facebook.com/oauth/access_token',
 	);
 
 	protected function fetchAttributes()
 	{
-		$info = (object)$this->makeSignedRequest('https://graph.facebook.com/me');
+		$info=(object)$this->makeSignedRequest('https://graph.facebook.com/me');
 
-		$this->attributes['id'] = $info->id;
-		$this->attributes['name'] = $info->name;
-		$this->attributes['url'] = $info->link;
+		$this->attributes['id']=$info->id;
+		$this->attributes['name']=$info->name;
+		$this->attributes['url']=$info->link;
 	}
 
 	protected function getCodeUrl($redirect_uri)
 	{
 		if(strpos($redirect_uri, '?') !== false)
 		{
-			$url = explode('?', $redirect_uri);
-			$url[1] = preg_replace('#[/]#', '%2F', $url[1]);
-			$redirect_uri = implode('?', $url);
+			$url=explode('?', $redirect_uri);
+			$url[1]=preg_replace('#[/]#', '%2F', $url[1]);
+			$redirect_uri=implode('?', $url);
 		}
 
 		$url = parent::getCodeUrl($redirect_uri);
 
 		if(isset($_GET['js']))
-			$url .= '&display=popup';
+			$url.='&display=popup';
 
 		return $url;
 	}
 
 	protected function getAccessToken($code)
 	{
-		$response = $this->makeRequest($this->getTokenUrl($code), array(), false);
-		// The response format of https://www.facebook.com/v2.3/oauth/access_token returned
-		// when you exchange a code for an access_token now return valid JSON instead of being URL encoded.
-		// The new format of this response is {"access_token": {TOKEN}, "token_type":{TYPE}, "expires_in":{TIME}}.
-		// We made this update to be compliant with section 5.1 of RFC 6749.
-		//parse_str($response, $result);
+		$response=$this->makeRequest($this->getTokenUrl($code), array(), false);
 		$result=CJSON::decode($response);
 		return $result;
 	}
@@ -78,7 +73,7 @@ class FacebookOAuthService extends EOAuth2Service
 	{
 		$this->setState('auth_token', $token['access_token']);
 		$this->setState('expires', isset($token['expires']) ? time() + (int)$token['expires'] - 60 : 0);
-		$this->access_token = $token['access_token'];
+		$this->access_token=$token['access_token'];
 	}
 
 	/**
@@ -92,13 +87,11 @@ class FacebookOAuthService extends EOAuth2Service
 		if(isset($json->error))
 		{
 			return array(
-				'code' => $json->error->code,
-				'message' => $json->error->message,
+				'code'=>$json->error->code,
+				'message'=>$json->error->message,
 			);
 		}
 		else
-		{
 			return null;
-		}
 	}
 }

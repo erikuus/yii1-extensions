@@ -170,7 +170,7 @@ class XStepBar extends CWidget
 			$cssFile=CHtml::asset(dirname(__FILE__).DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'stepbar.css');
 			Yii::app()->clientScript->registerCssFile($cssFile);
 		}
-		else if($this->cssFile!==false)
+		elseif($this->cssFile!==false)
 			Yii::app()->clientScript->registerCssFile($this->cssFile);
 
 		// register inline style

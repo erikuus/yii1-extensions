@@ -12,8 +12,8 @@
  *
  * @package application.extensions.eauth
  */
-interface IAuthService {
-
+interface IAuthService
+{
 	/**
 	 * Initizlize the component.
 	 *
@@ -21,7 +21,6 @@ interface IAuthService {
 	 * @param array $options properties initialization.
 	 */
 	public function init($component, $options = array());
-
 
 	/**
 	 * Returns service name(id).
@@ -43,7 +42,6 @@ interface IAuthService {
 	 */
 	public function getJsArguments();
 
-
 	/**
 	 * Sets {@link EAuth} application component
 	 *
@@ -55,7 +53,6 @@ interface IAuthService {
 	 * Returns the {@link EAuth} application component.
 	 */
 	public function getComponent();
-
 
 	/**
 	 * Sets redirect url after successful authorization.
@@ -69,7 +66,6 @@ interface IAuthService {
 	 */
 	public function getRedirectUrl();
 
-
 	/**
 	 * Sets redirect url after unsuccessful authorization (e.g. user canceled).
 	 *
@@ -82,7 +78,6 @@ interface IAuthService {
 	 */
 	public function getCancelUrl();
 
-
 	/**
 	 * Authenticate the user.
 	 */
@@ -92,7 +87,6 @@ interface IAuthService {
 	 * Whether user was successfuly authenticated.
 	 */
 	public function getIsAuthenticated();
-
 
 	/**
 	 * Redirect to the url. If url is null, {@link redirectUrl} will be used.
@@ -105,7 +99,6 @@ interface IAuthService {
 	 * Redirect to the {@link cancelUrl} or simply close the popup window.
 	 */
 	public function cancel();
-
 
 	/**
 	 * Returns the user unique id.
@@ -136,5 +129,4 @@ interface IAuthService {
 	 * Returns an object with a human-readable representation of the current authorization.
 	 */
 	public function getItem();
-
 }
