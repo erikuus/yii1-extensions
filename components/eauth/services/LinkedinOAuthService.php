@@ -34,7 +34,7 @@ class LinkedinOAuthService extends EOAuth2Service
 	protected function fetchAttributes()
 	{
 		$info=(object)$this->makeSignedRequest('https://api.linkedin.com/v2/me');
-		
+
 		$this->attributes['id']=$info->id;
 	}
 
