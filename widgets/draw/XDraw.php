@@ -28,7 +28,7 @@
  *         -webkit-user-select: none;
  *         overflow: hidden;
  *     }
- * </style>
+ *     </style>
  * </head>
  * <body>
  * <?php $this->widget('ext.widgets.draw.XDraw', array(
@@ -72,9 +72,7 @@
  *        )
  *    ),
  *    'containerHtmlOptions'=>array(
- *        'width'=>'100vw',
- *        'height'=>'100vh',
- *        'overflow'=>'hidden'
+ *        'style'=>'width:100vw; height:100vh; overflow:hidden'
  *    ),
  *    'enableDownloadButton'=>true,
  *    'enableUploadButton'=>true,
@@ -245,10 +243,10 @@ class XDraw extends CWidget
 	 */
 	public function init()
 	{
-		if(isset($this->htmlOptions['id']))
-			$this->id=$this->htmlOptions['id'];
+		if(isset($this->canvasHtmlOptions['id']))
+			$this->id=$this->canvasHtmlOptions['id'];
 		else
-			$this->htmlOptions['id']=$this->id;
+			$this->canvasHtmlOptions['id']=$this->id;
 
 		$this->registerClientScriptFiles();
 		$this->registerClientScript();
@@ -280,13 +278,12 @@ class XDraw extends CWidget
 		$assets=dirname(__FILE__).'/assets';
 		$baseUrl=Yii::app()->assetManager->publish($assets);
 
-		// css file
+		// register css
 		$cs->registerCssFile($this->iconCssUrl);
 
-		// core script
-		$cs->registerCoreScript('jquery');
-
-		// drawr jquery plugin
+		// register js
+		$cs->scriptMap['jquery.js']=false;
+		$cs->registerScriptFile($baseUrl.'/jquery-3.4.1.min.js', CClientScript::POS_HEAD);
 		$cs->registerScriptFile($baseUrl.'/jquery.drawr.combined.js', CClientScript::POS_HEAD);
 	}
 
@@ -304,18 +301,18 @@ class XDraw extends CWidget
 		$options=CJavaScript::encode($this->options);
 
 		// register and start plugin
-		$script=<<<SCRIPT
-			$("#{$this->id}").drawr({$options});
-			$("#{$this->id}").drawr("start");
-		SCRIPT;
+		$script="
+			$('#{$this->id}').drawr({$options});
+			$('#{$this->id}').drawr('start');
+		";
 
 		// preload drawing from file or as base64 string
 		if($this->loadFile)
 		{
 			$errorMessage=Yii::t('XDraw.draw', 'Could not load drawing!');
-			$script.=<<<SCRIPT
+			$script.="
 				$.ajax({
-					url: "{$this->loadFile}",
+					url: '{$this->loadFile}',
 					cache: false,
 					xhr: function(){
 						var xhr = new XMLHttpRequest();
@@ -325,76 +322,76 @@ class XDraw extends CWidget
 					success: function(data){
 						var reader = new FileReader();
 						reader.onloadend = function () {
-							$("#{$this->id}").drawr("load", reader.result);
+							$('#{$this->id}').drawr('load', reader.result);
 						}
 						reader.readAsDataURL(data);
 					},
 					error: function(){
-						alert("{$errorMessage}");
+						alert('{$errorMessage}');
 					}
 				});
-			SCRIPT;
+			";
 		}
 		elseif($this->loadBase64)
 		{
-			$script.=<<<SCRIPT
-				$("#{$this->id}").drawr("load", {$this->loadBase64}});
-			SCRIPT;
+			$script.="
+				$('#{$this->id}').drawr('load', '{$this->loadBase64}');
+			";
 		}
 
 		// register upload button
 		if($this->enableUploadButton)
 		{
-			$script.=<<<SCRIPT
-				var buttoncollection = $("#{$this->id}").drawr("button", {
-					"icon": "{$this->uploadButtonIcon}"
-				}).on("touchstart mousedown", function() {
-				    $("#{$this->id}-file-picker").click();
+			$script.="
+				var buttoncollection = $('#{$this->id}').drawr('button', {
+					'icon': '{$this->uploadButtonIcon}'
+				}).on('touchstart mousedown', function() {
+				    $('#{$this->id}-file-picker').click();
 				});
-				$("#file-picker")[0].onchange = function(){
-					var file = $("#{$this->id}-file-picker")[0].files[0];
-					if (!file.type.startsWith("image/")){return}
+				$('#{$this->id}-file-picker')[0].onchange = function(){
+					var file = $('#{$this->id}-file-picker')[0].files[0];
+					if (!file.type.startsWith('image/')){return}
 					var reader = new FileReader();
 					reader.onload = function(e) {
-						$("#{$this->id}").drawr("load",e.target.result);
+						$('#{$this->id}').drawr('load',e.target.result);
 					};
 					reader.readAsDataURL(file);
 				};
-			SCRIPT;
+			";
 		}
 
 		// register download button
 		if($this->enableDownloadButton)
 		{
-			$script.=<<<SCRIPT
-				var buttoncollection = $("#{$this->id}").drawr("button", {
-					"icon": "{$this->downloadButtonIcon}"
-				}).on("touchstart mousedown", function() {
-					var imagedata = $("#{$this->id}").drawr("export","{$this->downloadMimetype}");
-					var element = document.createElement("a");
-					element.setAttribute("href", imagedata);
-					element.setAttribute("download", "{$this->downloadFilename}");
-					element.style.display = "none";
+			$script.="
+				var buttoncollection = $('#{$this->id}').drawr('button', {
+					'icon': '{$this->downloadButtonIcon}'
+				}).on('touchstart mousedown', function() {
+					var imagedata = $('#{$this->id}').drawr('export','{$this->downloadMimetype}');
+					var element = document.createElement('a');
+					element.setAttribute('href', imagedata);
+					element.setAttribute('download', '{$this->downloadFilename}');
+					element.style.display = 'none';
 					document.body.appendChild(element);
 					element.click();
 					document.body.removeChild(element);
 				});
-			SCRIPT;
+			";
 		}
 
 		// register save button
 		if($this->enableSaveButton)
 		{
-			$script.=<<<SCRIPT
-				var buttoncollection = $("#{$this->id}").drawr("button", {
-					"icon": "{$this->saveButtonIcon}"
-				}).on("touchstart mousedown", function() {
-					var imagedata = $("#{$this->id}").drawr("export","{$this->saveMimetype}");
-					$.post("{$this->saveUrl}", {imagedata: imagedata}, function(data) {
+			$script.="
+				var buttoncollection = $('#{$this->id}').drawr('button', {
+					'icon': '{$this->saveButtonIcon}'
+				}).on('touchstart mousedown', function() {
+					var imagedata = $('#{$this->id}').drawr('export','{$this->saveMimetype}');
+					$.post('{$this->saveUrl}', {imagedata: imagedata}, function(data) {
 						alert(data);
 					});
 				});
-			SCRIPT;
+			";
 		}
 
 		$cs->registerScript(__CLASS__.'#'.$this->id, $script, CClientScript::POS_READY);
