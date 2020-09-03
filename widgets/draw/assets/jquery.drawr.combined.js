@@ -1395,9 +1395,7 @@ jQuery.fn.drawr.register({
 	order: 7,
 	pressure_affects_alpha: false,
 	pressure_affects_size: false,
-	activate: function(brush,context){
-
-	},
+	activate: function(brush,context){},
 	deactivate: function(brush,context){},
 	drawStart: function(brush,context,x,y,size,alpha,event){
 		context.globalCompositeOperation="source-over";
@@ -1408,6 +1406,7 @@ jQuery.fn.drawr.register({
 			"y" : y
 		};
 		this.effectCallback = brush.effectCallback;
+		context.globalCompositeOperation="source-over";
 		context.globalAlpha=alpha;
 	},
 	drawStop: function(brush,context,x,y,size,alpha,event){
@@ -1442,9 +1441,7 @@ jQuery.fn.drawr.register({
 	order: 8,
 	pressure_affects_alpha: false,
 	pressure_affects_size: false,
-	activate: function(brush,context){
-
-	},
+	activate: function(brush,context){},
 	deactivate: function(brush,context){},
 	drawStart: function(brush,context,x,y,size,alpha,event){
 		brush.currentAlpha = alpha;
@@ -1453,6 +1450,7 @@ jQuery.fn.drawr.register({
 			"y" : y
 		};
 		this.effectCallback = brush.effectCallback;
+		context.globalCompositeOperation="source-over";
 		context.globalAlpha=alpha;
 		context.lineWidth = size;
 	},
@@ -1499,6 +1497,7 @@ jQuery.fn.drawr.register({
 			"y" : y
 		};
 		this.effectCallback = brush.effectCallback;
+		context.globalCompositeOperation="source-over";
 		context.globalAlpha=alpha;
 		context.lineWidth = size;
 	},
