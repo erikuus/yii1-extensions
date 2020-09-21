@@ -52,7 +52,7 @@ class XRequiredMultiColumnValidator extends CValidator
 				if(!$this->strict && $value!=$this->requiredValue || $this->strict && $value!==$this->requiredValue)
 					$countErrors++;
 			}
-			else if($this->isEmpty($value,true))
+			elseif($this->isEmpty($value,true))
 				$countErrors++;
 		}
 		if($countAttributes==$countErrors)
