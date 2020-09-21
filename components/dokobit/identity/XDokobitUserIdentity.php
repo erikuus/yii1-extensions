@@ -161,6 +161,9 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 	 *
 	 * - modelName: the name of the model that stores user data in the application
 	 * - scenarioName: the name of the scenario that is used to save user data
+	 * - fallbackMethodName: the name of the model method that will be used to find user after
+	 *   no user was found by code and country code; all data of authenticated user returned
+	 *   by Dokobit Identity Gateway is sent to this method
 	 * - codeAttributeName: the name of the model attribute that must match api user code
 	 * - countryCodeAttributeName: the name of the model attribute that must match api user country code
 	 * - usernameAttributeName: the name of the model attribute that stores username in the application
@@ -229,6 +232,7 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 						// set option variables for convenience
 						$modelName=$this->getValue($options,'modelName');
 						$scenarioName=$this->getValue($options,'scenarioName');
+						$fallbackMethodName=$this->getValue($options,'fallbackMethodName');
 						$codeAttributeName=$this->getValue($options,'codeAttributeName');
 						$countryCodeAttributeName=$this->getValue($options,'countryCodeAttributeName');
 						$usernameAttributeName=$this->getValue($options,'usernameAttributeName');
@@ -246,6 +250,10 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 							$codeAttributeName=>$code,
 							$countryCodeAttributeName=>$countryCode
 						));
+
+						// if user was not found and fallback method is defined then try to find user by this method
+						if($user===null && $fallbackMethodName)
+							$user=CActiveRecord::model($modelName)->{$fallbackMethodName}($userData);
 
 						// in case of guest if user was not found by codes and create is enabled then create new user
 						if(Yii::app()->user->isGuest && $user===null)
