@@ -10,7 +10,7 @@ require_once dirname(dirname(__FILE__)).'/services/FacebookOAuthService.php';
 
 class CustomFacebookOAuthService extends FacebookOAuthService
 {
-	protected $scope='email user_birthday';
+	protected $scope='email'; //user_birthday
 
 	protected $providerOptions=array(
 		'authorize'=>'https://www.facebook.com/v2.8/dialog/oauth',
