@@ -22,6 +22,7 @@
  *     'hostInfo' => 'http://example.com',
  *     'secureHostInfo' => 'https://example.com',
  *     'secureRoutes' => array(
+ *         '',             // home page (no route in url)
  *         'site/login',   // site/login action
  *         'site/signup',  // site/signup action
  *         'settings',     // all actions of SettingsController
@@ -45,14 +46,15 @@ class XSslUrlManager extends CUrlManager
 	public $secureHostInfo = 'https://localhost';
 	/**
 	 * @var array $secureRoutes the list of routes that should work only in SSL mode.
-	 * Each array element can be either a URL route (e.g. 'site/create')
-	 * or a controller ID (e.g. 'settings'). The latter means all actions
-	 * of that controller should be secured.
+	 * Each array element can be either a URL route (e.g. 'site/create') or a controller ID (e.g. 'settings').
+	 * The latter means all actions of that controller should be secured. If you want all routes to work only
+	 * in SSL mode, set $secureRoutes to array('*')
+	 * Defaults to array()
 	 */
 	public $secureRoutes = array();
 	/**
 	 * @var array allowedLanguages the language codes that are suppported by application,
-	 * deafults to array('et','en')
+	 * defaults to array('et','en')
 	 */
 	public $supportedLanguages = array('et','en');
 
@@ -67,14 +69,14 @@ class XSslUrlManager extends CUrlManager
 		$url = parent::createUrl($route, $params, $ampersand);
 
 		// If already an absolute URL, return it directly
-		if (strpos($url, 'http') === 0)
+		if(strpos($url, 'http') === 0)
 			return $url;
 
 		// Check if the current protocol matches the expected protocol of the route
 		// If not, prefix the generated URL with the correct host info.
 		$secureRoute = $this->isSecureRoute($route);
 
-		if ($this->isSecureConnection())
+		if($this->isSecureConnection())
 			return $secureRoute ? $url : $this->hostInfo . $url;
 		else
 			return $secureRoute ? $this->secureHostInfo . $url : $url;
@@ -88,7 +90,7 @@ class XSslUrlManager extends CUrlManager
 		// Set application language
 		$urlLanguage = Yii::app()->getRequest()->getParam('language');
 
-		if ($urlLanguage && in_array($urlLanguage, $this->supportedLanguages))
+		if($urlLanguage && in_array($urlLanguage, $this->supportedLanguages))
 			Yii::app()->setLanguage($urlLanguage);
 
 		// Perform a 301 redirection if the current protocol
@@ -124,14 +126,18 @@ class XSslUrlManager extends CUrlManager
 	 */
 	protected function isSecureRoute($route)
 	{
-		if ($this->_secureMap === null)
+		if($this->secureRoutes==array('*'))
+			return true;
+
+		if($this->_secureMap === null)
 		{
-			foreach ($this->secureRoutes as $r)
+			foreach($this->secureRoutes as $r)
 				$this->_secureMap[strtolower($r)] = true;
 		}
+
 		$route = strtolower($route);
 
-		if (isset($this->_secureMap[$route]))
+		if(isset($this->_secureMap[$route]))
 			return true;
 		else
 			return ($pos = strpos($route, '/')) !== false && isset($this->_secureMap[substr($route, 0, $pos)]);
