@@ -118,6 +118,21 @@ class XVauForm extends CFormModel
 		return $itemname ? true : false;
 	}
 
+	/**
+	 * @param integer user id
+	 * @return boolean whether user has whitelist role
+	 */
+	public function checkWhitelistRole($userId)
+	{
+		$itemname=Yii::app()->kmooduldb->createCommand("
+			SELECT itemname
+			FROM tbl_auth_assignment
+			WHERE itemname='WhitelistOwner'
+			AND userid=$userId
+			LIMIT 1
+		")->queryScalar();
+		return $itemname ? true : false;
+	}
 
 	/**
 	 * @return string quoted and escaped
