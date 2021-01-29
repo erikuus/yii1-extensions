@@ -138,7 +138,7 @@ abstract class XIPizza extends CApplicationComponent
 	/**
 	 * @var string $datetime Timestamp format [YYYYMMDDhhmmss] ISO-8601
 	 */
- 	public $datetime;
+	public $datetime;
 	/**
 	 * @var string $reference the payment reference code
 	 */
@@ -224,14 +224,14 @@ abstract class XIPizza extends CApplicationComponent
 		openssl_free_key($publicKey);
 
 		// set error and return false/true
-		if ($signatureOK==1 && $serviceId==$this->getSuccessServiceId())
+		if($signatureOK==1 && $serviceId==$this->getSuccessServiceId())
 		{
 			$this->errorCode=self::ERROR_NONE;
 			return true;
 		}
 		else
 		{
-			if ($signatureOK==1 && $serviceId==$this->getFailureServiceId())
+			if($signatureOK==1 && $serviceId==$this->getFailureServiceId())
 			{
 				$this->errorCode=self::ERROR_TRANSACTION_FAILED;
 				$this->errorMessage=Yii::t('XIPizza.ipizza', 'Payment failed! Bank did not authorize the transaction.');
@@ -278,7 +278,7 @@ abstract class XIPizza extends CApplicationComponent
 	{
 		$macParamMap = $this->getMacParamMap();
 
-		if (!isset($macParamMap[$serviceId]))
+		if(!isset($macParamMap[$serviceId]))
 			throw new Exception("Unknown service: $serviceId");
 
 		$macParams = array_intersect_key($params, array_flip($macParamMap[$serviceId]));
