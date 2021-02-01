@@ -210,6 +210,9 @@ abstract class XIPizza extends CApplicationComponent
 	 */
 	public function validatePayment()
 	{
+		if(!isset($_REQUEST[$this->getServiceParamName()]))
+			throw new CHttpException(400,'Invalid request. Please do not repeat this request again.');
+
 		// get data
 		$serviceId=$_REQUEST[$this->getServiceParamName()];
 		$data=$this->getMacString($serviceId, $_REQUEST);
