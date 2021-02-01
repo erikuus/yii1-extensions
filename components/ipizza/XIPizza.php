@@ -284,13 +284,15 @@ abstract class XIPizza extends CApplicationComponent
 		if(!isset($macParamMap[$serviceId]))
 			throw new Exception("Unknown service: $serviceId");
 
-		$macParams = array_intersect_key($params, array_flip($macParamMap[$serviceId]));
-
 		$str='';
-		foreach($macParams as $value)
+		foreach($macParamMap[$serviceId] as $macParamName)
 		{
-			$length=mb_strlen($value);
-			$str.=str_pad($length,3,'0',STR_PAD_LEFT).$value;
+			if(isset($params[$macParamName]))
+			{
+				$value=$params[$macParamName];
+				$length=mb_strlen($value);
+				$str.=str_pad($length,3,'0',STR_PAD_LEFT).$value;
+			}
 		}
 		return $str;
 	}
