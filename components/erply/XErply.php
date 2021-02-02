@@ -143,7 +143,7 @@ class XErply extends CApplicationComponent
 			$company=$result['records'][0];
 			if(isset($company['addresses']))
 			{
-				foreach ($company['addresses'] as $address)
+				foreach($company['addresses'] as $address)
 				{
 					if($address['typeID']=='3')
 					{
@@ -207,7 +207,7 @@ class XErply extends CApplicationComponent
 
 		if(isset($result['records']))
 		{
-			foreach ($result['records'] as $country)
+			foreach($result['records'] as $country)
 			{
 				if($country['countryID']==$id)
 				{
@@ -239,11 +239,11 @@ class XErply extends CApplicationComponent
 
 		if(isset($result['records']))
 		{
-			foreach ($result['records'] as $address)
+			foreach($result['records'] as $address)
 			{
 				if($address['street']==$params['street'] && $address['city']==$params['city'] && $address['postalCode']==$params['postalCode'] && $address['country']==$params['country'])
 				{
-					if (!$address['state'] || $address['state']==$params['state']) // NB! State can be empty in ERPLY
+					if(!$address['state'] || $address['state']==$params['state']) // NB! State can be empty in ERPLY
 					{
 						$id=$address['addressID'];
 						break;
@@ -369,6 +369,26 @@ class XErply extends CApplicationComponent
 	{
 		$result=$this->sendRequest('getProductPrices',array(
 			'productIDs'=>$productIDs
+		));
+
+		if(isset($result['records']))
+			return $result['records'];
+		else
+			return array();
+	}
+
+	/**
+	 * Gets Erply products with stock info
+	 * @link https://erply.com/api/getProductPrices/
+	 * @param array $productIDs
+	 * @return array product and stock info
+	 */
+	public function getProductsWithStockInfo($productIDs)
+	{
+		$result=$this->sendRequest('getProducts',array(
+			'productIDs'=>$productIDs,
+			'getStockInfo'=>1,
+			'recordsOnPage'=>100
 		));
 
 		if(isset($result['records']))
