@@ -91,12 +91,14 @@ class XVauForm extends CFormModel
 	{
 		$reference=$this->quote($reference);
 		$id=Yii::app()->kmooduldb->createCommand("
-			SELECT id
-			FROM tbl_whitelist
-			WHERE refcode=$reference
-			AND rightholder_user_id=$userId
-			AND deleted IS FALSE
-			AND (deadline IS NULL OR deadline>=NOW())
+			SELECT t.id
+			FROM tbl_whitelist t
+			LEFT OUTER JOIN tbl_user_whitelist_group u
+			ON (t.rightholder_group_id=u.whitelist_group_id AND u.deleted IS FALSE)
+			WHERE (t.refcode=$reference)
+			AND (t.deleted IS FALSE)
+			AND (t.rightholder_user_id=$userId OR u.rightholder_user_id=$userId)
+			AND (t.deadline IS NULL OR t.deadline>=NOW())
 			LIMIT 1
 		")->queryScalar();
 		return $id ? true : false;
