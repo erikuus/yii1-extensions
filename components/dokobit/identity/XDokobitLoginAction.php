@@ -247,14 +247,13 @@ class XDokobitLoginAction extends CAction
 			$identity->authenticate($this->authOptions);
 			if($identity->errorCode==XDokobitUserIdentity::ERROR_NONE)
 			{
+				// set state
+				if($this->userStateKey)
+					Yii::app()->user->setState($this->userStateKey, $identity->method);
+
 				// login guest into application
 				if(Yii::app()->user->isGuest)
-				{
-					if($this->userStateKey)
-						Yii::app()->user->setState($this->userStateKey, $identity->method);
-
 					Yii::app()->user->login($identity);
-				}
 
 				// redirect or callback on success
 				if($this->successUrl)
