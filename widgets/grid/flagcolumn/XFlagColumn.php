@@ -40,11 +40,13 @@ class XFlagColumn extends CGridColumn
 {
 	public $name;
 	public $icons=false;
+	public $yesFlag = '+';
+	public $noFlag = '-';
 	public $sortable=true;
 	public $callbackUrl = array('flag');
 	public $htmlOptions = array('class'=>'flag-column');
+	public $flagClass = "flag-link";
 
-	private $_flagClass = "flag-link";
 	private $_assets;
 
 	public function init()
@@ -54,10 +56,9 @@ class XFlagColumn extends CGridColumn
 		if($this->icons)
 			$this->_assets=Yii::app()->assetManager->publish(dirname(__FILE__).DIRECTORY_SEPARATOR.'assets');
 
-		$cs=Yii::app()->getClientScript();
 		$gridId = $this->grid->getId();
 		$script = <<<SCRIPT
-		jQuery(".{$this->_flagClass}").live("click", function(e){
+		jQuery(".{$this->flagClass}").live("click", function(e){
 			e.preventDefault();
 			var link = this;
 			$.ajax({
@@ -70,7 +71,7 @@ class XFlagColumn extends CGridColumn
 			});
 		});
 SCRIPT;
-		$cs->registerScript(__CLASS__.$gridId.'#flag_link', $script);
+		Yii::app()->getClientScript()->registerScript(__CLASS__.$gridId.'#flag_link', $script);
 	}
 
 	protected function renderDataCellContent($row, $data)
@@ -83,11 +84,11 @@ SCRIPT;
 
 		$link = CHtml::normalizeUrl($this->callbackUrl);
 
-		$yes = $this->icons ? CHtml::image($this->_assets . '/checkbox-checked.png') : '+';
-		$no = $this->icons ? CHtml::image($this->_assets . '/checkbox-unchecked.png') : '-';
+		$yes = $this->icons ? CHtml::image($this->_assets . '/checkbox-checked.png') : $this->yesFlag;
+		$no = $this->icons ? CHtml::image($this->_assets . '/checkbox-unchecked.png') : $this->noFlag;
 
 		echo CHtml::link(!empty($value) ? $yes : $no, $link, array(
-			'class' => $this->_flagClass,
+			'class' => $this->flagClass,
 		));
 	}
 
