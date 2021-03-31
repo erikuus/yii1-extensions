@@ -1,0 +1,56 @@
+Timeout-dialog is a JQuery plugin that displays a timeout popover after a certain period of time.
+The timeout dialog should be used whenever you want to display to the user that the logged in session is about to expire.
+It creates a light box with a countdown and options to stay signed in or sign out.
+
+##Requirements
+
+Yii 1.1.x, jQuery.ui core script
+
+##Usage
+
+In your layout view:
+~~~
+[php]
+<?php
+    $this->widget('ext.widgets.timeout.XTimeoutDialog', array(
+        // Get timeout settings from session settings.
+        'timeout' => Yii::app()->getSession()->getTimeout(),
+        // Uncomment to test.
+        // Dialog should appear 20 sec after page load.
+        //'timeout' => 80,
+        'keepAliveUrl' => $this->createUrl('/site/keepalive'),
+        'logoutRedirectUrl' => $this->createUrl('/site/logout'),
+    ));
+?>
+~~~
+
+In your SiteController:
+~~~
+[php]
+/**
+ * Keep the session alive, called by timeout-dialog.
+ */
+public function actionKeepAlive()
+{
+    echo 'OK';
+    Yii::app()->end();
+}
+~~~
+
+
+##Resources
+
+ * [Try out a demo](http://rigoneri.github.com/timeout-dialog.js)
+ * [Github repo](https://github.com/digitick/yii-timeout-dialog)
+
+###Credit
+_timeout-dialog.js_ was developed by rigoneri.
+
+### Version History
+ * 1.2 — 2013-02-27
+   * Fix for Yii 1.1.13 jQuery UI update.
+ * 1.1 — 2012-08-03
+   * Make the widget inherit from CJuiWidget class for better integration.
+   * Fixes and updates to CSS.
+ * 1.0 — 2012-07-05
+   * Initial release.
