@@ -32,7 +32,9 @@ In your SiteController:
  */
 public function actionKeepAlive()
 {
-    echo 'OK';
+    if(Yii::app()->session->sessionID)
+      echo 'OK';
+
     Yii::app()->end();
 }
 ~~~
