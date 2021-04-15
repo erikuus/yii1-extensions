@@ -73,6 +73,22 @@ class LookupModule extends CWebModule
 	 */
 	public $rightPortlets=array();
 	/**
+	 * @var string css class for primary buttons
+	 */
+	public $primaryLinkCssClass='blue pill';
+	/**
+	 * @var string css class for secondary buttons
+	 */
+	public $secondaryLinkCssClass='white pill';
+	/**
+	 * @var string css class for primary buttons
+	 */
+	public $primaryButtonCssClass='btn btn-primary';
+	/**
+	 * @var string css class for secondary buttons
+	 */
+	public $secondaryButtonCssClass='btn';	
+	/**
 	 * @var array a list of safe types. If safe types are set,
 	 * only admin user can manage other (unsafe) attributes.
 	 */

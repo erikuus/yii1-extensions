@@ -59,6 +59,22 @@ class HelpModule extends CWebModule
 	 */
 	public $rightPortlets=array();
 	/**
+	 * @var string css class for primary buttons
+	 */
+	public $primaryLinkCssClass='blue pill';
+	/**
+	 * @var string css class for secondary buttons
+	 */
+	public $secondaryLinkCssClass='white pill';
+	/**
+	 * @var string css class for primary buttons
+	 */
+	public $primaryButtonCssClass='btn btn-primary';
+	/**
+	 * @var string css class for secondary buttons
+	 */
+	public $secondaryButtonCssClass='btn';
+	/**
 	 * @var mixed css filename or array of paths to css files for XHeditor widget
 	 */
 	public $editorCSS;

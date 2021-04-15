@@ -14,12 +14,13 @@
 return array (
 	// module view standard
 	'Helps' => 'Abitekstid',
+	'New' => 'Lisa',
 	'New Help' => 'Lisa abitekst',
-    'Update Help' => 'Muuda abiteksti',
-    'Are you sure to delete this item?' => 'Kas olete kindel, et soovite kustutada selle rea?',
+	'Update Help' => 'Muuda abiteksti',
+	'Are you sure to delete this item?' => 'Kas olete kindel, et soovite kustutada selle rea?',
 	'Fields with {mark} are required' => '{mark}-ga märgitud väljad on kohustuslikud',
-    'Cancel' => 'Loobu',
-    'Save' => 'Salvesta muudatused',
+	'Cancel' => 'Loobu',
+	'Save' => 'Salvesta muudatused',
 	'Create' => 'Salvesta',
 	// module install standard
 	'Installation'=>'Installeerimine',

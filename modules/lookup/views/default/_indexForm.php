@@ -1,4 +1,4 @@
-<div class="form">
+<div class="form" style="width:auto">
 <?php $form=$this->beginWidget('CActiveForm', array(
 	'id'=>'lookup-form',
 	'enableClientValidation'=>true,
@@ -29,12 +29,7 @@
 	</div>
 
 	<div class="action">
-		<?php $this->widget('zii.widgets.jui.CJuiButton', array(
-			'buttonType'=>'submit',
-			'name'=>'btnSubmit',
-			'value'=>'Submit',
-			'caption'=>Yii::t('LookupModule.ui', 'Create'),
-		));  ?>
+		<?php echo CHtml::submitButton(Yii::t('LookupModule.ui', 'Create'), array('class'=>$this->module->primaryButtonCssClass)); ?>
 	</div>
 
 <?php $this->endWidget(); ?>

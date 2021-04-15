@@ -26,19 +26,8 @@
 	</div>
 
 	<div class="action">
-		<?php $this->widget('zii.widgets.jui.CJuiButton', array(
-			'buttonType'=>'submit',
-			'name'=>'btnSubmit',
-			'value'=>'Submit',
-			'caption'=>$model->isNewRecord ? Yii::t('LookupModule.ui', 'Create') : Yii::t('LookupModule.ui','Save'),
-		));  ?>
-		<?php $this->widget('zii.widgets.jui.CJuiButton', array(
-			'buttonType'=>'link',
-			'name'=>'btnCancel',
-			'value'=>'Cancel',
-			'caption'=>Yii::t('LookupModule.ui', 'Cancel'),
-			'url'=>$this->getReturnUrl(),
-		)); ?>
+		<?php echo CHtml::submitButton($model->isNewRecord ? Yii::t('LookupModule.ui', 'Create') : Yii::t('LookupModule.ui','Save'), array('class'=>$this->module->primaryButtonCssClass)); ?>
+		<?php echo CHtml::link(Yii::t('LookupModule.ui', 'Cancel'), $this->getReturnUrl() ? $this->getReturnUrl() : array('admin'), array('class'=>$this->module->secondaryButtonCssClass)); ?>
 	</div>
 
 <?php $this->endWidget(); ?>

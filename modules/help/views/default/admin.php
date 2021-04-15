@@ -7,7 +7,10 @@ $this->breadcrumbs=array(
 
 <h2><?php echo Yii::t('HelpModule.ui', 'Helps'); ?></h2>
 
-<?php echo CHtml::link(Yii::t('HelpModule.ui', 'New Help'), array('create'));?>
+<?php echo CHtml::link(Yii::t('HelpModule.ui', 'New'), array('create'), array(
+	'class'=>$this->module->primaryLinkCssClass,
+	'style'=>'float:right; margin-top:-40px'
+)); ?>
 
 <?php $this->widget('zii.widgets.grid.CGridView', array(
 	'dataProvider'=>$dataProvider,

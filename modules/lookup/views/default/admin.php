@@ -8,7 +8,12 @@ $this->breadcrumbs=array(
 
 <h2><?php echo Yii::t('ui',XHtml::labelize($model->type)); ?></h2>
 
-<?php echo CHtml::link(Yii::t('LookupModule.ui', 'New'), $this->createReturnableUrl('create',array('type'=>$model->type)));?>
+<?php echo CHtml::link(Yii::t('LookupModule.ui', 'New'),
+	$this->createReturnableUrl('create', array('type'=>$model->type)), array(
+		'class'=>$this->module->primaryLinkCssClass,
+		'style'=>'float:right; margin-top:-40px'
+	)
+); ?>
 
 <?php $this->widget('zii.widgets.grid.CGridView', array(
 	'id'=>'lookup-grid',

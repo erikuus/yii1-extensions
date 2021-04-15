@@ -14,7 +14,10 @@ Yii::app()->clientScript->registerScript('search', "
 <h2><?php echo Yii::t('LookupModule.ui','Lookup Names'); ?></h2>
 
 <?php if(Yii::app()->user->name=='admin'):?>
-	<p><?php echo CHtml::link(Yii::t('LookupModule.ui', 'New'),'#',array('class'=>'new-type-button')); ?></p>
+	<p><?php echo CHtml::link(Yii::t('LookupModule.ui', 'New'),'#', array(
+		'class'=>"new-type-button {$this->module->primaryLinkCssClass}",
+		'style'=>'float:right; margin-top:-40px'
+	)); ?></p>
 	<div class="new-type-form" style="display:none">
 		<?php $this->renderPartial('_indexForm',array(
 			'model'=>$model,

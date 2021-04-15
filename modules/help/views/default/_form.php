@@ -93,19 +93,8 @@
 		</table>
 	</div><!--complex-->
 
-	<?php $this->widget('zii.widgets.jui.CJuiButton', array(
-		'buttonType'=>'submit',
-		'name'=>'btnSubmit',
-		'value'=>'Submit',
-		'caption'=>$model->isNewRecord ? Yii::t('HelpModule.ui', 'Create') : Yii::t('HelpModule.ui','Save'),
-	));  ?>
-	<?php $this->widget('zii.widgets.jui.CJuiButton', array(
-		'buttonType'=>'link',
-		'name'=>'btnCancel',
-		'value'=>'Cancel',
-		'caption'=>Yii::t('HelpModule.ui', 'Cancel'),
-		'url'=>$model->isNewRecord || !$this->getReturnUrl()  ? array('admin') : $this->getReturnUrl(),
-	)); ?>
+	<?php echo CHtml::submitButton($model->isNewRecord ? Yii::t('HelpModule.ui', 'Create') : Yii::t('HelpModule.ui','Save'), array('class'=>$this->module->primaryButtonCssClass)); ?>
+	<?php echo CHtml::link(Yii::t('HelpModule.ui', 'Cancel'), $this->getReturnUrl() ? $this->getReturnUrl() : array('admin'), array('class'=>$this->module->secondaryButtonCssClass)); ?>
 
 <?php $this->endWidget(); ?>
 
