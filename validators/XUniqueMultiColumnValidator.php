@@ -71,7 +71,7 @@ class XUniqueMultiColumnValidator extends CValidator
 				$message .= isset($labels[$attribute]) ? $labels[$attribute].", " : null;
 
 			$message = substr ($message, 0, -2);
-			$message = $this->message!==null ? $this->message : Yii::t('vd','The Combination of ({attributes}) should be unique.', array('{attributes}'=>$message));
+			$message = $this->message!==null ? $this->message : Yii::t(__CLASS__ . '.' . __CLASS__, 'The Combination of ({attributes}) should be unique.', array('{attributes}'=>$message));
 			$this->addError($object,$attributes[0],$message);
 		}
 	}

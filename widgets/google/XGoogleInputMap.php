@@ -122,9 +122,9 @@ class XGoogleInputMap extends CInputWidget
 		$id=$this->getId();
 		$this->registerClientScript();
 
-		echo Yii::t('ui','Click on the map to place markers. Then drag the markers to define a polygon.');
+		echo Yii::t(__CLASS__ . '.' . __CLASS__, 'Click on the map to place markers. Then drag the markers to define a polygon.');
 		echo "<div id=\"{$id}_map_canvas\" style=\"width:".$this->width."px; height:".$this->height."px; margin:5px 0 5px 0; overflow:hidden\"></div>\n";
-		echo CHtml::link(Yii::t('ui','Clear map'),'#',array(
+		echo CHtml::link(Yii::t(__CLASS__ . '.' . __CLASS__, 'Clear map'), '#', array(
 			'onclick'=>$id.'_clearMap(); return false;'
 		));
 

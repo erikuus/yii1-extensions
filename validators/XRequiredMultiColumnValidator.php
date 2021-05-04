@@ -63,7 +63,7 @@ class XRequiredMultiColumnValidator extends CValidator
 				$message.=$labels[$attribute] ? $labels[$attribute].", " : null;
 
 			$message = substr ($message, 0, -2);
-			$message = $this->message!==null ? $this->message : Yii::t('vd','At least one of these ({attributes}) should be filled.', array('{attributes}'=>$message));
+			$message = $this->message!==null ? $this->message : Yii::t(__CLASS__ . '.' . __CLASS__, 'At least one of these ({attributes}) should be filled.', array('{attributes}'=>$message));
 			$this->addError($object,$attributes[0],$message);
 		}
 	}
