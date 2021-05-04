@@ -58,7 +58,7 @@ class Lookup extends CActiveRecord
 	public static function items($type)
 	{
 		if(!isset(self::$_items[$type]))
-			self::loadItems($type);
+			self::_loadItems($type);
 		return self::$_items[$type];
 	}
 
@@ -71,7 +71,7 @@ class Lookup extends CActiveRecord
 	public static function item($type,$code)
 	{
 		if(!isset(self::$_items[$type]))
-			self::loadItems($type);
+			self::_loadItems($type);
 		return isset(self::$_items[$type][$code]) ? self::$_items[$type][$code] : null;
 	}
 
@@ -87,7 +87,7 @@ class Lookup extends CActiveRecord
 	 * Loads the lookup items for the specified type from the database.
 	 * @param string the item type
 	 */
-	private static function loadItems($type)
+	private static function _loadItems($type)
 	{
 		self::$_items[$type]=array();
 		$models=self::model()->findAll(array(
@@ -107,8 +107,6 @@ class Lookup extends CActiveRecord
 	 */
 	public function rules()
 	{
-		// NOTE: you should only define rules for those attributes that
-		// will receive user inputs.
 		return array(
 			array('type, name_et, name_en', 'required'),
 			array('code, position', 'numerical', 'integerOnly'=>true),
@@ -174,7 +172,7 @@ class Lookup extends CActiveRecord
 		foreach($models as $model)
 		{
 			$menu[]=array(
-				'label'=>Yii::t('ui',XHtml::labelize($model->type)),
+				'label'=>Yii::t(Yii::app()->controller->module->messageCategory, XHtml::labelize($model->type)),
 				'url'=>array('admin','type'=>$model->type),
 				'visible'=>$this->isTypeVisible($model->type),
 			);

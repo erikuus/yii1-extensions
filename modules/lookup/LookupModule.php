@@ -87,7 +87,7 @@ class LookupModule extends CWebModule
 	/**
 	 * @var string css class for secondary buttons
 	 */
-	public $secondaryButtonCssClass='btn';	
+	public $secondaryButtonCssClass='btn';
 	/**
 	 * @var array a list of safe types. If safe types are set,
 	 * only admin user can manage other (unsafe) attributes.
@@ -115,6 +115,10 @@ class LookupModule extends CWebModule
 	 * @var string reoder column class for admin view.
 	 */
 	public $reorderColumnClass='ext.widgets.grid.reordercolumn.XReorderColumn';
+	/**
+	 * @var string the translation message category.
+	 */
+	public $messageCategory='ui';
 
 	private $_publicPages=array();
 	private $_adminPages=array(
