@@ -2,11 +2,11 @@
 $this->pageTitle=Yii::app()->name. ' - ' . Yii::t('LookupModule.ui','Lookup Names');
 $this->breadcrumbs=array(
 	Yii::t('LookupModule.ui','Lookup Names')=>array('index'),
-	Yii::t('ui',XHtml::labelize($model->type)),
+	Yii::t($this->module->messageCategory,XHtml::labelize($model->type)),
 );
 ?>
 
-<h2><?php echo Yii::t('ui',XHtml::labelize($model->type)); ?></h2>
+<h2><?php echo Yii::t($this->module->messageCategory,XHtml::labelize($model->type)); ?></h2>
 
 <?php echo CHtml::link(Yii::t('LookupModule.ui', 'New'),
 	$this->createReturnableUrl('create', array('type'=>$model->type)), array(
