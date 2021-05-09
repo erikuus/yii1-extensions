@@ -1,46 +1,10 @@
 <?php
 
 /**
- * XVauLoginAction class file.
- *
  * XVauLoginAction makes use of {@link XVauSecurityManager} and {@link XVauUserIdentity} to authenticate user based on VauID 2.0 protocol
  *
- * First configure security manager component.
- * <pre>
- * 'components'=>array(
- *     'vauSecurityManager'=> array(
- *         'class'=>'ext.components.vauid.XVauSecurityManager',
- *         'validationKey'=>'###'
- *     )
- * )
- * </pre>
- *
- * Now set up 'vauLogin' action in application SiteController.
- * <pre>
- * public function actions()
- * {
- *     return array(
- *         'vauLogin'=>array(
- *             'class'=>'ext.components.vauid.XVauLoginAction'
- *         )
- *     );
- * }
- * </pre>
- *
- * Next redirect your login action as follows.
- * <pre>
- * public function actionLogin()
- * {
- *     $this->redirect('http://www.ra.ee/vau/index.php/site/login?v=2&s=user&remoteUrl='.$this->createAbsoluteUrl('/site/vauLogin'));
- * }
- * </pre>
- *
- * Finally point logout link as follows.
- * <pre>
- * echo CHtml::link('Logout', 'http://www.ra.ee/vau/index.php/site/logout?remoteUrl='.$this->createAbsoluteUrl('site/logout'));?>
- * </pre>
- *
  * @link http://www.ra.ee/apps/vauid/
+ * @link https://github.com/erikuus/yii1-extensions/tree/master/components/vauid#readme
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 1.0
  */

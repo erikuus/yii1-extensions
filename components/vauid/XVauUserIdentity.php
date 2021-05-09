@@ -1,13 +1,10 @@
 <?php
 
 /**
- * XVauUserIdentity class file.
- *
  * XVauUserIdentity class authenticates user based on VauID 2.0 protocol
  *
- * For usage refer to {@link XVauLoginAction}
- *
  * @link http://www.ra.ee/apps/vauid/
+ * @link https://github.com/erikuus/yii1-extensions/tree/master/components/vauid#readme
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 1.0
  */
