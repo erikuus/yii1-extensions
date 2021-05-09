@@ -30,7 +30,7 @@ public function actions()
 {
     return array(
         'vauLogin'=>array(
-            'class'=>'ext.components.vauid.XVauLoginAction',
+            'class'=>'ext.components.vauid.XVauLoginAction'
         )
     );
 }
@@ -50,14 +50,14 @@ Suuna väljalogimise link VauID väljalogimise teenuse aadressile, määrates **
 
 ```php
 $remoteUrl=Yii::app()->createAbsoluteUrl('site/logout', array(), 'https');
-echo CHtml::link('Logout', 'http://www.ra.ee/vau/index.php/site/logout?remoteUrl='.$remoteUrl);?>
+echo CHtml::link('Logout', 'https://www.ra.ee/vau/index.php/site/logout?remoteUrl='.$remoteUrl);?>
     
 ```
 
 Sellise seadistuse puhul loob laiendus pärast edukat VAU kaudu sisselogimist rakenduses sessiooni, kus:
 
-- **Yii::app()->user->id** kasutaja id VAU-s
-- **Yii::app()->user->name** kasutaja täisnimi VAU-s
+- **Yii::app()->user->id** on kasutaja id VAU-s
+- **Yii::app()->user->name** on kasutaja täisnimi VAU-s
 
 Juurdepääsu piiramine
 ---------------------
@@ -221,7 +221,7 @@ CREATE TABLE kasutaja
 )
 ```
 
-Alustame kõige lihtsamast kasutusjuhust. Loome seose rakenduse kasutaja ja VAU kasutaja vahele käsitsi, lisades väljale vau_kood kasutaja ID VAU andmebaasis. Kui see on tehtud, määrame **XVauLoginAction** parameetri **dataMapping** järgmiselt:
+Alustame kõige lihtsamast kasutusjuhust. Loome seose rakenduse kasutaja ja VAU kasutaja vahele käsitsi, lisades väljale **vau_kood** kasutaja ID VAU andmebaasis. Kui see on tehtud, määrame **XVauLoginAction** parameetri **dataMapping** järgmiselt:
 
 ```php
 public function actions()
@@ -243,8 +243,8 @@ public function actions()
 Sellise seadistuse puhul õnnestub VAU kaudu rakendusse sisse logida ainult neil VAU kasutajatel, kelle ID leidub tabeli **kasutaja** väljal **vau_kood**.
 Rakenduses käivitatakse sessioon, kus:
 
-- **Yii::app()->user->id** = kasutaja id rakenduses (mitte kasutaja id VAU-s),
-- **Yii::app()->user->name** = kasutaja täisnimi VAU-s.
+- **Yii::app()->user->id** on kasutaja id rakenduses (mitte kasutaja id VAU-s),
+- **Yii::app()->user->name** on kasutaja täisnimi VAU-s.
 
 Kui me soovime, et kasutaja nimi sessioonis **Yii::app()->user->name** ei ole VAU kasutaja täisnimi, vaid tabeli kasutaja välja eesnimi väärtus, defineerime **authOptions['dataMapping']['name']**.
 
