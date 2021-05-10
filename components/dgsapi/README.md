@@ -1,7 +1,8 @@
 Yii 1 raamistiku laiendus DGS API kasutamiseks
 ==========================================================
 
-https://github.com/erikuus/yii1-extensions/tree/master/components/dgsapi
+API dokumentatsioon
+-----------------------
 https://www.ra.ee/dgs-api/doc/index
 
 Paigaldus
@@ -23,7 +24,6 @@ Lisa konfiguratsioonifailis komponentide hulka **XDgsApi**:
 
 Kasutamine
 --------------------
-
 ```php
 Yii::app()->dgs->request('get-file-path', array(
 	'uid'=>'b1bc1876-d34b-57d1-a7a5-7563ef53333b'
