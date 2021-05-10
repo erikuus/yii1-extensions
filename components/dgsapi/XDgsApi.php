@@ -1,4 +1,5 @@
 <?php
+
 /**
  * XDgsApi component enables to call DGS API
  *
@@ -6,7 +7,6 @@
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 1.0.0
  */
-
 class XDgsApi extends CApplicationComponent
 {
 	/**
