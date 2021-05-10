@@ -15,7 +15,7 @@ Lisa konfiguratsioonifailis komponentide hulka **XDgsApi**:
 
 ```php
 'components'=>array(
-    'dgs'=> array(
+    'dgsapi'=> array(
         'class'=>'ext.components.dgsapi.XDgsApi',
         'url'=>'https://www.ra.ee/dgs-api/api/v1/dip/'
     )
@@ -25,7 +25,7 @@ Lisa konfiguratsioonifailis komponentide hulka **XDgsApi**:
 Kasutamine
 --------------------
 ```php
-Yii::app()->dgs->request('get-file-path', array(
+Yii::app()->dgsapi->request('get-file-path', array(
     'uid'=>'b1bc1876-d34b-57d1-a7a5-7563ef53333b'
 );
 ```
