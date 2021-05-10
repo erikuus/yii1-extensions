@@ -27,5 +27,5 @@ Kasutamine
 ```php
 Yii::app()->dgsapi->request('get-file-path', array(
     'uid'=>'b1bc1876-d34b-57d1-a7a5-7563ef53333b'
-);
+));
 ```
