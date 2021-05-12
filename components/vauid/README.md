@@ -41,17 +41,18 @@ Suuna **SiteController::actionLogin** VauID sisselogimise teenuse aadressile, m�
 ```
 public function actionLogin()
 {
+    $vauUrl='https://www.ra.ee/vau/index.php/site/login?v=2&s=user_role&remoteUrl=';
     $remoteUrl=$this->createAbsoluteUrl('site/vauLogin', array(), 'https');
-    $this->redirect('https://www.ra.ee/vau/index.php/site/login?v=2&s=user_role&remoteUrl='.$remoteUrl);
+    $this->redirect($vauUrl.$remoteUrl);
 }
 ```
 
 Suuna v채ljalogimise link VauID v채ljalogimise teenuse aadressile, m채채rates **remoteUrl** v채채rtuseks **SiteController::actionLogout**:
 
 ```
+$vauUrl='https://www.ra.ee/vau/index.php/site/logout?remoteUrl=';
 $remoteUrl=Yii::app()->createAbsoluteUrl('site/logout', array(), 'https');
-echo CHtml::link('Logout', 'https://www.ra.ee/vau/index.php/site/logout?remoteUrl='.$remoteUrl);?>
-    
+echo CHtml::link('Logout', $vauUrl.$remoteUrl);
 ```
 
 Sellise seadistuse puhul loob laiendus p채rast edukat VAU kaudu sisselogimist rakenduses sessiooni, kus:
@@ -193,17 +194,18 @@ Suuna **SiteController::actionLogin** VauID sisselogimise teenuse aadressile, m�
 ```
 public function actionLogin()
 {
+    $vauUrl='https://www.ra.ee/vau/index.php/site/login?v=2&s=user_role&remoteUrl=';
     $remoteUrl=$this->createAbsoluteUrl('site/vauLogin', array(), 'https');
-    $this->redirect('https://www.ra.ee/vau/index.php/site/login?v=2&s=user_role&remoteUrl='.$remoteUrl);
+    $this->redirect($vauUrl.$remoteUrl);
 }
 ```
 
 Suuna v채ljalogimise link VauID v채ljalogimise teenuse aadressile, m채채rates **remoteUrl** v채채rtuseks **SiteController::actionLogout**:
 
 ```
+$vauUrl='https://www.ra.ee/vau/index.php/site/logout?remoteUrl=';
 $remoteUrl=Yii::app()->createAbsoluteUrl('site/logout', array(), 'https');
-echo CHtml::link('Logout', 'https://www.ra.ee/vau/index.php/site/logout?remoteUrl='.$remoteUrl);?>
-    
+echo CHtml::link('Logout', $vauUrl.$remoteUrl);
 ```
 
 N체체d, kui me soovime teha nii, et rakenduse kasutajad on vastavuses VAU kasutajatega ja rakendusse sisselogimine k채ib VAU kaudu, siis peame k천igepealt lisama tabelisse uue tulba VAU kasutaja ID jaoks:
