@@ -59,7 +59,7 @@ class XSearchAction extends CAction
 			throw new CHttpException(400);
 
 		$form->attributes=$form->getParams();
-		if ($form->validate())
+		if($form->validate())
 		{
 			$this->getController()->render($this->view,array(
 				'dataProvider'=>$this->getModel()->{$this->methodName}($form),
