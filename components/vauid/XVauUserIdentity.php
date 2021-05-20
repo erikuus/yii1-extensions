@@ -1,5 +1,4 @@
 <?php
-
 /**
  * XVauUserIdentity class authenticates user based on VauID 2.0 protocol
  *
@@ -8,6 +7,7 @@
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 1.0
  */
+
 class XVauUserIdentity extends CBaseUserIdentity
 {
 	const ERROR_INVALID_DATA=1;
@@ -16,24 +16,8 @@ class XVauUserIdentity extends CBaseUserIdentity
 	const ERROR_UNAUTHORIZED=4;
 
 	/**
+	 * @see https://www.ra.ee/apps/vauid/index.php/site/version2
 	 * @var string JSON posted back by VAU after successful login.
-	 * {
-	 *   "id":3,
-	 *   "type":1,
-	 *   "firstname":"Erik",
-	 *   "lastname":"Uus",
-	 *   "fullname":"Erik Uus",
-	 *   "birthday":"1973-07-30",
-	 *   "email":"erik.uus@ra.ee",
-	 *   "phone":"53225399",
-	 *   "lang":"et",
-	 *   "country":"EE",
-	 *   "warning":false,
-	 *   "safelogin":false,
-	 *   "safehost":true,
-	 *   "timestamp":"2020-01-27T14:42:31+02:00",
-	 *   "roles":["ClientManager","EnquiryManager"]
-	 * }
 	 */
 	protected $jsonData;
 	/**
@@ -46,7 +30,6 @@ class XVauUserIdentity extends CBaseUserIdentity
 	protected $name;
 
 	/**
-	 * Constructor
 	 * @param string json data posted back by VAU after successful login.
 	 */
 	public function __construct($jsonData=null)
@@ -55,8 +38,6 @@ class XVauUserIdentity extends CBaseUserIdentity
 	}
 
 	/**
-	 * Returns the unique identifier for the identity.
-	 * This method is required by {@link IUserIdentity}.
 	 * @return string the unique identifier for the identity.
 	 */
 	public function getId()
@@ -65,8 +46,6 @@ class XVauUserIdentity extends CBaseUserIdentity
 	}
 
 	/**
-	 * Returns the display name for the identity.
-	 * This method is required by {@link IUserIdentity}.
 	 * @return string the display name for the identity.
 	 */
 	public function getName()
@@ -76,68 +55,12 @@ class XVauUserIdentity extends CBaseUserIdentity
 
 	/**
 	 * Authenticates VAU user.
+	 * @see https://github.com/erikuus/yii1-extensions/tree/master/components/vauid#readme
 	 * @param array $options the authentication options. The array keys are
-	 * 'accessRules' and 'dataMapping' and the array values are subarrays
-	 * with keys as follows:
-	 * <ul>
-	 *     <li>accessRules</li>
-	 *     <ul>
-	 *         <li>safelogin: whether access is allowed only if user logged into
-	 *         VAU using ID-card or Mobile-ID.</li>
-	 *         <li>safehost: whether access is allowed only if user logged into
-	 *         VAU from host that is recognized as safe in VauID 2.0 protocol.</li>
-	 *         <li>safe: whether access is allowed only if at least one of the above conditions
-	 *         are met, i.e. user logged into VAU using ID-card or Mobile-ID or from the safe host.</li>
-	 *         <li>employee: whether access is allowed only if VAU user type is employee.</li>
-	 *         <li>roles: the list of VAU role names; access is allowed only if user has at
-	 *         least one role in VAU that is present in this list.</li>
-	 *     </ul>
-	 *     <li>dataMapping</li>
-	 *     <ul>
-	 *         <li>model: the name of the model that stores user data in the application.</li>
-	 *         <li>scenario: the name of the scenario that is used to save VAU user data.</li>
-	 *         <li>id: the name of the model attribute that stores VAU user id in the application.</li>
-	 *         <li>name: the name of the model attribute that stores user name in the application.
-	 *         In user session a value of this attribute will be assigned to Yii::app()->user->name.</li>
-	 *         <li>create: whether new user should be created in application based on VAU user data
-	 *         if there is no user with given VAU user id.</li>
-	 *         <li>update: whether user data in application database should be overwritten with
-	 *         VAU user data every time user is authenticated.</li>
-	 *         <li>attributes: the list of mapping VauID 2.0 user data elements onto user model
-	 *         attributes in the application.</li>
-	 *     </ul>
-	 * </ul>
-	 * <pre>
-	 * array(
-	 *     'accessRules' => array(
-	 *         'safelogin'=>true,
-	 *         'safehost'=>true,
-	 *         'safe'=>true,
-	 *         'employee'=>true,
-	 *         'roles'=>array(
-	 *             'ClientManager',
-	 *             'EnquiryManager'
-	 *          )
-	 *     ),
-	 *     'dataMapping'=>array(
-	 *         'model'=>'User',
-	 *         'scenario'=>'vauid',
-	 *         'id'=>'vau_id',
-	 *         'name'=>'username',
-	 *         'create'=>false,
-	 *         'update'=>false,
-	 *         'attributes'=>array(
-	 *             'firstname'=>'first_name',
-	 *             'lastname'=>'last_name'
-	 *         )
-	 *     )
-	 * )
-	 * </pre>
 	 * @return boolean whether authentication succeeds.
 	 */
 	public function authenticate($options=array())
 	{
-		// decode json into array
 		$vauUserData=CJSON::decode($this->jsonData);
 
 		// validate json
@@ -147,65 +70,32 @@ class XVauUserIdentity extends CBaseUserIdentity
 			if((time()-strtotime($vauUserData['timestamp']))<60)
 			{
 				// validate access rules
-				if($this->checkAccess($vauUserData,$options))
+				if($this->checkAccess($vauUserData, $options))
 				{
 					// authenticate user in application database and
 					// sync VAU and application user data if required
 					if($this->getValue($options,'dataMapping'))
 					{
-						// set variables for convenience
-						$modelName=$this->getValue($options,'dataMapping.model');
-						$scenario=$this->getValue($options,'dataMapping.scenario');
-						$vauIdAttribute=$this->getValue($options,'dataMapping.id');
-						$userNameAttribute=$this->getValue($options,'dataMapping.name');
-						$enableCreate=$this->getValue($options,'dataMapping.create');
-						$enableUpdate=$this->getValue($options,'dataMapping.update');
-						$syncAttributes=$this->getValue($options,'dataMapping.attributes');
+						$this->checkRequiredDataMapping($options);
+						$user=$this->findUser($vauUserData, $options);
 
-						// check required
-						if(!$modelName || !$vauIdAttribute)
-							throw new CException('Model name and vauid have to be set in data mapping!');
-
-						$user=CActiveRecord::model($modelName)->findByAttributes(array(
-							$vauIdAttribute=>(int)$vauUserData['id']
-						));
-
-						// if there is no user with given vau id
-						// create new user if $enableCreate is true
-						// otherwise access is denied
 						if($user===null)
 						{
-							if($enableCreate)
-							{
-								$user=$scenario ? new $modelName($scenario) : new $modelName();
-								$user->{$vauIdAttribute}=$vauUserData['id'];
-
-								foreach($syncAttributes as $key=>$attribute)
-									$user->{$attribute}=$this->getValue($vauUserData,$key);
-
-								if(!$user->save())
-									$this->errorCode=self::ERROR_SYNC_DATA;
-							}
+							if($this->getValue($options,'dataMapping.create'))
+								$user=$this->createUser($vauUserData, $options);
 							else
 								$this->errorCode=self::ERROR_UNAUTHORIZED;
 						}
-						elseif($enableUpdate)
-						{
-							if($scenario)
-								$user->scenario=$scenario;
-
-							foreach($syncAttributes as $key=>$attribute)
-								$user->{$attribute}=$this->getValue($vauUserData,$key);
-
-							if(!$user->save())
-								$this->errorCode=self::ERROR_SYNC_DATA;
-						}
+						elseif($this->getValue($options,'dataMapping.update'))
+							$user=$this->updateUser($user, $vauUserData, $options);
 
 						if(!in_array($this->errorCode, array(self::ERROR_UNAUTHORIZED, self::ERROR_SYNC_DATA)))
 						{
 							// assign identity attributes
 							$this->id=$user->primaryKey;
-							$this->name=$userNameAttribute ? $user->{$userNameAttribute} : $vauUserData['fullname'];
+							$this->name=$this->getValue($options,'dataMapping.name') ?
+								$user->{$this->getValue($options,'dataMapping.name')} :
+								$vauUserData['fullname'];
 							$this->errorCode=self::ERROR_NONE;
 						}
 					}
@@ -257,6 +147,82 @@ class XVauUserIdentity extends CBaseUserIdentity
 			return false;
 
 		return true;
+	}
+
+	/**
+	 * Check whether required data mapping parameters are set
+	 * @param array $authOptions the authentication options
+	 * @throws CException
+	 * @see authenticate()
+	 */
+	protected function checkRequiredDataMapping($authOptions)
+	{
+		if(!$this->getValue($authOptions,'dataMapping.model') || !$this->getValue($authOptions,'dataMapping.id'))
+			throw new CException('Model name and vauid have to be set in data mapping!');
+	}
+
+	/**
+	 * Find user
+	 * @param array $vauUserData the user data based on VauID 2.0 protocol
+	 * @param array $authOptions the authentication options
+	 * @return CActiveRecord | null
+	 * @see authenticate()
+	 */
+	protected function findUser($vauUserData, $authOptions)
+	{
+		$model=CActiveRecord::model($this->getValue($authOptions,'dataMapping.model'));
+
+		return $model->findByAttributes(array(
+			$this->getValue($authOptions,'dataMapping.id')=>(int)$vauUserData['id']
+		));
+	}
+
+	/**
+	 * Create new user
+	 * @param array $vauUserData the user data based on VauID 2.0 protocol
+	 * @param array $authOptions the authentication options
+	 * @return CActiveRecord
+	 * @see authenticate()
+	 */
+	protected function createUser($vauUserData, $authOptions)
+	{
+		$modelName=$this->getValue($authOptions,'dataMapping.model');
+
+		$user=$this->getValue($authOptions,'dataMapping.scenario') ?
+			new $modelName($this->getValue($authOptions,'dataMapping.scenario')) :
+			new $modelName();
+
+		$user->{$this->getValue($authOptions,'dataMapping.id')}=$vauUserData['id'];
+
+		foreach($this->getValue($authOptions,'dataMapping.attributes') as $key=>$attribute)
+			$user->{$attribute}=$this->getValue($vauUserData, $key);
+
+		if(!$user->save())
+			$this->errorCode=self::ERROR_SYNC_DATA;
+
+		return $user;
+	}
+
+	/**
+	 * Update user
+	 * @param CActiveRecord the user object
+	 * @param array $vauUserData the user data based on VauID 2.0 protocol
+	 * @param array $authOptions the authentication options
+	 * @return CActiveRecord
+	 * @see authenticate()
+	 */
+	protected function updateUser($user, $vauUserData, $authOptions)
+	{
+		if($this->getValue($authOptions,'dataMapping.scenario'))
+			$user->scenario=$this->getValue($authOptions,'dataMapping.scenario');
+
+		foreach($this->getValue($authOptions,'dataMapping.attributes') as $key=>$attribute)
+			$user->{$attribute}=$this->getValue($vauUserData,$key);
+
+		if(!$user->save())
+			$this->errorCode=self::ERROR_SYNC_DATA;
+
+		return $user;
 	}
 
 	/**
