@@ -84,13 +84,17 @@ class XGoogleInputMap extends CInputWidget
 	 */
 	public $sw_lon='sw_lon';
 	/**
-	 * @var string The model attribute name for the select rectangle NE latitude
+	 * @var string the model attribute name for the select rectangle NE latitude
 	 */
 	public $ne_lat='ne_lat';
 	/**
-	 * @var string The model attribute name for the select rectangle NE longitude
+	 * @var string the model attribute name for the select rectangle NE longitude
 	 */
 	public $ne_lon='ne_lon';
+	/**
+	 * @var string the map style definitions
+	 */
+	public $styles='[]';
 
 	/**
 	 * Initializes the widget.
@@ -123,7 +127,7 @@ class XGoogleInputMap extends CInputWidget
 		$this->registerClientScript();
 
 		echo Yii::t(__CLASS__ . '.' . __CLASS__, 'Click on the map to place markers. Then drag the markers to define a polygon.');
-		echo "<div id=\"{$id}_map_canvas\" style=\"width:".$this->width."px; height:".$this->height."px; margin:5px 0 5px 0; overflow:hidden\"></div>\n";
+		echo "<div id=\"{$id}_map_canvas\" style=\"width:".$this->width."px; height:".$this->height."px; margin:10px 0 10px 0; overflow:hidden\"></div>\n";
 		echo CHtml::link(Yii::t(__CLASS__ . '.' . __CLASS__, 'Clear map'), '#', array(
 			'onclick'=>$id.'_clearMap(); return false;'
 		));
@@ -212,7 +216,8 @@ class XGoogleInputMap extends CInputWidget
 					zoom: $initZoom,
 					mapTypeId: google.maps.MapTypeId.ROADMAP,
 					panControl: true,
-					streetViewControl: false
+					streetViewControl: false,
+					styles: $this->styles
 				};
 
 				// if map is inside hidden div you need to set size in constructor
