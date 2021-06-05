@@ -1,7 +1,4 @@
 <?php
-/**
- * Global defination for CLinkPager
- */
 return array(
 	'default'=>array(
 		'header'=>'',

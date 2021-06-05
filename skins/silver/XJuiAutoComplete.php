@@ -1,8 +1,4 @@
 <?php
-/**
- * To apply classic skin, assign skin attribute:
- * $this->widget('XJuiAutocomplete', array('skin'=>'notDefault'));
- */
 return array(
 	'default'=>array(
 		'options'=>array(

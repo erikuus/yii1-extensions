@@ -1,7 +1,4 @@
 <?php
-/**
- * Global defination for CookieMonster
- */
 return array(
 	'default'=>array(
 		'box'=>array(

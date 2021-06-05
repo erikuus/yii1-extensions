@@ -1,7 +1,4 @@
 <?php
-/**
- * Global defination for XPasswordStrength
- */
 return array(
 	'default'=>array(
 		'options'=>array(

@@ -1,7 +1,4 @@
 <?php
-/**
- * Global defination for XSelect2
- */
 return array(
 	'default'=>array(
 		'options'=>array(
