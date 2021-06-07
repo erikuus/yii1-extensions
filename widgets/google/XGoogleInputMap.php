@@ -56,6 +56,18 @@ class XGoogleInputMap extends CInputWidget
 	 */
 	public $height=300;
 	/**
+	 * @var string the css style definitions for map canvas div
+	 */
+	public $cssStyles='margin: 10px 0';
+	/**
+	 * @var boolean whether to display hint text before map area
+	 */
+	public $enableHintText=true;
+	/**
+	 * @var boolean whether to display clear link after map area
+	 */
+	public $enableClearMap=true;
+	/**
 	 * @var CActiveForm the form associated with this widget.
 	 */
 	public $form;
@@ -126,11 +138,13 @@ class XGoogleInputMap extends CInputWidget
 		$id=$this->getId();
 		$this->registerClientScript();
 
-		echo Yii::t(__CLASS__ . '.' . __CLASS__, 'Click on the map to place markers. Then drag the markers to define a polygon.');
-		echo "<div id=\"{$id}_map_canvas\" style=\"width:".$this->width."px; height:".$this->height."px; margin:10px 0 10px 0; overflow:hidden\"></div>\n";
-		echo CHtml::link(Yii::t(__CLASS__ . '.' . __CLASS__, 'Clear map'), '#', array(
-			'onclick'=>$id.'_clearMap(); return false;'
-		));
+		if($this->enableHintText)
+			echo Yii::t(__CLASS__ . '.' . __CLASS__, 'Click on the map to place markers. Then drag the markers to define a polygon.');
+
+		echo "<div id=\"{$id}_map_canvas\" style=\"width:{$this->width}px; height:{$this->height}px; overflow:hidden; {$this->cssStyles}\"></div>\n";
+
+		if($this->enableClearMap)
+			echo CHtml::link(Yii::t(__CLASS__ . '.' . __CLASS__, 'Clear map'), '#', array('onclick'=>$id.'_clearMap(); return false;'));
 
 		echo $this->form->hiddenField($this->model, $this->ce_lat, array('id'=>$id.'_ce_lat'));
 		echo $this->form->hiddenField($this->model, $this->ce_lon, array('id'=>$id.'_ce_lon'));
