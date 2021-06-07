@@ -12,9 +12,6 @@ return array(
 					.find( "li.ui-menu-item:odd a" )
 					.addClass( "ui-menu-item-alternate" );
 			}',
-		),
-		'htmlOptions'=>array(
-			'style'=>'background: #ffffe0;'
-		),
-	),
+		)
+	)
 );
