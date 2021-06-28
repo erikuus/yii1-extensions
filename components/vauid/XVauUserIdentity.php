@@ -121,7 +121,7 @@ class XVauUserIdentity extends CBaseUserIdentity
 	 * Check whether user can be authenticated by access rules
 	 * @param array $vauUserData the user data based on VauID 2.0 protocol
 	 * @param array $authOptions the authentication options
-	 * @throws CException if access is denied
+	 * @throws XVauAccessDeniedException if access is denied
 	 */
 	protected function checkAccess($vauUserData, $authOptions)
 	{
@@ -139,7 +139,7 @@ class XVauUserIdentity extends CBaseUserIdentity
 	 * Check whether user can be authenticated by safelogin access rules
 	 * @param boolean $accessRulesSafelogin the safelogin flag in access rules
 	 * @param boolean $vauUserDataSafelogin the safelogin flag in VAU postback
-	 * @throws CException if access is denied
+	 * @throws XVauAccessDeniedException if access is denied
 	 */
 	protected function checkAccessBySafeloginRule($accessRulesSafelogin, $vauUserDataSafelogin)
 	{
@@ -151,7 +151,7 @@ class XVauUserIdentity extends CBaseUserIdentity
 	 * Check whether user can be authenticated by safehost access rules
 	 * @param boolean $accessRulesSafehost the safehost flag in access rules
 	 * @param boolean $vauUserDataSafehost the safehost flag in VAU postback
-	 * @throws CException if access is denied
+	 * @throws XVauAccessDeniedException if access is denied
 	 */
 	protected function checkAccessBySafehostRule($accessRulesSafehost, $vauUserDataSafehost)
 	{
@@ -164,7 +164,7 @@ class XVauUserIdentity extends CBaseUserIdentity
 	 * @param boolean $accessRulesSafe the safe flag in access rules
 	 * @param boolean $vauUserDataSafelogin the safelogin flag in VAU postback
 	 * @param boolean $vauUserDataSafehost the safehost flag in VAU postback
-	 * @throws CException if access is denied
+	 * @throws XVauAccessDeniedException if access is denied
 	 */
 	protected function checkAccessBySafeRule($accessRulesSafe, $vauUserDataSafelogin, $vauUserDataSafehost)
 	{
@@ -176,7 +176,7 @@ class XVauUserIdentity extends CBaseUserIdentity
 	 * Check whether user can be authenticated by employee access rules
 	 * @param boolean $accessRulesEmployee the access rule whether
 	 * @param integer $vauUserDataType the type of user in VAU
-	 * @throws CException if access is denied
+	 * @throws XVauAccessDeniedException if access is denied
 	 */
 	protected function checkAccessByEmployeeRule($accessRulesEmployee, $vauUserDataType)
 	{
@@ -188,7 +188,7 @@ class XVauUserIdentity extends CBaseUserIdentity
 	 * Check whether user can be authenticated by roles access rules
 	 * @param array $accessRulesRoles the list of role names in access rules
 	 * @param array $vauUserDataRoles the list of role names assigned to user in VAU
-	 * @throws CException if access is denied
+	 * @throws XVauAccessDeniedException if access is denied
 	 */
 	protected function checkAccessByRolesRule($accessRulesRoles, $vauUserDataRoles)
 	{
