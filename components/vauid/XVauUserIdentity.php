@@ -8,29 +8,26 @@
  * @version 1.0
  */
 
+Yii::import('ext.components.vauid.XVauAccessDeniedException');
+
 class XVauUserIdentity extends CBaseUserIdentity
 {
-	const ERROR_INVALID_DATA=1;
-	const ERROR_EXPIRED_DATA=2;
-	const ERROR_SYNC_DATA=3;
-	const ERROR_UNAUTHORIZED=4;
-
 	/**
 	 * @see https://www.ra.ee/apps/vauid/index.php/site/version2
-	 * @var string JSON posted back by VAU after successful login.
+	 * @var string JSON posted back by VAU after successful login
 	 */
 	protected $jsonData;
 	/**
-	 * @var string the unique identifier for the identity.
+	 * @var string the unique identifier for the identity
 	 */
 	protected $id;
 	/**
-	 * @var string the display name for the identity.
+	 * @var string the display name for the identity
 	 */
 	protected $name;
 
 	/**
-	 * @param string json data posted back by VAU after successful login.
+	 * @param string json data posted back by VAU after successful login
 	 */
 	public function __construct($jsonData=null)
 	{
@@ -38,7 +35,7 @@ class XVauUserIdentity extends CBaseUserIdentity
 	}
 
 	/**
-	 * @return string the unique identifier for the identity.
+	 * @return string the unique identifier for the identity
 	 */
 	public function getId()
 	{
@@ -46,7 +43,7 @@ class XVauUserIdentity extends CBaseUserIdentity
 	}
 
 	/**
-	 * @return string the display name for the identity.
+	 * @return string the display name for the identity
 	 */
 	public function getName()
 	{
@@ -54,106 +51,155 @@ class XVauUserIdentity extends CBaseUserIdentity
 	}
 
 	/**
-	 * Authenticates VAU user.
+	 * Authenticates VAU user
 	 * @see https://github.com/erikuus/yii1-extensions/tree/master/components/vauid#readme
-	 * @param array $options the authentication options. The array keys are
-	 * @return boolean whether authentication succeeds.
+	 * @param array $options the authentication options
+	 * @param integer $requestLifetime the number of seconds VAU postback is valid
+	 * @return boolean whether authentication succeeds
 	 */
-	public function authenticate($options=array())
+	public function authenticate($options=array(), $requestLifetime=60)
 	{
-		$vauUserData=CJSON::decode($this->jsonData);
+		$vauUserData=$this->decodeVauUserData();
 
-		// validate json
-		if(json_last_error()==JSON_ERROR_NONE)
+		$this->checkVauRequestTimestamp($vauUserData['timestamp'], $requestLifetime);
+		$this->checkAccess($vauUserData, $options);
+
+		if($this->getValue($options,'dataMapping'))
 		{
-			// validate that data was posted within one minute
-			if((time()-strtotime($vauUserData['timestamp']))<60)
+			$this->checkRequiredDataMapping($options);
+			$user=$this->findUser($vauUserData, $options);
+
+			if($user===null)
 			{
-				// validate access rules
-				if($this->checkAccess($vauUserData, $options))
-				{
-					// authenticate user in application database and
-					// sync VAU and application user data if required
-					if($this->getValue($options,'dataMapping'))
-					{
-						$this->checkRequiredDataMapping($options);
-						$user=$this->findUser($vauUserData, $options);
-
-						if($user===null)
-						{
-							if($this->getValue($options,'dataMapping.create'))
-								$user=$this->createUser($vauUserData, $options);
-							else
-								$this->errorCode=self::ERROR_UNAUTHORIZED;
-						}
-						elseif($this->getValue($options,'dataMapping.update'))
-							$user=$this->updateUser($user, $vauUserData, $options);
-
-						if(!in_array($this->errorCode, array(self::ERROR_UNAUTHORIZED, self::ERROR_SYNC_DATA)))
-						{
-							// assign identity attributes
-							$this->id=$user->primaryKey;
-							$this->name=$this->getValue($options,'dataMapping.name') ?
-								$user->{$this->getValue($options,'dataMapping.name')} :
-								$vauUserData['fullname'];
-							$this->errorCode=self::ERROR_NONE;
-						}
-					}
-					else
-					{
-						// assign identity attributes
-						$this->id=$vauUserData['id'];
-						$this->name=$vauUserData['fullname'];
-						$this->errorCode=self::ERROR_NONE;
-					}
-				}
+				if($this->getValue($options,'dataMapping.create'))
+					$user=$this->createUser($vauUserData, $options);
 				else
-					$this->errorCode=self::ERROR_UNAUTHORIZED;
+					throw new XVauAccessDeniedException('Access denied because user not found and "create" not enabled!');
 			}
-			else
-				$this->errorCode=self::ERROR_EXPIRED_DATA;
+			elseif($this->getValue($options,'dataMapping.update'))
+				$user=$this->updateUser($user, $vauUserData, $options);
+
+			$this->id=$user->primaryKey;
+			$this->name=$this->getValue($options,'dataMapping.name') ?
+				$user->{$this->getValue($options,'dataMapping.name')} :
+				$vauUserData['fullname'];
 		}
 		else
-			$this->errorCode=self::ERROR_INVALID_DATA;
+		{
+			$this->id=$vauUserData['id'];
+			$this->name=$vauUserData['fullname'];
+		}
+	}
 
-		return !$this->errorCode;
+	/**
+	 * Decode JSON posted back by VAU after successful login
+	 * @return array VAU user data
+	 * @throws CException if decoding fails
+	 */
+	protected function decodeVauUserData()
+	{
+		$vauUserData=CJSON::decode($this->jsonData);
+		if(json_last_error()==JSON_ERROR_NONE)
+			return $vauUserData;
+		else
+			throw new CException('Failed to decode json posted back by VAU!');
+	}
+
+	/**
+	 * Check whether VAU request timestamp is valid
+	 * @param integer $vauRequestTimestamp the unix time when VAU postback was created
+	 * @param integer $requestLifetime the number of seconds VAU postback is valid
+	 * @throws CException if VAU request timestamp is not valid
+	 */
+	protected function checkVauRequestTimestamp($vauRequestTimestamp, $requestLifetime)
+	{
+		if((time()-strtotime($vauRequestTimestamp)) > $requestLifetime)
+			throw new CException('Request timestamp posted back by VAU is not valid!');
 	}
 
 	/**
 	 * Check whether user can be authenticated by access rules
 	 * @param array $vauUserData the user data based on VauID 2.0 protocol
 	 * @param array $authOptions the authentication options
-	 * @return boolean whether access is granted
-	 * @see authenticate()
+	 * @throws CException if access is denied
 	 */
 	protected function checkAccess($vauUserData, $authOptions)
 	{
-		if($this->getValue($authOptions,'accessRules.safelogin')===true && $vauUserData['safelogin']!==true)
-			return false;
-
-		if($this->getValue($authOptions,'accessRules.safehost')===true && $vauUserData['safehost']!==true)
-			return false;
-
-		if($this->getValue($authOptions,'accessRules.safe')===true && $vauUserData['safelogin']!==true && $vauUserData['safehost']!==true)
-			return false;
-
-		if($this->getValue($authOptions,'accessRules.employee')===true && $vauUserData['type']!=1)
-			return false;
+		$this->checkAccessBySafeloginRule($this->getValue($authOptions,'accessRules.safelogin'), $vauUserData['safelogin']);
+		$this->checkAccessBySafehostRule($this->getValue($authOptions,'accessRules.safehost'), $vauUserData['safehost']);
+		$this->checkAccessBySafeRule($this->getValue($authOptions,'accessRules.safe'), $vauUserData['safelogin'], $vauUserData['safehost']);
+		$this->checkAccessByEmployeeRule($this->getValue($authOptions,'accessRules.employee'), $vauUserData['type']);
 
 		$accessRulesRoles=$this->getValue($authOptions,'accessRules.roles',array());
 		$vauUserDataRoles=$this->getValue($vauUserData,'roles',array());
+		$this->checkAccessByRolesRule($accessRulesRoles, $vauUserDataRoles);
+	}
 
+	/**
+	 * Check whether user can be authenticated by safelogin access rules
+	 * @param boolean $accessRulesSafelogin the safelogin flag in access rules
+	 * @param boolean $vauUserDataSafelogin the safelogin flag in VAU postback
+	 * @throws CException if access is denied
+	 */
+	protected function checkAccessBySafeloginRule($accessRulesSafelogin, $vauUserDataSafelogin)
+	{
+		if($accessRulesSafelogin===true && $vauUserDataSafelogin!==true)
+			throw new XVauAccessDeniedException('Access denied by safelogin rule!');
+	}
+
+	/**
+	 * Check whether user can be authenticated by safehost access rules
+	 * @param boolean $accessRulesSafehost the safehost flag in access rules
+	 * @param boolean $vauUserDataSafehost the safehost flag in VAU postback
+	 * @throws CException if access is denied
+	 */
+	protected function checkAccessBySafehostRule($accessRulesSafehost, $vauUserDataSafehost)
+	{
+		if($accessRulesSafehost===true && $vauUserDataSafehost!==true)
+			throw new XVauAccessDeniedException('Access denied by safehost rule!');
+	}
+
+	/**
+	 * Check whether user can be authenticated by safe access rules
+	 * @param boolean $accessRulesSafe the safe flag in access rules
+	 * @param boolean $vauUserDataSafelogin the safelogin flag in VAU postback
+	 * @param boolean $vauUserDataSafehost the safehost flag in VAU postback
+	 * @throws CException if access is denied
+	 */
+	protected function checkAccessBySafeRule($accessRulesSafe, $vauUserDataSafelogin, $vauUserDataSafehost)
+	{
+		if($accessRulesSafe===true && $vauUserDataSafelogin!==true && $vauUserDataSafehost!==true)
+			throw new XVauAccessDeniedException('Access denied by safe rule!');
+	}
+
+	/**
+	 * Check whether user can be authenticated by employee access rules
+	 * @param boolean $accessRulesEmployee the access rule whether
+	 * @param integer $vauUserDataType the type of user in VAU
+	 * @throws CException if access is denied
+	 */
+	protected function checkAccessByEmployeeRule($accessRulesEmployee, $vauUserDataType)
+	{
+		if($accessRulesEmployee===true && $vauUserDataType!=1)
+			throw new XVauAccessDeniedException('Access denied by employee rule!');
+	}
+
+	/**
+	 * Check whether user can be authenticated by roles access rules
+	 * @param array $accessRulesRoles the list of role names in access rules
+	 * @param array $vauUserDataRoles the list of role names assigned to user in VAU
+	 * @throws CException if access is denied
+	 */
+	protected function checkAccessByRolesRule($accessRulesRoles, $vauUserDataRoles)
+	{
 		if($accessRulesRoles!==array() && array_intersect($accessRulesRoles,$vauUserDataRoles)===array())
-			return false;
-
-		return true;
+			throw new XVauAccessDeniedException('Access denied by roles rule!');
 	}
 
 	/**
 	 * Check whether required data mapping parameters are set
 	 * @param array $authOptions the authentication options
-	 * @throws CException
-	 * @see authenticate()
+	 * @throws CException if data mapping is incomplete
 	 */
 	protected function checkRequiredDataMapping($authOptions)
 	{
@@ -166,7 +212,6 @@ class XVauUserIdentity extends CBaseUserIdentity
 	 * @param array $vauUserData the user data based on VauID 2.0 protocol
 	 * @param array $authOptions the authentication options
 	 * @return CActiveRecord | null
-	 * @see authenticate()
 	 */
 	protected function findUser($vauUserData, $authOptions)
 	{
@@ -181,8 +226,8 @@ class XVauUserIdentity extends CBaseUserIdentity
 	 * Create new user
 	 * @param array $vauUserData the user data based on VauID 2.0 protocol
 	 * @param array $authOptions the authentication options
-	 * @return CActiveRecord
-	 * @see authenticate()
+	 * @return CActiveRecord the user data
+	 * @throws CException if save fails
 	 */
 	protected function createUser($vauUserData, $authOptions)
 	{
@@ -198,7 +243,7 @@ class XVauUserIdentity extends CBaseUserIdentity
 			$user->{$attribute}=$this->getValue($vauUserData, $key);
 
 		if(!$user->save())
-			$this->errorCode=self::ERROR_SYNC_DATA;
+			throw new CException('Failed to save VAU user data into application database!');
 
 		return $user;
 	}
@@ -208,8 +253,8 @@ class XVauUserIdentity extends CBaseUserIdentity
 	 * @param CActiveRecord the user object
 	 * @param array $vauUserData the user data based on VauID 2.0 protocol
 	 * @param array $authOptions the authentication options
-	 * @return CActiveRecord
-	 * @see authenticate()
+	 * @return CActiveRecord the user data
+	 * @throws CException if save fails
 	 */
 	protected function updateUser($user, $vauUserData, $authOptions)
 	{
@@ -220,7 +265,7 @@ class XVauUserIdentity extends CBaseUserIdentity
 			$user->{$attribute}=$this->getValue($vauUserData,$key);
 
 		if(!$user->save())
-			$this->errorCode=self::ERROR_SYNC_DATA;
+			throw new CException('Failed to save VAU user data into application database!');
 
 		return $user;
 	}
@@ -228,39 +273,14 @@ class XVauUserIdentity extends CBaseUserIdentity
 	/**
 	 * Retrieves the value of an array element or object property with the given key or property name.
 	 * If the key does not exist in the array, the default value will be returned instead.
-	 * Not used when getting value from an object.
 	 *
-	 * The key may be specified in a dot format to retrieve the value of a sub-array or the property
-	 * of an embedded object. In particular, if the key is `x.y.z`, then the returned value would
-	 * be `$array['x']['y']['z']` or `$array->x->y->z` (if `$array` is an object). If `$array['x']`
-	 * or `$array->x` is neither an array nor an object, the default value will be returned.
-	 * Note that if the array already has an element `x.y.z`, then its value will be returned
-	 * instead of going through the sub-arrays. So it is better to be done specifying an array of key names
-	 * like `['x', 'y', 'z']`.
-	 *
-	 * @param array|object $array array or object to extract value from
-	 * @param string|\Closure|array $key key name of the array element, an array of keys or property name of the object,
-	 * or an anonymous function returning the value. The anonymous function signature should be:
-	 * `function($array, $defaultValue)`.
-	 * The possibility to pass an array of keys is available since version 2.0.4.
-	 * @param mixed $default the default value to be returned if the specified array key does not exist. Not used when
-	 * getting value from an object.
+	 * @param array $array array or object to extract value from
+	 * @param string $key key name of the array element.
+	 * @param mixed $default the default value to be returned if the specified array key does not exist.
 	 * @return mixed the value of the element if found, default value otherwise
 	 */
 	protected function getValue($array, $key, $default=null)
 	{
-		if($key instanceof \Closure)
-			return $key($array,$default);
-
-		if(is_array($key))
-		{
-			$lastKey=array_pop($key);
-			foreach($key as $keyPart)
-				$array=$this->getValue($array,$keyPart);
-
-			$key=$lastKey;
-		}
-
 		if(is_array($array) && (isset($array[$key]) || array_key_exists($key,$array)))
 			return $array[$key];
 
@@ -270,9 +290,7 @@ class XVauUserIdentity extends CBaseUserIdentity
 			$key=substr($key,$pos+1);
 		}
 
-		if(is_object($array))
-			return $array->$key;
-		elseif(is_array($array))
+		if(is_array($array))
 			return (isset($array[$key]) || array_key_exists($key,$array)) ? $array[$key] : $default;
 
 		return $default;

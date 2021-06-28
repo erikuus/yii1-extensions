@@ -8,6 +8,9 @@
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 1.0
  */
+
+Yii::import('ext.components.vauid.XVauAccessDeniedException');
+
 class XVauLoginAction extends CAction
 {
 	/**
@@ -15,6 +18,11 @@ class XVauLoginAction extends CAction
 	 * Defaults to 'vauSecurityManager'.
 	 */
 	public $securityManagerName='vauSecurityManager';
+	/**
+	 * @var string $userIdentityClassName the name of the user identity class.
+	 * Defaults to 'XVauUserIdentity'.
+	 */
+	public $userIdentityClassName='XVauUserIdentity';
 	/**
 	 * @var string $redirectUrl the url user will be redirected after successful login.
 	 * If empty, Yii::app()->user->returnUrl will be used.
@@ -25,6 +33,10 @@ class XVauLoginAction extends CAction
 	 */
 	public $authOptions=array();
 	/**
+	 * @var integer the number of seconds VAU postback is valid.
+	 */
+	public $requestLifetime=60;
+	/**
 	 * @var boolean $enableLogging whether to log failed login requests.
 	 */
 	public $enableLogging=false;
@@ -34,48 +46,31 @@ class XVauLoginAction extends CAction
 	 */
 	public function run()
 	{
-		if(isset($_POST['postedData']))
-		{
-			$securityManager=Yii::app()->getComponent($this->securityManagerName);
-
-			if($securityManager)
-				$jsonData=$securityManager->decrypt($_POST['postedData']);
-			else
-				throw new CException('The "XVauSecurityManager" component have to be defined in configuration file.');
-
-			Yii::import('ext.components.vauid.XVauUserIdentity');
-			$identity=new XVauUserIdentity($jsonData);
-			$identity->authenticate($this->authOptions);
-			if($identity->errorCode==XVauUserIdentity::ERROR_NONE)
-			{
-				Yii::app()->user->login($identity);
-				$this->controller->redirect($this->redirectUrl ? $this->redirectUrl : Yii::app()->user->returnUrl);
-			}
-			elseif($identity->errorCode==XVauUserIdentity::ERROR_UNAUTHORIZED)
-				throw new CHttpException(403,'You do not have the proper credential to access this page.');
-			else
-			{
-				if($this->enableLogging===true)
-				{
-					switch($identity->errorCode)
-					{
-						case XVauUserIdentity::ERROR_INVALID_DATA:
-							Yii::log('Invalid VAU login request: '.$jsonData,CLogger::LEVEL_ERROR);
-							break;
-						case XVauUserIdentity::ERROR_EXPIRED_DATA:
-							Yii::log('Expired VAU login request: '.$jsonData,CLogger::LEVEL_ERROR);
-							break;
-						case XVauUserIdentity::ERROR_SYNC_DATA:
-							Yii::log('Failed VAU user data sync: '.$jsonData,CLogger::LEVEL_ERROR);
-							break;
-						default:
-							Yii::log('Unknown error code: '.$identity->errorCode, CLogger::LEVEL_ERROR);
-					}
-				}
-				throw new CHttpException(400,'Invalid request. Please do not repeat this request again.');
-			}
-		}
-		else
+		if(!isset($_POST['postedData']))
 			throw new CHttpException(400,'Invalid request. Please do not repeat this request again.');
+
+		$securityManager=Yii::app()->getComponent($this->securityManagerName);
+		if($securityManager)
+			$jsonData=$securityManager->decrypt($_POST['postedData']);
+		else
+			throw new CException('The security manager component have to be defined in configuration file.');
+
+		try
+		{
+			Yii::import('ext.components.vauid.'.$this->userIdentityClassName);
+			$identity=new $this->userIdentityClassName($jsonData);
+			$identity->authenticate($this->authOptions, $this->requestLifetime);
+			Yii::app()->user->login($identity);
+			$this->controller->redirect($this->redirectUrl ? $this->redirectUrl : Yii::app()->user->returnUrl);
+		}
+		catch(XVauAccessDeniedException $e)
+		{
+			throw new CHttpException(403,'You do not have the proper credential to access this page.');
+		}
+		catch(CException $e)
+		{
+			Yii::log($e->getMessage().PHP_EOL.$jsonData, CLogger::LEVEL_ERROR);
+			throw new CHttpException(400,'Invalid request. Please do not repeat this request again.');
+		}
 	}
 }
