@@ -8,6 +8,7 @@
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 1.0
  */
-class XVauAccessDeniedException extends CException {
+class XVauAccessDeniedException extends CException
+{
 
 }
