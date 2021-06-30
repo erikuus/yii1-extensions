@@ -55,7 +55,7 @@ class XVauUserIdentity extends CBaseUserIdentity
 	 * @see https://github.com/erikuus/yii1-extensions/tree/master/components/vauid#readme
 	 * @param array $options the authentication options
 	 * @param integer $requestLifetime the number of seconds VAU postback is valid
-	 * @return boolean whether authentication succeeds
+	 * @throws CException or XVauAccessDeniedException if authentication fails
 	 */
 	public function authenticate($options=array(), $requestLifetime=60)
 	{
@@ -211,7 +211,7 @@ class XVauUserIdentity extends CBaseUserIdentity
 	 * Find user
 	 * @param array $vauUserData the user data based on VauID 2.0 protocol
 	 * @param array $authOptions the authentication options
-	 * @return CActiveRecord | null
+	 * @return CActiveRecord the user data | null
 	 */
 	protected function findUser($vauUserData, $authOptions)
 	{
