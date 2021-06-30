@@ -69,7 +69,8 @@ class XVauLoginAction extends CAction
 		}
 		catch(CException $e)
 		{
-			Yii::log($e->getMessage().PHP_EOL.$jsonData, CLogger::LEVEL_ERROR);
+			if($this->enableLogging)
+				Yii::log($e->getMessage().PHP_EOL.$jsonData, CLogger::LEVEL_ERROR);
 			throw new CHttpException(400,'Invalid request. Please do not repeat this request again.');
 		}
 	}
