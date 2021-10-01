@@ -29,41 +29,48 @@ class XCSVGridBehavior extends CBehavior
 	 * @param bool $endApplication Application will be ended if true. false to keep going and export more data. Defautls to TRUE.
 	 * @param integer $endLineCount Number of newlines to append below this data. Defaults to 0.
 	 */
-	public function exportCSV($data, $attributes = array(), $endApplication = true, $endLineCount = 0) {
-		if ($this->isExportRequest()) {
+	public function exportCSV($data, $attributes = array(), $endApplication = true, $endLineCount = 0)
+	{
+		if ($this->isExportRequest())
+		{
 			$this->sendHeaders();
 			$fileHandle = fopen('php://output', 'w');
 			if ($data instanceof CActiveDataProvider) {
 				$this->csvRowHeaders($fileHandle, $attributes, $data->model);
 				$this->csvRowModels($fileHandle, new CDataProviderIterator($data, 150), $attributes);
-			} else if (is_array($data) && current($data) instanceof CModel) {
+			} elseif ($data instanceof IDataProvider) {
+				$this->csvRowHeaders($fileHandle, $attributes);
+				$this->csvRows($fileHandle, $data->getData(), $attributes);
+			} elseif (is_array($data) && current($data) instanceof CModel) {
 				$this->csvRowHeaders($fileHandle, $attributes, current($data));
 				$this->csvRowModels($fileHandle, $data, $attributes);
-			} else if (is_array($data) && is_string(current($data))) {
+			} elseif (is_array($data) && is_string(current($data))) {
 				fputcsv($fileHandle, $data, $this->csvDelimiter, $this->csvEnclosure);
-			} else if ($data instanceof CModel) {
+			} elseif ($data instanceof CModel) {
 				$this->csvModel($fileHandle, $data, $attributes);
 			}
 			fprintf($fileHandle, str_repeat("\n", $endLineCount));
 			fclose($fileHandle);
 
-			if ($endApplication) {
+			if($endApplication) {
 				Yii::app()->end(0, false);
 				exit(0);
 			}
 		}
 	}
 
-	private function csvRowHeaders($fileHandle, $attributes, CModel $model) {
+	private function csvRowHeaders($fileHandle, $attributes, CModel $model = null) {
 		$row = array();
 		foreach ($attributes as $attr) {
 			if (is_array($attr)) {
-				if (isset($attr['header'])) {
-					$row[] = $attr['header'];
-				} elseif (isset($attr['name'])) {
-					$row[] = $model->getAttributeLabel($attr['name']);
-				} else {
-					$row[] = '';
+				if (!isset($attr['visible']) || $attr['visible']==true) {
+					if (isset($attr['header'])) {
+						$row[] = $attr['header'];
+					} elseif (isset($attr['name'])) {
+						$row[] = $model->getAttributeLabel($attr['name']);
+					} else {
+						$row[] = '';
+					}
 				}
 			} else {
 				$row[] = $model->getAttributeLabel($attr);
@@ -77,15 +84,37 @@ class XCSVGridBehavior extends CBehavior
 			$row = array();
 			foreach ($attributes as $attr) {
 				if (is_array($attr)) {
-					if (isset($attr['value'])) {
-						$row[] = $this->evaluateExpression($attr['value'], array('data'=>$cModel));
-					} elseif (isset($attr['name'])) {
-						$row[] = CHtml::value($cModel, $attr['name']);
-					} else {
-						$row[] = '';
+					if (!isset($attr['visible']) || $attr['visible']==true) {
+						if (isset($attr['value'])) {
+							$row[] = $this->evaluateExpression($attr['value'], array('data'=>$cModel));
+						} elseif (isset($attr['name'])) {
+							$row[] = CHtml::value($cModel, $attr['name']);
+						} else {
+							$row[] = '';
+						}
 					}
 				} else {
 					$row[] = CHtml::value($cModel, $attr);
+				}
+			}
+			fputcsv($fileHandle, $row, $this->csvDelimiter, $this->csvEnclosure);
+		}
+	}
+
+	private function csvRows($fileHandle, array $rows, $attributes) {
+		foreach ($rows as $data) {
+			$row = array();
+			foreach ($attributes as $attr) {
+				if (is_array($attr)) {
+					if (!isset($attr['visible']) || $attr['visible']==true) {
+						if (isset($attr['value'])) {
+							$row[] = $this->evaluateExpression($attr['value'], array('data'=>$data));
+						} else {
+							$row[] = '';
+						}
+					}
+				} else {
+					$row[] = '';
 				}
 			}
 			fputcsv($fileHandle, $row, $this->csvDelimiter, $this->csvEnclosure);
