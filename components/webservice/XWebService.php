@@ -9,6 +9,8 @@
  */
 class XWebService extends CWebService
 {
+	public $generatorConfig='CWsdlGenerator';
+		
 	public function generateWsdl()
 	{
 		$providerClass=is_object($this->provider) ? get_class($this->provider) : Yii::import($this->provider,true);
