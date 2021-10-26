@@ -11,6 +11,8 @@ class XWebService extends CWebService
 {
 	public function generateWsdl()
 	{
-		return file_get_contents($this->wsdlUrl);
+        $contents=file_get_contents($this->wsdlUrl);
+        $wsdl=str_replace('{serviceUrl}', htmlspecialchars($this->serviceUrl), $contents);
+        return $wsdl;       
 	}
 }
