@@ -21,12 +21,49 @@ class XDgsForm extends CFormModel
 	const STATUS_FORBIDDEN=4;
 
 	/**
+	 * @param string item reference cod
+	 * @return boolean if item is public
+	 */
+	public function isItemAvailable($reference)
+	{
+		$reference = $this->quote($reference);
+		$statuses = implode(', ', array(self::STATUS_PUBLIC, self::STATUS_FORBIDDEN));
+		$sql = "SELECT id FROM  dgs.tbl_app WHERE refcode={$reference} AND status IN ($statuses)";
+		$id = Yii::app()->kmooduldb->createCommand($sql)->queryScalar();
+		return $id ? true : false;
+	}
+
+	/**
+	 * @param array of item reference codes
+	 * @return array of public item references
+	 *
+	 * Example:
+	 * Array
+	 * (
+	 *   [0] => ERAF.24.1.281
+	 *   [1] => ERA.2280.1.1
+	 *   [2] => EAA.1427.1.24
+	 *   [3] => EAA.2072.3.320
+	 *   [4] => ERA.1608.2.2260
+	 * )
+	 *
+	 */
+	public function getAvailableItems($arrReference)
+	{
+		array_walk($arrReference, array($this, 'walkQuote'));
+		$list = implode(',',$arrReference);
+		$statuses = implode(', ', array(self::STATUS_PUBLIC, self::STATUS_FORBIDDEN));
+		$sql = "SELECT DISTINCT(refcode) FROM  dgs.tbl_app WHERE refcode IN ($list) AND status IN ($statuses)";
+		return Yii::app()->kmooduldb->createCommand($sql)->queryColumn();
+	}
+
+	/**
 	 * @param string item reference code
 	 * @return boolean if parent is public
 	 */
 	public function isParentPublic($reference)
 	{
-		$reference=$this->quote($reference.'.%');
+		$reference = $this->quote($reference.'.%');
 		$sql = "SELECT COUNT(*) FROM  dgs.tbl_app WHERE refcode LIKE {$reference} AND status=".self::STATUS_PUBLIC;
 		$c = Yii::app()->kmooduldb->createCommand($sql)->queryScalar();
 		return $c > 0 ? true : false;
