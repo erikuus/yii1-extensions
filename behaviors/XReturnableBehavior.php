@@ -182,6 +182,17 @@ class XReturnableBehavior extends CBehavior
 	}
 
 	/**
+	 * @return string the absolute url of current page
+	 */
+	public function getCurrentPageAbsoluteUrlWithoutReturnParam()
+	{
+		$params=$_GET;
+		if($this->paramName)
+			unset($params[$this->paramName]);
+		return $this->Owner->createAbsoluteUrl('', $params);
+	}
+
+	/**
 	 * Redirect to the last page on the stack.
 	 * @return bool Wether a return URL was found.
 	 */
