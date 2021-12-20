@@ -62,7 +62,7 @@ class XFillTreeAction extends CAction
 		}
 		else
 		{
-			$rootId=$_GET['root'];
+			$rootId=(int)$_GET['root'];
 			$showRoot=false;
 		}
 
