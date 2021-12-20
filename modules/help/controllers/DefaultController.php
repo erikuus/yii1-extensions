@@ -28,6 +28,33 @@ class DefaultController extends Controller
 	}
 
 	/**
+	 * @param $c filter chain
+	 */
+	public function filterCheckViewCode($c)
+	{
+		$code=Yii::app()->getRequest()->getQuery('code');
+		$table=Yii::app()->getModule('help')->helpTable;
+
+		$codes=Yii::app()->db->createCommand("
+			SELECT code FROM $table
+		")->queryColumn();
+
+		if(!in_array($code, $codes))
+			throw new CHttpException(404);
+		$c->run();
+	}
+
+	/**
+	 * @return array action filters
+	 */
+	public function filters()
+	{
+		return array(
+			'checkViewCode+ view sview'
+		);
+	}
+
+	/**
 	 * Displays content for help dialog with Ajax load.
 	 */
 	public function actionView()
