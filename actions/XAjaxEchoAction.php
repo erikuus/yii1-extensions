@@ -44,7 +44,11 @@ class XAjaxEchoAction extends CAction
 		if(isset($_GET['id']) && $_GET['id'])
 		{
 			$model=$this->getModel()->findByPk($_GET['id']);
-			if(isset($_GET['lang']))
+
+			if($model===null)
+				throw new CHttpException(404);
+
+			if(isset($_GET['lang']) && isset($model->{$this->attributeName.'_'.$_GET['lang']}))
 				echo $model->{$this->attributeName.'_'.$_GET['lang']};
 			else
 				echo $model->{$this->attributeName};
