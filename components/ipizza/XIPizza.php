@@ -184,6 +184,10 @@ abstract class XIPizza extends CApplicationComponent
 	 * @var string the authentication error message. Defaults to empty.
 	 */
 	public $errorMessage;
+	/**
+	 * @var a valid string returned by openssl_get_md_methods() example, "SHA1" or "SHA512".
+	 */
+	public $algorithm='SHA1';
 
 	/**
 	 * Render form with hidden fields and autosubmit
@@ -223,7 +227,7 @@ abstract class XIPizza extends CApplicationComponent
 
 		// verify with public key
 		$publicKey = openssl_pkey_get_public(file_get_contents($this->certificatePath));
-		$signatureOK = openssl_verify($data, $macSignature, $publicKey);
+		$signatureOK = openssl_verify($data, $macSignature, $publicKey, $this->algorithm);
 		openssl_free_key($publicKey);
 
 		// set error and return false/true
@@ -264,7 +268,7 @@ abstract class XIPizza extends CApplicationComponent
 
 		// sign with private key
 		$privateKey=openssl_pkey_get_private(file_get_contents($this->privateKeyPath), $this->privateKeyPass);
-		openssl_sign($data, $macSignature, $privateKey);
+		openssl_sign($data, $macSignature, $privateKey, $this->algorithm);
 		openssl_free_key($privateKey);
 
 		// return encoded
