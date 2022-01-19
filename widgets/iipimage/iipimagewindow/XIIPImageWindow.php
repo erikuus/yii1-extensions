@@ -99,26 +99,9 @@ class XIIPImageWindow extends CWidget
 	);
 
 	/**
-	 * @var array the list of parameters for IIP image download link
-	 * @link https://iipimage.sourceforge.io/documentation/protocol/
-	 * Defaults to
-	 * <code>
-	 * array(
-	 *   'server'=>'/fcgi-bin/iipsrv.fcgi',
-	 *   'wid'=>5000,
-	 *   'hei'=>5000,
-	 *   'qlt'=>100,
-	 *   'cvt'=>'jpeg'
-	 * )
-	 * </code>
+	 * @var string controller method that returns download url
 	 */
-	public $downloadParams=array(
-		'server'=>'/fcgi-bin/iipsrv.fcgi',
-		'wid'=>4000,
-		'hei'=>4000,
-		'qlt'=>100,
-		'cvt'=>'jpeg'
-	);
+	public $downloadUrlMethod;
 
 	/**
 	 * @var string the CSS class name for the widget container
@@ -149,21 +132,6 @@ class XIIPImageWindow extends CWidget
 
 		if(!isset($this->widgetConfig['config']))
 			throw new CException('The "config" value of "widgetConfig" array have to be set.');
-
-		if(!isset($this->downloadParams['server']))
-			throw new CException('The "downloadParams" array must have "server" key.');
-
-		if(!isset($this->downloadParams['wid']))
-			throw new CException('The "downloadParams" array must have "wid" key.');
-
-		if(!isset($this->downloadParams['hei']))
-			throw new CException('The "downloadParams" array must have "hei" key.');
-
-		if(!isset($this->downloadParams['qlt']))
-			throw new CException('The "downloadParams" array must have "qlt" key.');
-
-		if(!isset($this->downloadParams['cvt']))
-			throw new CException('The "downloadParams" array must have "cvt" key.');
 	}
 
 	/**
@@ -194,8 +162,8 @@ class XIIPImageWindow extends CWidget
 			if($this->_countImageData>1)
 				$this->renderPager($dataProvider, $data);
 
-			if($this->enableDownloadLink)
-				echo CHtml::link($this->downloadLinkLabel, $this->getIIPImageSource($data['0']['filename']), $this->downloadLinkOptions);
+			if($this->enableDownloadLink && $this->downloadUrlMethod)
+				echo CHtml::link($this->downloadLinkLabel, $this->controller->{$this->downloadUrlMethod}($data), $this->downloadLinkOptions);
 
 			echo '</div>';
 		}
@@ -263,20 +231,5 @@ class XIIPImageWindow extends CWidget
 	protected function arrayWalkEvaluateExpression(&$value, $key, $data)
 	{
 	    $value=$this->evaluateExpression($value, $data);
-	}
-
-	/**
-	 * Get IIPImage source for html image
-	 * @param string current filename
-	 * @return string image source
-	 */
-	public function getIIPImageSource($filename)
-	{
-		return $this->downloadParams['server'].
-			'?FIF='.$filename.
-			'&wid='.$this->downloadParams['wid'].
-			'&hei='.$this->downloadParams['hei'].
-			'&qlt='.$this->downloadParams['qlt'].
-			'&cvt='.$this->downloadParams['cvt'];
 	}
 }
