@@ -189,7 +189,6 @@ class Security
 		if(!is_string($expected))
 			throw new Exception('Expected expected value to be a string, ' . gettype($expected) . ' given.');
 
-
 		if(!is_string($actual))
 			throw new Exception('Expected actual value to be a string, ' . gettype($actual) . ' given.');
 
