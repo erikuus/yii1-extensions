@@ -53,7 +53,6 @@ class Security
 		if(!isset($this->allowedCiphers[$this->cipher][0], $this->allowedCiphers[$this->cipher][1]))
 			throw new InvalidConfigException($this->cipher . ' is not an allowed cipher');
 
-
 		list($blockSize, $keySize) = $this->allowedCiphers[$this->cipher];
 
 		$keySalt = $this->generateRandomKey($keySize);
@@ -88,7 +87,6 @@ class Security
 		$data = $this->validateData($this->byteSubstr($data, $keySize, null), $authKey);
 		if($data === false)
 			return false;
-
 
 		$iv = $this->byteSubstr($data, 0, $blockSize);
 		$encrypted = $this->byteSubstr($data, $blockSize, null);
