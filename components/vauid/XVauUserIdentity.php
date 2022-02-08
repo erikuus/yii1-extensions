@@ -99,7 +99,7 @@ class XVauUserIdentity extends CBaseUserIdentity
 	protected function decodeVauUserData()
 	{
 		$vauUserData=CJSON::decode($this->jsonData);
-		if(json_last_error()==JSON_ERROR_NONE)
+		if($this->jsonData && json_last_error()==JSON_ERROR_NONE)
 			return $vauUserData;
 		else
 			throw new CException('Failed to decode json posted back by VAU!');
