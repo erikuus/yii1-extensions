@@ -18,12 +18,6 @@ class Security
 
 	public $authKeyInfo = 'AuthorizationKey';
 
-	public $derivationIterations = 100000;
-
-	public $passwordHashStrategy;
-
-	public $passwordHashCost = 13;
-
 	private $_useLibreSSL;
 
 	/**
