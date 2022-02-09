@@ -42,10 +42,10 @@ class Security
 	public function encrypt($data, $secret, $info=null)
 	{
 		if(!extension_loaded('openssl'))
-			throw new InvalidConfigException('Encryption requires the OpenSSL PHP extension');
+			throw new Exception('Encryption requires the OpenSSL PHP extension');
 
 		if(!isset($this->allowedCiphers[$this->cipher][0], $this->allowedCiphers[$this->cipher][1]))
-			throw new InvalidConfigException($this->cipher . ' is not an allowed cipher');
+			throw new Exception($this->cipher . ' is not an allowed cipher');
 
 		list($blockSize, $keySize) = $this->allowedCiphers[$this->cipher];
 
@@ -138,10 +138,10 @@ class Security
 	public function generateRandomKey($length = 32)
 	{
 		if(!is_int($length))
-			throw new InvalidArgumentException('First parameter ($length) must be an integer');
+			throw new Exception('First parameter ($length) must be an integer');
 
 		if($length < 1)
-			throw new InvalidArgumentException('First parameter ($length) must be greater than 0');
+			throw new Exception('First parameter ($length) must be greater than 0');
 
 		return random_bytes($length);
 	}
