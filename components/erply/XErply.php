@@ -109,6 +109,13 @@ class XErply extends CApplicationComponent
 
 		if(isset($result['records'][0])) // update
 		{
+			if(isset($params['companyName']))
+			{
+				unset($params['companyName']);
+				unset($params['email']);
+				unset($params['phone']);
+			}
+
 			$params['customerID']=$result['records'][0]['customerID'];
 			$this->sendRequest('saveCustomer', $params);
 			return $params['customerID'];
