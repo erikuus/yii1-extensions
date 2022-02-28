@@ -12,6 +12,93 @@ class XAisForm extends CFormModel
 	const CACHE_DURATION=600;
 
 	/**
+	 * Find descriptive units data by parent reference
+	 * @param string $reference the unit reference code
+	 * @return array of subunit data
+	 * Example:
+	 * array (
+	 *   [0] => array (
+	 *     [kood] => 200250493892
+	 *     [kirjeldusyksus] => 200100001006
+	 *     [tyyp] => SAR
+	 *     [leidandmed] => null
+	 *     [pealkiri] => Statistilised andmed kiriku ja rüütlimõisate müümata maade külvi üle
+	 *     [piirdaatumid] => null
+	 *   )
+	 *   [1] => array (
+	 *     [kood] => 200250493968
+	 *     [kirjeldusyksus] => 200100001006
+	 *     [tyyp] => SAR
+	 *     [leidandmed] => null
+	 *     [pealkiri] => Statistilised andmed koolide ja õpilaste kohta
+	 *     [piirdaatumid] => null
+	 *   )
+	 *   [2] => array(
+	 *     [kood] => 200250494091
+	 *     [kirjeldusyksus] => 200100001006
+	 *     [tyyp] => SAR
+	 *     [leidandmed] => null
+	 *     [pealkiri] => Ettepanekud Maapäevale
+	 *     [piirdaatumid] => null
+	 *   )
+	 * )
+	 */
+	public function findSubUnitsByReference($reference)
+	{
+		$sql = "
+			SELECT u.kood, u.kirjeldusyksus, u.tyyp, u.leidandmed, u.pealkiri, ra.ky_aeg_list(u.kood,'MOOD') AS piirdaatumid
+			FROM ra.kirjeldusyksus u
+			INNER JOIN ra.kirjeldusyksus p ON u.kirjeldusyksus=p.kood
+			WHERE p.leidandmed=".$this->quote($reference)."
+		";
+
+		return Yii::app()->aisdb->createCommand($sql)->queryAll();
+	}
+
+	/**
+	 * Find descriptive units data by parent code
+	 * @param integer $code the unit reference code
+	 * @return array of subunit data
+	 * Example:
+	 * array (
+	 *   [0] => array (
+	 *     [kood] => 200250493904
+	 *     [kirjeldusyksus] => 200250493892
+	 *     [tyyp] => AHV
+	 *     [leidandmed] => EAA.1427.1.48
+	 *     [pealkiri] => Statistilised andmed kiriku- ja rüütlimõisate müümata maade külvi üle. Pärnu maakond
+	 *     [piirdaatumid] => 1893
+	 *   )
+	 *   [1] => array (
+	 *     [kood] => 200250493910
+	 *     [kirjeldusyksus] => 200250493892
+	 *     [tyyp] => AHV
+	 *     [leidandmed] => EAA.1427.1.49
+	 *     [pealkiri] => Statistilised andmed kiriku- ja rüütlimõisate müümata maade külvi üle. Tartu maakond
+	 *     [piirdaatumid] => 1893
+	 *   )
+	 *   [2] => array(
+	 *     [kood] => 200250493915
+	 *     [kirjeldusyksus] => 200250493892
+	 *     [tyyp] => AHV
+	 *     [leidandmed] => EAA.1427.1.50
+	 *     [pealkiri] => Statistilised andmed kiriku- ja rüütlimõisate müümata maade külvi üle. Tartu maakond
+	 *     [piirdaatumid] => 1893
+	 *   )
+	 * )
+	 */
+	public function findSubUnitsByCode($code)
+	{
+		$sql = "
+			SELECT kood, kirjeldusyksus, tyyp, leidandmed, pealkiri, ra.ky_aeg_list(kood,'MOOD') AS piirdaatumid
+			FROM ra.kirjeldusyksus
+			WHERE kirjeldusyksus=".$this->quote($code)."
+		";
+
+		return Yii::app()->aisdb->createCommand($sql)->queryAll();
+	}
+
+	/**
 	 * Find descriptive unit data and years
 	 * @param mixed $reference unit reference code(s)
 	 * @param boolean $checkFondsOnly whether to check units on fond type only
