@@ -92,8 +92,11 @@ class XBusinessRegisterValidator extends CValidator
 	{
 		$handle=curl_init();
 
+		$name=$name.' ';
+		$name=str_replace(' ', '+', $name);
+
 		curl_setopt_array($handle, array(
-			CURLOPT_URL => $this->apiUrl.'?q='.curl_escape($handle, $name.' '),
+			CURLOPT_URL => $this->apiUrl.'?q='.$name,
 			CURLOPT_RETURNTRANSFER => true,
 			CURLOPT_MAXREDIRS => 10,
 			CURLOPT_TIMEOUT => 5,
