@@ -50,6 +50,7 @@ class XAisForm extends CFormModel
 			FROM ra.kirjeldusyksus u
 			INNER JOIN ra.kirjeldusyksus p ON u.kirjeldusyksus=p.kood
 			WHERE p.leidandmed=".$this->quote($reference)."
+			ORDER BY u.jarjekord
 		";
 
 		return Yii::app()->aisdb->createCommand($sql)->queryAll();
@@ -93,6 +94,7 @@ class XAisForm extends CFormModel
 			SELECT kood, kirjeldusyksus, tyyp, leidandmed, pealkiri, ra.ky_aeg_list(kood,'MOOD') AS piirdaatumid
 			FROM ra.kirjeldusyksus
 			WHERE kirjeldusyksus=".$this->quote($code)."
+			ORDER BY jarjekord
 		";
 
 		return Yii::app()->aisdb->createCommand($sql)->queryAll();
