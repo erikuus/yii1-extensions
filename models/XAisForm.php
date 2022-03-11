@@ -482,7 +482,7 @@ class XAisForm extends CFormModel
 			$sql = "
 				SELECT LIST(leidandmed)
 				FROM ra.kirjeldusyksus
-				WHERE kirjeldusyksus=$code;
+				WHERE kirjeldusyksus=$code
 				AND tyyp='AHV'
 			";
 			return Yii::app()->aisdb->createCommand($sql)->queryScalar();
