@@ -443,9 +443,8 @@ class XAisForm extends CFormModel
 	}
 
 	/**
-	 * Find list of item references by range
-	 * @param string $fromReference item reference code starting range
-	 * @param string $toReference item reference code limiting range
+	 * Find list of item references by reference pattern
+	 * @param string $reference item reference code
 	 * @return string comma separated list of item references
 	 * Example: EAA.1.1.1,EAA.1.1.10,EAA.1.1.100,EAA.1.1.101,EAA.1.1.102,EAA.1.1.103
 	 */
@@ -460,6 +459,31 @@ class XAisForm extends CFormModel
 				SELECT LIST(leidandmed)
 				FROM ra.kirjeldusyksus
 				WHERE leidandmed LIKE $reference;
+			";
+			return Yii::app()->aisdb->createCommand($sql)->queryScalar();
+		}
+		else
+			return null;
+	}
+
+	/**
+	 * Find list of sub item references by parent code
+	 * @param string $fromReference item reference code starting range
+	 * @param string $toReference item reference code limiting range
+	 * @return string comma separated list of item references
+	 * Example: EAA.1.1.1,EAA.1.1.10,EAA.1.1.100,EAA.1.1.101,EAA.1.1.102,EAA.1.1.103
+	 */
+	public function findSubItemReferenceList($code)
+	{
+		if($code)
+		{
+			$code=$this->quote($code);
+
+			$sql = "
+				SELECT LIST(leidandmed)
+				FROM ra.kirjeldusyksus
+				WHERE kirjeldusyksus=$code;
+				AND tyyp='AHV'
 			";
 			return Yii::app()->aisdb->createCommand($sql)->queryScalar();
 		}
