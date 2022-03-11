@@ -88,10 +88,12 @@ class XAisForm extends CFormModel
 	 *   )
 	 * )
 	 */
-	public function findSubUnitsByCode($code)
+	public function findSubUnitsByCode($code, $limit=null)
 	{
+		$top=$limit ? "TOP $limit" : null;
+
 		$sql = "
-			SELECT kood, kirjeldusyksus, tyyp, leidandmed, pealkiri, ra.ky_aeg_list(kood,'MOOD') AS piirdaatumid
+			SELECT $top kood, kirjeldusyksus, tyyp, leidandmed, pealkiri, ra.ky_aeg_list(kood,'MOOD') AS piirdaatumid
 			FROM ra.kirjeldusyksus
 			WHERE kirjeldusyksus=".$this->quote($code)."
 			ORDER BY jarjekord
@@ -469,7 +471,7 @@ class XAisForm extends CFormModel
 	 * @param item reference code (ex. EAA.1.2.1)
 	 * @return string sortable reference (ex.  0001      0000   0000000002  000000000001)
 	 */
-	protected function getSortableReference($reference)
+	public function getSortableReference($reference)
 	{
 		$arrReference=$this->getReferenceArray($reference);
 		$archiveIds=$this->getArchiveIds($arrReference['a']);
@@ -480,6 +482,24 @@ class XAisForm extends CFormModel
 			AND nimistu_nr=".$this->quote($arrReference['n'])."
 			AND sailiku_nr=".$this->quote($arrReference['s'])."
 			AND yksus in ($archiveIds)
+		";
+		return Yii::app()->aisdb->cache(self::CACHE_DURATION)->createCommand($sql)->queryScalar();
+	}
+
+	/**
+	 * @param item reference code (ex. EAA.1.2.1)
+	 * @return string sortable reference (ex.  0001      0000   0000000002  000000000001)
+	 */
+	public function getSortableReferenceByFunction($reference)
+	{
+		$arrReference=$this->getReferenceArray($reference);
+		$sql = "
+			SELECT * FROM ra.z_leidandmed_to_string
+			(
+				".$this->quote($arrReference['f']).",
+				".$this->quote($arrReference['n']).",
+				".$this->quote($arrReference['s'])."
+			)
 		";
 		return Yii::app()->aisdb->cache(self::CACHE_DURATION)->createCommand($sql)->queryScalar();
 	}
