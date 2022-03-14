@@ -379,8 +379,8 @@ class XAisForm extends CFormModel
 	{
 		$arrReference=$this->getReferenceArray($fromReference);
 		$archiveIds=$this->getArchiveIds($arrReference['a']);
-		$from=$this->getSortableReference($fromReference);
-		$to=$this->getSortableReference($toReference);
+		$from=$this->getSortableReferenceByFunction($fromReference);
+		$to=$this->getSortableReferenceByFunction($toReference);
 		if($from && $to)
 		{
 			$sql = "
@@ -422,8 +422,8 @@ class XAisForm extends CFormModel
 	{
 		$arrReference=$this->getReferenceArray($fromReference);
 		$archiveIds=$this->getArchiveIds($arrReference['a']);
-		$from=$this->getSortableReference($fromReference);
-		$to=$this->getSortableReference($toReference);
+		$from=$this->getSortableReferenceByFunction($fromReference);
+		$to=$this->getSortableReferenceByFunction($toReference);
 		if($from && $to)
 		{
 			$sql = "
@@ -518,7 +518,7 @@ class XAisForm extends CFormModel
 	{
 		$arrReference=$this->getReferenceArray($reference);
 		$sql = "
-			SELECT * FROM ra.z_leidandmed_to_string
+			SELECT ra.z_leidandmed_to_string
 			(
 				".$this->quote($arrReference['f']).",
 				".$this->quote($arrReference['n']).",
