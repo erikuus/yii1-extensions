@@ -517,15 +517,21 @@ class XAisForm extends CFormModel
 	public function getSortableReferenceByFunction($reference)
 	{
 		$arrReference=$this->getReferenceArray($reference);
-		$sql = "
-			SELECT ra.z_leidandmed_to_string
-			(
-				".$this->quote($arrReference['f']).",
-				".$this->quote($arrReference['n']).",
-				".$this->quote($arrReference['s'])."
-			)
-		";
-		return Yii::app()->aisdb->cache(self::CACHE_DURATION)->createCommand($sql)->queryScalar();
+
+		if($arrReference['f']!==null && $arrReference['n']!==null && $arrReference['s']!==null)
+		{
+			$sql = "
+				SELECT ra.z_leidandmed_to_string
+				(
+					".$this->quote($arrReference['f']).",
+					".$this->quote($arrReference['n']).",
+					".$this->quote($arrReference['s'])."
+				)
+			";
+			return Yii::app()->aisdb->cache(self::CACHE_DURATION)->createCommand($sql)->queryScalar();
+		}
+		else
+			return null;
 	}
 
 	/**
