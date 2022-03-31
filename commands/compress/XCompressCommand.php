@@ -19,7 +19,7 @@
  * );
  *
  * Now, under protected directory, you can run commands:
- * yiic compress yuicompressor
+ * yiic compress
  *
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 1.0.0
@@ -50,6 +50,10 @@ class XCompressCommand extends CConsoleCommand
 	 * the resulting file name will be put into this application parameter.
 	 */
 	public $param;
+	/**
+	 * @var string css filename prefix.
+	 */
+	public $prefix;
 
 	public function getHelp()
 	{
@@ -63,7 +67,7 @@ class XCompressCommand extends CConsoleCommand
 		$this->temporaryDir=dirname(__FILE__);
 	}
 
-	public function actionYuicompressor()
+	public function run($args)
 	{
 		Yii::import('ext.vendors.compress.*');
 		require_once('yuicompressor.php');
@@ -75,7 +79,7 @@ class XCompressCommand extends CConsoleCommand
 		$code=$yui->compress();
 
 		// save to file
-		$compressedFilename='site-'.date('YmdHis').'.'.$this->options['type'];
+		$compressedFilename=$this->prefix.date('YmdHis').'.'.$this->options['type'];
 		$newFile=$this->dir.$compressedFilename;
 		file_put_contents($newFile, $code);
 
