@@ -14,31 +14,34 @@ class XHtml extends CHtml
 	/**
 	 * Makes the given filename relative to the /css directory
 	 * @param string $filename the css filename
+	 * @param boolean whether to return an absolute URL
 	 * @return string css relative url
 	 */
-	public static function cssUrl($filename)
+	public static function cssUrl($filename, $absolute=false)
 	{
-		return Yii::app()->baseUrl.'/css/'.$filename;
+		return Yii::app()->getBaseUrl($absolute).'/css/'.$filename;
 	}
 
 	/**
 	 * Makes the given URL relative to the /js directory
 	 * @param string $filename the js filename
+	 * @param boolean whether to return an absolute URL
 	 * @return string js relative url
 	 */
-	public static function jsUrl($filename)
+	public static function jsUrl($filename, $absolute=false)
 	{
-		return Yii::app()->baseUrl.'/js/'.$filename;
+		return Yii::app()->getBaseUrl($absolute).'/js/'.$filename;
 	}
 
 	/**
 	 * Makes the given URL relative to the /images directory
 	 * @param string $filename the image filename
+	 * @param boolean whether to return an absolute URL
 	 * @return string image relative url
 	 */
-	public static function imageUrl($filename)
+	public static function imageUrl($filename, $absolute=false)
 	{
-		return Yii::app()->baseUrl.'/images/'.$filename;
+		return Yii::app()->getBaseUrl($absolute).'/images/'.$filename;
 	}
 
 	/**
