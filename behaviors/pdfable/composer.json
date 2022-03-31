@@ -1,0 +1,24 @@
+{
+    "name": "mikehaertl/pdfable",
+    "description": "PDFable is a Yii extension to create PDFs from web pages with PHPWkHtmlToPdf(included)",
+    "keywords": ["yii","pdf"],
+    "homepage": "https://github.com/mikehaertl/pdfable",
+    "type": "yii-extension",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Michael Haertl",
+            "email": "haertl.mike@gmail.com"
+        }
+    ],
+    "autoload": {
+        "classmap" : [
+            "Pdfable.php",
+            "PdfFile.php",
+            "WkHtmlToPdf.php"
+        ]
+    },
+    "require": {
+        "php": ">=5.0.0"
+    }
+}

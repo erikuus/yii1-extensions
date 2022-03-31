@@ -1,0 +1,113 @@
+/* Define page size. (Requires print-area adjustment!) */
+body {
+    margin:         0;
+    padding:        0;
+    width:          21cm;
+    height:         29.7cm;
+}
+
+/* Printable area (top + height = body.height; left + width = body.width */
+#print-area {
+    position:       relative;
+    margin:         0;
+    padding:        0;
+    top:            1cm;
+    left:           2.41cm;
+    width:          17cm;
+    height:         27.6cm;
+
+    font-size:      10pt;
+    font-family:    Arial, Helvetica, Sans Serif;
+}
+
+/* Position and size of header and footer areas */
+#header-area {
+    height:         2.5cm;
+
+    border-bottom:  .2cm solid #ccc;
+}
+#footer-area {
+    position:       absolute;
+    bottom:         0;
+    width:          100%;
+    height:         2cm;
+
+    border-top:     .2cm solid #ccc;
+}
+
+/* Style header content */
+#header {
+    padding:        .3cm;
+    text-align:     right;
+    font-weight:    bold;
+}
+#header .title {
+    font-size:      36pt;
+    font-weight:    bold;
+    color:          #88a;
+}
+#header .claim {
+    font-style:     italic;
+    color:          #666;
+}
+
+/* Style footer content */
+#footer {
+    padding:        .3cm;
+    font-size:      9pt;
+}
+#footer div {
+    float:          left;
+    width:          5cm;
+}
+
+/* Style address box */
+#addressbox {
+    position:       absolute;
+    top:            3.5cm;
+    left:           0;
+    width:          8cm;
+    height:         4cm;
+}
+#addressbox .sender {
+    font-size:      8pt;
+    border-bottom:  1pt solid black;
+}
+#addressbox .address {
+    margin-top:     0.2cm;
+}
+
+/* Style title */
+#title {
+    margin-top:     .3cm;
+    font-size:      14px;
+    font-weight:    bold;
+}
+
+/* Style main content */
+#main.letter {
+    margin-top:     5cm;
+}
+
+table#items {
+    width:          100%;
+    border-collapse:collapse;
+}
+#items th,
+#items td {
+    border-bottom:  1pt solid #ccc;
+    padding:        0.2cm;
+    vertical-align: top;
+    text-align:     left;
+}
+#items td.amount {
+    text-align:     right;
+}
+#items tr.total td {
+    text-align:     right;
+}
+
+/* Hide the WebLogRoute */
+.yiiLog {
+    display:        none;
+}
