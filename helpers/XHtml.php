@@ -140,13 +140,13 @@ class XHtml extends CHtml
 		$min=floor(($sec-($days*60*60*24)-($hours*60*60))/60);
 		$sec=floor($sec-($days*60*60*24+$hours*60*60+$min*60));
 
-		$human=Yii::t('ui','n==0#|n==1#1 day |n>1#{n} days ', array($days)).Yii::t('ui','n==0#|n==1#1 hour |n>1#{n} hours ', array($hours));
+		$human=Yii::t('XHtml.html','n==0#|n==1#1 day |n>1#{n} days ', array($days)).Yii::t('XHtml.html','n==0#|n==1#1 hour |n>1#{n} hours ', array($hours));
 
 		if($days==0 || $hours==0)
-			$human.=Yii::t('ui','n==0#|n==1#1 minute |n>1#{n} minutes ', array($min));
+			$human.=Yii::t('XHtml.html','n==0#|n==1#1 minute |n>1#{n} minutes ', array($min));
 
 		if($days==0 && $hours==0)
-			$human.=Yii::t('ui','n==0#|n==1#1 second|n>1#{n} seconds', array($sec));
+			$human.=Yii::t('XHtml.html','n==0#|n==1#1 second|n>1#{n} seconds', array($sec));
 
 		return $human;
 	}
