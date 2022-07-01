@@ -106,7 +106,7 @@ public function actions()
 }
 ```
 
-In the above example, if there is no row in the aplication user table where user_id_number=code and user_country_code=country_code, new user is inserted based on the data of authenticated user returned by Dokobit Identity Gateway API and according to the data mapping given in 'authOptions'.
+In the above example, if there is no row in the aplication user table where user_id_number=code and user_country_code=country_code, new user is inserted based on the data of authenticated user returned by Dokobit Identity Gateway API and according to the data mapping given in 'syncAttributes'.
 
 But you may need to keep application data in sync with authenticated user data that may change in some cases (for example name change in case of marriage).
 
@@ -138,7 +138,7 @@ public function actions()
 }
 ```
 
-In the above example, every time user is authorized and logged into application, application database (user table) is updated with the data of authenticated user returned by Dokobit Identity Gateway API and according to the data mapping given in 'authOptions'.
+In the above example, every time user is authorized and logged into application, application database (user table) is updated with the data of authenticated user returned by Dokobit Identity Gateway API and according to the data mapping given in 'syncAttributes'.
 
 **Widget**
 
