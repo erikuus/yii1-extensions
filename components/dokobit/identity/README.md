@@ -52,7 +52,7 @@ public function actions()
 }
 ```
 
-Note that in the above example after successful authentication only user session will be started in the application with Yii::app()->user->id being set to code@country_code. This minimalist configuration is useful only for limited cases, where there are no user data stored in application database. In most cases you need define authOption to authorize athenticated user against database.
+Note that in the above example after successful authentication only user session will be started in the application with Yii::app()->user->id being set to code@country_code. This minimalist configuration is useful only for limited cases, where there are no user data stored in application database. In most cases you need to define authOption to authorize authenticated user against database.
 
 Example 2:
 
