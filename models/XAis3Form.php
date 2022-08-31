@@ -9,7 +9,7 @@
  */
 class XAis3Form extends CFormModel
 {
-	const CACHE_DURATION=600;
+	const CACHE_DURATION=0;
 
 	/**
 	 * Find descriptive units data by parent reference
@@ -449,7 +449,7 @@ class XAis3Form extends CFormModel
 					WHERE du.active = true
 						AND du.unit_level in (0,6)
 						AND du.fns ILIKE {$this->quote("$fond.%")}
-						AND du.archival_document_token_order BETWEEN $this->quote($from) AND {$this->quote($to)}
+						AND du.archival_document_token_order BETWEEN {$this->quote($from)} AND {$this->quote($to)}
 				)
 				SELECT
 					MAX(models.fns)     as leidandmed,
@@ -495,7 +495,7 @@ class XAis3Form extends CFormModel
 					WHERE du.active = true
 						AND du.unit_level in (0,6)
 						AND du.fns ILIKE {$this->quote("$fond.%")}
-						AND du.archival_document_token_order BETWEEN $this->quote($from) AND {$this->quote($to)}
+						AND du.archival_document_token_order BETWEEN {$this->quote($from)} AND {$this->quote($to)}
 				)
 				SELECT string_agg(a.leidandmed, ',')
 				FROM (SELECT models.id, MAX(models.fns) as leidandmed
@@ -549,6 +549,7 @@ class XAis3Form extends CFormModel
 				SELECT string_agg(du.fns, ',')
 				FROM description_unit du
 				WHERE du.parent_id = {$this->quote($code)}
+				GROUP BY du.reference_search_order
 				ORDER BY du.reference_search_order
 			";
 
