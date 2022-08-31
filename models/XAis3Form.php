@@ -64,7 +64,7 @@ class XAis3Form extends CFormModel
 			FROM description_unit du
 				 INNER JOIN public.description_unit du2 ON du.parent_id = du2.id
 			WHERE du2.active = true
-			  AND du2.fns ~* '^".$this->quote($reference)."$'
+			  AND du2.fns ~* {$this->quote("^$reference$")}
 			ORDER BY du.sequence;
 		";
 
@@ -124,7 +124,7 @@ class XAis3Form extends CFormModel
 				du.name         as pealkiri,
 				du.period       as piirdaatumid
 			FROM description_unit du
-			WHERE du.active = true AND du.parent_id = ".$this->quote($code)."
+			WHERE du.active = true AND du.parent_id = {$this->quote($code)}
 			ORDER BY du.sequence
 			$limit_condition;
 		";
@@ -155,12 +155,12 @@ class XAis3Form extends CFormModel
 		{
 			array_walk($reference, array($this, 'walkQuote'));
 			$list=implode(',',$reference);
-			$condition = 'AND du.fns IN ('.$list.')';
+			$condition = "AND du.fns IN ($list)";
 			$queryMethod='queryAll';
 		}
 		else
 		{
-			$condition = "AND du.fns ~* '^".$this->quote($reference)."$'";
+			$condition = "AND du.fns ~* {$this->quote("^$reference$")}";
 			$queryMethod='queryRow';
 		}
 
@@ -186,7 +186,7 @@ class XAis3Form extends CFormModel
 			FROM description_unit du
 			WHERE du.active = true
 				AND du.unit_level IN (0, 6)
-				".$condition."
+				$condition
 		";
 
 		return Yii::app()->ais3db->createCommand($sql)->{$queryMethod}();
@@ -228,7 +228,7 @@ class XAis3Form extends CFormModel
 				du.name         as pealkiri
 			FROM description_unit du
 			WHERE du.active = true
-				AND du.fns ~* '^".$this->quote($reference)."$'
+				AND du.fns ~* {$this->quote("^$reference$")}
 		";
 
 		if($checkFondsOnly)
@@ -273,7 +273,7 @@ class XAis3Form extends CFormModel
 				du.name         as pealkiri
 			FROM description_unit du
 			WHERE du.active = true
-				AND du.parent_id = ".$this->quote($parentId)."
+				AND du.parent_id = {$this->quote($parentId)}
 			ORDER BY du.sequence
 		";
 
@@ -298,7 +298,7 @@ class XAis3Form extends CFormModel
 		$sql = "
 			WITH
 				root as (
-					SELECT id FROM description_unit WHERE active = true AND fns ~* '^". $fond ."$'
+					SELECT id FROM description_unit WHERE active = true AND fns ~* {$this->quote("^$fond$")}
 				),
 				rooms as (
 					SELECT dus.room_id FROM description_unit du
@@ -335,7 +335,7 @@ class XAis3Form extends CFormModel
 				FROM description_unit du
 					INNER JOIN description_unit_storage s ON du.id = s.description_unit_id
 				WHERE du.active = true
-					AND du.fns ~* '^".$this->quote($reference)."$'
+					AND du.fns ~* {$this->quote("^$reference$")}
 			)
 			SELECT
 				MAX(sto.room_name) 	as hoidla,
@@ -375,7 +375,7 @@ class XAis3Form extends CFormModel
 				FROM description_unit du
 					INNER JOIN description_unit_storage s ON du.id = s.description_unit_id
 				WHERE du.active = true
-				  AND du.fns ~* '^".$this->quote($reference)."$'
+				  AND du.fns ~* {$this->quote("^$reference$")}
 				  AND du.unit_level in (0,6)
 			)
 			SELECT
@@ -436,8 +436,8 @@ class XAis3Form extends CFormModel
 	{
 		$arrReference=$this->getReferenceArray($fromReference);
 		$fond = $arrReference['a'].$arrReference['f'];
-		$from = $this->quote($arrReference['s']);
-		$to = $this->quote($toReference);
+		$from = $arrReference['s'];
+		$to = $toReference;
 		if($from && $to)
 		{
 			$sql = "
@@ -448,8 +448,8 @@ class XAis3Form extends CFormModel
 						INNER JOIN description_unit_storage s ON du.id = s.description_unit_id
 					WHERE du.active = true
 						AND du.unit_level in (0,6)
-						AND du.fns ILIKE '".$fond."%'
-						AND du.archival_document_token_order BETWEEN '".$from."' AND '".$to."'
+						AND du.fns ILIKE {$this->quote("$fond.%")}
+						AND du.archival_document_token_order BETWEEN $this->quote($from) AND {$this->quote($to)}
 				)
 				SELECT
 					MAX(models.fns)     as leidandmed,
@@ -463,8 +463,8 @@ class XAis3Form extends CFormModel
 				FROM storage sto
 					INNER JOIN models ON sto.id in (models.institution_id, models.room_id, models.section_id, models.case_id, models.shelf_id)
 				GROUP BY models.id
-				LIMIT " . $limit;
-
+				LIMIT $limit
+			";
 			return Yii::app()->ais3db->cache(self::CACHE_DURATION)->createCommand($sql)->queryAll();
 		}
 		else
@@ -482,8 +482,8 @@ class XAis3Form extends CFormModel
 	{
 		$arrReference=$this->getReferenceArray($fromReference);
 		$fond = $arrReference['a'].$arrReference['f'];
-		$from = $this->quote($arrReference['s']);
-		$to = $this->quote($toReference);
+		$from = $arrReference['s'];
+		$to = $toReference;
 		if($from && $to)
 		{
 			$sql = "
@@ -494,8 +494,8 @@ class XAis3Form extends CFormModel
 							INNER JOIN description_unit_storage s ON du.id = s.description_unit_id
 					WHERE du.active = true
 						AND du.unit_level in (0,6)
-						AND du.fns ILIKE '".$fond."%'
-						AND du.archival_document_token_order BETWEEN '".$from."' AND '".$to."'
+						AND du.fns ILIKE {$this->quote("$fond.%")}
+						AND du.archival_document_token_order BETWEEN $this->quote($from) AND {$this->quote($to)}
 				)
 				SELECT string_agg(a.leidandmed, ',')
 				FROM (SELECT models.id, MAX(models.fns) as leidandmed
@@ -522,13 +522,12 @@ class XAis3Form extends CFormModel
 	{
 		if($reference)
 		{
-			$reference=$this->quote($reference);
-			$reference=mb_substr($reference, 0, -1).".%'";
+			$reference=mb_substr($reference, 0, -1);
 
 			$sql = "
 				SELECT string_agg(du.fns, ',')
 				FROM description_unit du
-				WHERE du.fns ILIKE $reference;
+				WHERE du.fns ILIKE {$this->quote("$reference.%")}
 			";
 
 			return Yii::app()->ais3db->createCommand($sql)->queryScalar();
@@ -546,12 +545,10 @@ class XAis3Form extends CFormModel
 	{
 		if($code)
 		{
-			$code=$this->quote($code);
-
 			$sql = "
 				SELECT string_agg(du.fns, ',')
 				FROM description_unit du
-				WHERE du.parent_id = $code
+				WHERE du.parent_id = {$this->quote($code)}
 				ORDER BY du.reference_search_order
 			";
 
@@ -584,7 +581,7 @@ class XAis3Form extends CFormModel
 				s.room_location as korrus,
 				(SELECT code FROM storage WHERE id = s.root_id) as yksus
 			FROM storage s
-			WHERE s.room_name ILIKE '".$this->quote($reference)."%'
+			WHERE s.room_name ILIKE {$this->quote("$reference%")}
 		";
 
 		return Yii::app()->ais3db->cache(self::CACHE_DURATION)->createCommand($sql)->queryRow();
