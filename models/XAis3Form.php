@@ -241,7 +241,7 @@ class XAis3Form extends CFormModel
 
 	/**
 	 * Find descriptive unit data
-	 * @param integer unit parent id
+	 * @param integer unit id
 	 * @return array of unit data
 	 * Example:
 	 * array (
@@ -253,7 +253,7 @@ class XAis3Form extends CFormModel
 	 *  [pealkiri]=>EELK Ambla kogudus
 	 * )
 	 */
-	public function findUnitByParentId($parentId)
+	public function findUnitById($id)
 	{
 		$sql = "
 			SELECT
@@ -273,7 +273,7 @@ class XAis3Form extends CFormModel
 				du.name         as pealkiri
 			FROM description_unit du
 			WHERE du.active = true
-				AND du.parent_id = {$this->quote($parentId)}
+				AND du.id = {$this->quote($id)}
 			ORDER BY du.sequence
 		";
 
