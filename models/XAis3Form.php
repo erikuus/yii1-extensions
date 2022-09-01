@@ -47,24 +47,16 @@ class XAis3Form extends CFormModel
 	{
 		$sql = "
 			SELECT
-				du.id           as kood,
-				du.parent_id    as kirjeldusyksus,
-				CASE
-					WHEN du.unit_level = 0 THEN 'ARH'
-					WHEN du.unit_level = 0 THEN 'KOLL'
-					WHEN du.unit_level = 1 THEN 'A_ARH'
-					WHEN du.unit_level = 4 THEN 'SAR'
-					WHEN du.unit_level = 5 THEN 'A_SAR'
-					WHEN du.unit_level = 6 THEN 'AHV'
-					WHEN du.unit_level = 7 THEN 'A_AHV'
-				END             as tyyp,
+				du.id::varchar           as kood,
+				du.parent_id::varchar    as kirjeldusyksus,
+				du.out_tyyp     as tyyp,
 				du.fns          as leidandmed,
 				du.name         as pealkiri,
 				du.period       as piirdaatumid
-			FROM description_unit du
-				 INNER JOIN public.description_unit du2 ON du.parent_id = du2.id
-			WHERE du2.active = true
-			  AND du2.fns ~* {$this->quote("^$reference$")}
+			FROM api_description_unit_mv du
+				INNER JOIN api_description_unit_mv du2 
+					ON du.parent_id = du2.id
+			WHERE du2.fns_search = lower({$this->quote($reference)})
 			ORDER BY du.sequence;
 		";
 
@@ -109,22 +101,14 @@ class XAis3Form extends CFormModel
 
 		$sql = "
 			SELECT
-				du.id           as kood,
-				du.parent_id    as kirjeldusyksus,
-				CASE
-					WHEN du.unit_level = 0 THEN 'ARH'
-					WHEN du.unit_level = 0 THEN 'KOLL'
-					WHEN du.unit_level = 1 THEN 'A_ARH'
-					WHEN du.unit_level = 4 THEN 'SAR'
-					WHEN du.unit_level = 5 THEN 'A_SAR'
-					WHEN du.unit_level = 6 THEN 'AHV'
-					WHEN du.unit_level = 7 THEN 'A_AHV'
-				END             as tyyp,
-				du.fns          as leidandmed,
-				du.name         as pealkiri,
-				du.period       as piirdaatumid
-			FROM description_unit du
-			WHERE du.active = true AND du.parent_id = {$this->quote($code)}
+				du.id::varchar          as kood,
+				du.parent_id::varchar   as kirjeldusyksus,
+				du.out_tyyp             as tyyp,
+				du.fns                  as leidandmed,
+				du.name                 as pealkiri,
+				du.period               as piirdaatumid
+			FROM api_description_unit_mv du
+			WHERE du.parent_id = {$this->quote($code)}
 			ORDER BY du.sequence
 			$limit_condition;
 		";
@@ -154,39 +138,31 @@ class XAis3Form extends CFormModel
 		if(is_array($reference))
 		{
 			array_walk($reference, array($this, 'walkQuote'));
-			$list=implode(',',$reference);
-			$condition = "AND du.fns IN ($list)";
+			$list = implode(',',$reference);
+			$list = mb_strtolower($list);
+			$condition = "AND du.fns_search IN ($list)";
 			$queryMethod='queryAll';
 		}
 		else
 		{
-			$condition = "AND du.fns ~* {$this->quote("^$reference$")}";
+			$condition = "AND du.fns_search = lower({$this->quote($reference)})";
 			$queryMethod='queryRow';
 		}
 
 		$sql = "
 			SELECT
-				du.id           as kood,
-				du.parent_id    as kirjeldusyksus,
-				CASE
-					WHEN du.unit_level = 0 THEN 'ARH'
-					WHEN du.unit_level = 0 THEN 'KOLL'
-					WHEN du.unit_level = 1 THEN 'A_ARH'
-					WHEN du.unit_level = 4 THEN 'SAR'
-					WHEN du.unit_level = 5 THEN 'A_SAR'
-					WHEN du.unit_level = 6 THEN 'AHV'
-					WHEN du.unit_level = 7 THEN 'A_AHV'
-				END             as tyyp,
-				du.fns          as leidandmed,
-				du.period       as piirdaatumid,
-				du.name         as pealkiri,
-				du.sequence     as jarjekord,
-				EXTRACT (year from du.valid_since_search) as algusaasta,
-				EXTRACT (year from du.valid_until_search) as loppaasta
-			FROM description_unit du
-			WHERE du.active = true
-				AND du.unit_level IN (0, 6)
-				$condition
+				du.id::varchar          as kood,
+				du.parent_id::varchar   as kirjeldusyksus,
+				du.out_tyyp             as tyyp,
+				du.fns                  as leidandmed,
+				du.period               as piirdaatumid,
+				du.name                 as pealkiri,
+				du.sequence::varchar    as jarjekord,
+				du.out_algusaasta       as algusaasta,
+				coalesce(du.out_loppaasta, du.out_algusaasta) as loppaasta
+			FROM api_description_unit_mv du
+			WHERE du.unit_level IN (0, 6)
+			$condition
 		";
 
 		return Yii::app()->ais3db->createCommand($sql)->{$queryMethod}();
@@ -212,23 +188,14 @@ class XAis3Form extends CFormModel
 	{
 		$sql = "
 			SELECT
-				du.id           as kood,
-				du.parent_id    as kirjeldusyksus,
-				CASE
-					WHEN du.unit_level = 0 THEN 'ARH'
-					WHEN du.unit_level = 0 THEN 'KOLL'
-					WHEN du.unit_level = 1 THEN 'A_ARH'
-					WHEN du.unit_level = 4 THEN 'SAR'
-					WHEN du.unit_level = 5 THEN 'A_SAR'
-					WHEN du.unit_level = 6 THEN 'AHV'
-					WHEN du.unit_level = 7 THEN 'A_AHV'
-				END             as tyyp,
-				du.fns          as leidandmed,
-				du.period       as piirdaatumid,
-				du.name         as pealkiri
-			FROM description_unit du
-			WHERE du.active = true
-				AND du.fns ~* {$this->quote("^$reference$")}
+				du.id::varchar          as kood,
+				du.parent_id::varchar   as kirjeldusyksus,
+				du.out_tyyp             as tyyp,
+				du.fns                  as leidandmed,
+				du.period               as piirdaatumid,
+				du.name                 as pealkiri
+			FROM api_description_unit_mv du
+			WHERE du.fns_search = lower({$this->quote($reference)})
 		";
 
 		if($checkFondsOnly)
@@ -257,23 +224,15 @@ class XAis3Form extends CFormModel
 	{
 		$sql = "
 			SELECT
-				du.id           as kood,
-				du.parent_id    as kirjeldusyksus,
-				CASE
-					WHEN du.unit_level = 0 THEN 'ARH'
-					WHEN du.unit_level = 0 THEN 'KOLL'
-					WHEN du.unit_level = 1 THEN 'A_ARH'
-					WHEN du.unit_level = 4 THEN 'SAR'
-					WHEN du.unit_level = 5 THEN 'A_SAR'
-					WHEN du.unit_level = 6 THEN 'AHV'
-					WHEN du.unit_level = 7 THEN 'A_AHV'
-				END             as tyyp,
-				du.fns          as leidandmed,
-				du.period       as piirdaatumid,
-				du.name         as pealkiri
-			FROM description_unit du
-			WHERE du.active = true
-				AND du.id = {$this->quote($id)}
+				SELECT
+				du.id::varchar          as kood,
+				du.parent_id::varchar   as kirjeldusyksus,
+				du.out_tyyp             as tyyp,
+				du.fns                  as leidandmed,
+				du.period               as piirdaatumid,
+				du.name                 as pealkiri
+			FROM api_description_unit_mv du
+			WHERE du.id = {$this->quote($id)}
 			ORDER BY du.sequence
 		";
 
@@ -295,21 +254,13 @@ class XAis3Form extends CFormModel
 	{
 		$arrReference=$this->getReferenceArray($reference);
 		$fond = $arrReference['a'].$arrReference['f'];
+
 		$sql = "
-			WITH
-				root as (
-					SELECT id FROM description_unit WHERE active = true AND fns ~* {$this->quote("^$fond$")}
-				),
-				rooms as (
-					SELECT dus.room_id FROM description_unit du
-						INNER JOIN root rr ON rr.id = du.root
-						INNER JOIN description_unit_storage dus ON dus.description_unit_id = du.id
-					GROUP BY dus.room_id
-				)
-			SELECT
-				s.room_name as nimetus
-			FROM storage s
-			WHERE s.id IN (SELECT r.room_id FROM rooms r)
+			SELECT DISTINCT dus.room_name
+			FROM api_description_unit_mv du
+				RIGHT JOIN description_unit_storage_mv dus 
+					ON du.id = dus.description_unit_id
+			WHERE du.archival_fond_token_search = lower({$this->quote($fond)});
 		";
 
 		return Yii::app()->ais3db->cache(self::CACHE_DURATION)->createCommand($sql)->queryColumn();
@@ -330,22 +281,15 @@ class XAis3Form extends CFormModel
 	public function findStorage($reference)
 	{
 		$sql = "
-			WITH model as (
-				SELECT du.id, s.institution_id, s.room_id, s.section_id, s.case_id, s.shelf_id
-				FROM description_unit du
-					INNER JOIN description_unit_storage s ON du.id = s.description_unit_id
-				WHERE du.active = true
-					AND du.fns ~* {$this->quote("^$reference$")}
-			)
 			SELECT
-				MAX(sto.room_name) 	as hoidla,
-				MAX(sto.section) 	as riiul,
-				MAX(sto.case) 		as kapp,
-				MAX(sto.shelf) 		as laudi,
-				MAX(sto.code) 		as yksus
-			FROM storage sto
-				INNER JOIN model ON sto.id IN (model.institution_id, model.room_id, model.section_id, model.case_id, model.shelf_id)
-			GROUP BY model.id
+				dus.room_name       as hoidla,
+				dus.section_name 	as riiul,
+				dus.case_name 		as kapp,
+				dus.shelf_name 	    as laudi,
+				dus.building_name	as yksus
+			FROM api_description_unit_mv du
+				RIGHT JOIN description_unit_storage_mv dus on du.id = dus.description_unit_id
+			WHERE du.fns_search = lower({$this->quote($reference)});
 		";
 
 		return Yii::app()->ais3db->cache(self::CACHE_DURATION)->createCommand($sql)->queryRow();
@@ -369,27 +313,18 @@ class XAis3Form extends CFormModel
 	public function findItemWithStorage($reference)
 	{
 		$sql = "
-			WITH model as (
-				SELECT du.id, du.fns, du.name, du.period,
-					s.institution_id, s.room_id, s.section_id, s.case_id, s.shelf_id
-				FROM description_unit du
-					INNER JOIN description_unit_storage s ON du.id = s.description_unit_id
-				WHERE du.active = true
-				  AND du.fns ~* {$this->quote("^$reference$")}
-				  AND du.unit_level in (0,6)
-			)
 			SELECT
-				MAX(model.fns)     as leidandmed,
-				MAX(model.name)    as pealkiri,
-				MAX(model.period)  as piirdaatumid,
-				MAX(sto.room_name) as hoidla,
-				MAX(sto.section)   as riiul,
-				MAX(sto.case)      as kapp,
-				MAX(sto.shelf)     as laudi,
-				MAX(sto.code)      as yksus
-			FROM storage sto
-				INNER JOIN model ON sto.id in (model.institution_id, model.room_id, model.section_id, model.case_id, model.shelf_id)
-			GROUP BY model.id
+				du.fns              as leidandmed,
+				du.name             as pealkiri,
+				du.period           as piirdaatumid,
+				dus.room_name       as hoidla,
+				dus.section_name 	as riiul,
+				dus.case_name 		as kapp,
+				dus.shelf_name 	    as laudi,
+				dus.building_name	as yksus
+			FROM api_description_unit_mv du
+				LEFT JOIN description_unit_storage_mv dus on du.id = dus.description_unit_id
+			WHERE du.fns_search = lower({$this->quote($reference)});
 		";
 
 		return Yii::app()->ais3db->cache(self::CACHE_DURATION)->createCommand($sql)->queryRow();
@@ -434,35 +369,23 @@ class XAis3Form extends CFormModel
 	 */
 	public function findItemRangeWithStorage($fromReference, $toReference, $limit=100)
 	{
-		$arrReference=$this->getReferenceArray($fromReference);
-		$fond = $arrReference['a'].$arrReference['f'];
-		$from = $arrReference['s'];
-		$to = $toReference;
-		if($from && $to)
+		if ($fromReference && $toReference)
 		{
 			$sql = "
-				WITH models as (
-					SELECT du.id, du.fns, du.name, du.period,
-						s.institution_id, s.room_id, s.section_id, s.case_id, s.shelf_id
-					FROM description_unit du
-						INNER JOIN description_unit_storage s ON du.id = s.description_unit_id
-					WHERE du.active = true
-						AND du.unit_level in (0,6)
-						AND du.fns ILIKE {$this->quote("$fond.%")}
-						AND du.archival_document_token_order BETWEEN {$this->quote($from)} AND {$this->quote($to)}
-				)
 				SELECT
-					MAX(models.fns)     as leidandmed,
-					MAX(models.name)    as pealkiri,
-					MAX(models.period)  as piirdaatumid,
-					MAX(sto.room_name) as hoidla,
-					MAX(sto.section)   as riiul,
-					MAX(sto.case)      as kapp,
-					MAX(sto.shelf)     as laudi,
-					MAX(sto.code)      as yksus
-				FROM storage sto
-					INNER JOIN models ON sto.id in (models.institution_id, models.room_id, models.section_id, models.case_id, models.shelf_id)
-				GROUP BY models.id
+					du.fns              as leidandmed,
+					du.name             as pealkiri,
+					du.period           as piirdaatumid,
+					dus.room_name       as hoidla,
+					dus.section_name 	as riiul,
+					dus.case_name 		as kapp,
+					dus.shelf_name 	    as laudi,
+					dus.building_name	as yksus
+				FROM api_description_unit_mv du
+					LEFT JOIN description_unit_storage_mv dus ON du.id = dus.description_unit_id
+				WHERE du.fns_search 
+					BETWEEN lower({$this->quote($fromReference)}) AND lower({$this->quote($toReference)})
+				ORDER BY du.fns_search
 				LIMIT $limit
 			";
 			return Yii::app()->ais3db->cache(self::CACHE_DURATION)->createCommand($sql)->queryAll();
@@ -480,30 +403,16 @@ class XAis3Form extends CFormModel
 	 */
 	public function findItemReferenceRangeList($fromReference, $toReference)
 	{
-		$arrReference=$this->getReferenceArray($fromReference);
-		$fond = $arrReference['a'].$arrReference['f'];
-		$from = $arrReference['s'];
-		$to = $toReference;
-		if($from && $to)
+		if ($fromReference && $toReference)
 		{
 			$sql = "
-				WITH models as (
-					SELECT du.id, du.fns, du.reference_search_order,
-						s.institution_id, s.room_id, s.section_id, s.case_id, s.shelf_id
-					FROM description_unit du
-							INNER JOIN description_unit_storage s ON du.id = s.description_unit_id
-					WHERE du.active = true
-						AND du.unit_level in (0,6)
-						AND du.fns ILIKE {$this->quote("$fond.%")}
-						AND du.archival_document_token_order BETWEEN {$this->quote($from)} AND {$this->quote($to)}
-				)
-				SELECT string_agg(a.leidandmed, ',')
-				FROM (SELECT models.id, MAX(models.fns) as leidandmed
-						FROM storage sto
-							INNER JOIN models ON sto.id in (models.institution_id, models.room_id, models.section_id, models.case_id, models.shelf_id)
-						GROUP BY models.id, models.reference_search_order
-						ORDER BY models.reference_search_order
-					) a
+				SELECT string_agg(a.fns, ',') as leidandmed
+				FROM (
+					SELECT du.fns FROM api_description_unit_mv du
+						WHERE du.fns_search 
+							BETWEEN lower({$this->quote($fromReference)}) AND lower({$this->quote($toReference)})
+					ORDER BY du.fns_search
+				) a
 			";
 
 			return Yii::app()->ais3db->createCommand($sql)->queryScalar();
@@ -522,12 +431,16 @@ class XAis3Form extends CFormModel
 	{
 		if($reference)
 		{
-			$reference=mb_substr($reference, 0, -1);
+			$reference=$this->quote($reference);
+			$reference=mb_substr($reference, 0, -1).".%'";
 
 			$sql = "
-				SELECT string_agg(du.fns, ',')
-				FROM description_unit du
-				WHERE du.fns ILIKE {$this->quote("$reference.%")}
+				SELECT string_agg(a.fns, ',') as leidandmed
+				FROM (
+					 SELECT du.fns FROM api_description_unit_mv du
+					 WHERE du.fns_search LIKE lower({$reference})
+					 ORDER BY du.fns_search
+				 ) a;
 			";
 
 			return Yii::app()->ais3db->createCommand($sql)->queryScalar();
@@ -545,12 +458,15 @@ class XAis3Form extends CFormModel
 	{
 		if($code)
 		{
+			$code=$this->quote($code);
+
 			$sql = "
-				SELECT string_agg(du.fns, ',')
-				FROM description_unit du
-				WHERE du.parent_id = {$this->quote($code)}
-				GROUP BY du.reference_search_order
-				ORDER BY du.reference_search_order
+				SELECT string_agg(a.fns, ',') as leidandmed
+				FROM (
+					 SELECT du.fns FROM api_description_unit_mv du
+						WHERE du.parent_id = {$code}
+					 ORDER BY du.fns_search
+				 ) a;
 			";
 
 			return Yii::app()->ais3db->createCommand($sql)->queryScalar();
@@ -576,13 +492,14 @@ class XAis3Form extends CFormModel
 	{
 		$sql = "
 			SELECT
-				s.room_name as nimetus,
-				s.repository_code as hoidla_nr,
+				s.room_name         as nimetus,
+				s.repository_code   as hoidla_nr,
 				(SELECT address FROM storage WHERE id = s.parent_id) as asukoht,
-				s.room_location as korrus,
-				(SELECT code FROM storage WHERE id = s.root_id) as yksus
+				s.room_location     as korrus,
+				(SELECT building_name FROM storage WHERE id = s.parent_id) as yksus
 			FROM storage s
-			WHERE s.room_name ILIKE {$this->quote("$reference%")}
+			WHERE s.storage_level = 2
+			  AND s.room_name ILIKE {$this->quote($reference)}
 		";
 
 		return Yii::app()->ais3db->cache(self::CACHE_DURATION)->createCommand($sql)->queryRow();
