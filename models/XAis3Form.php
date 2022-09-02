@@ -224,7 +224,6 @@ class XAis3Form extends CFormModel
 	{
 		$sql = "
 			SELECT
-				SELECT
 				du.id::varchar          as kood,
 				du.parent_id::varchar   as kirjeldusyksus,
 				du.out_tyyp             as tyyp,
@@ -252,15 +251,12 @@ class XAis3Form extends CFormModel
 	 */
 	public function findFondStorage($reference)
 	{
-		$arrReference=$this->getReferenceArray($reference);
-		$fond = $arrReference['a'].$arrReference['f'];
-
 		$sql = "
 			SELECT DISTINCT dus.room_name
 			FROM api_description_unit_mv du
 				RIGHT JOIN description_unit_storage_mv dus 
 					ON du.id = dus.description_unit_id
-			WHERE du.archival_fond_token_search = lower({$this->quote($fond)});
+			WHERE du.archival_fond_token_search = lower({$this->quote($reference)});
 		";
 
 		return Yii::app()->ais3db->cache(self::CACHE_DURATION)->createCommand($sql)->queryColumn();
