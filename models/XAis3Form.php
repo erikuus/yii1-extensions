@@ -282,7 +282,7 @@ class XAis3Form extends CFormModel
 				dus.section_name 	as riiul,
 				dus.case_name 		as kapp,
 				dus.shelf_name 	    as laudi,
-				dus.building_name	as yksus
+				coalesce(dus.building_id, 24)	as yksus -- if null, return 24 (Noora)
 			FROM api_description_unit_mv du
 				RIGHT JOIN description_unit_storage_mv dus on du.id = dus.description_unit_id
 			WHERE du.fns_search = lower({$this->quote($reference)});
@@ -317,7 +317,7 @@ class XAis3Form extends CFormModel
 				dus.section_name 	as riiul,
 				dus.case_name 		as kapp,
 				dus.shelf_name 	    as laudi,
-				dus.building_name	as yksus
+				coalesce(dus.building_id, 24)	as yksus -- if null, return 24 (Noora)
 			FROM api_description_unit_mv du
 				LEFT JOIN description_unit_storage_mv dus on du.id = dus.description_unit_id
 			WHERE du.fns_search = lower({$this->quote($reference)});
@@ -376,7 +376,7 @@ class XAis3Form extends CFormModel
 					dus.section_name 	as riiul,
 					dus.case_name 		as kapp,
 					dus.shelf_name 	    as laudi,
-					dus.building_name	as yksus
+				coalesce(dus.building_id, 24)	as yksus -- if null, return 24 (Noora)
 				FROM api_description_unit_mv du
 					LEFT JOIN description_unit_storage_mv dus ON du.id = dus.description_unit_id
 				WHERE du.fns_search 
@@ -492,7 +492,7 @@ class XAis3Form extends CFormModel
 				s.repository_code   as hoidla_nr,
 				(SELECT address FROM storage WHERE id = s.parent_id) as asukoht,
 				s.room_location     as korrus,
-				(SELECT building_name FROM storage WHERE id = s.parent_id) as yksus
+				s.parent_id			as yksus -- storage_level = 1 = building
 			FROM storage s
 			WHERE s.storage_level = 2
 			  AND s.room_name ILIKE {$this->quote($reference)}
