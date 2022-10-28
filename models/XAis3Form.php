@@ -490,10 +490,10 @@ class XAis3Form extends CFormModel
 			SELECT
 				s.room_name         as nimetus,
 				s.repository_code   as hoidla_nr,
-				(SELECT address FROM storage WHERE id = s.parent_id) as asukoht,
+				(SELECT address FROM storage_mv WHERE id = s.parent_id) as asukoht,
 				s.room_location     as korrus,
 				s.parent_id			as yksus -- storage_level = 1 = building
-			FROM storage s
+			FROM storage_mv s
 			WHERE s.storage_level = 2
 			  AND s.room_name ILIKE {$this->quote($reference)}
 		";
