@@ -16,7 +16,7 @@
  *     </style>
  * </head>
  * <body>
- * <?php $this->widget('ext.widgets.bookreader.XBookReader', array(
+ * $this->widget('ext.widgets.bookreader.XBookReader', array(
  *    'enableMobileNav'=>true,
  *    'enablePluginUrl'=>true,
  * 	  'htmlOptions'=>array(
@@ -73,7 +73,7 @@
  *            )
  *        )
  *    )
- * )); ?>
+ * ));
  * </body>
  * </html>
  *
