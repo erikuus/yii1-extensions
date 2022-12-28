@@ -180,6 +180,15 @@ class XPinal extends CApplicationComponent
 	}
 
 	/**
+	 * Clears cache
+	 * @return stdClass object
+	 */
+	public function clearCache()
+	{
+		return $this->getClient()->ClearCache();
+	}
+
+	/**
 	 * Add, update and register documents.
 	 *
 	 * @param string $importXml the xml content that defines what and where to create or update.
