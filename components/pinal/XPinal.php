@@ -194,7 +194,7 @@ class XPinal extends CApplicationComponent
 	 * @param string $importXml the xml content that defines what and where to create or update.
 	 *
 	 * For example, document can be created as follows:
-	 * <?xml version="1.0" encoding="utf-8"?>
+	 *
 	 * <system schemaVersion="1" xmlns="http://www.nortal.com/FlairPoint/RecordsManagement/WebCapture">
 	 *     <hierarchy>
 	 *         <parent>
@@ -214,7 +214,7 @@ class XPinal extends CApplicationComponent
 	 * </system>
 	 *
 	 * And later this document can be updated as follows:
-	 * <?xml version="1.0" encoding="utf-8"?>
+	 *
 	 * <system schemaVersion="1" xmlns="http://www.nortal.com/FlairPoint/RecordsManagement/WebCapture">
 	 *     <hierarchy>
 	 *         <parent>
