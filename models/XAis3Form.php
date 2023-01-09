@@ -106,7 +106,10 @@ class XAis3Form extends CFormModel
 				du.out_tyyp             as tyyp,
 				du.fns                  as leidandmed,
 				du.name                 as pealkiri,
-				du.period               as piirdaatumid
+				du.period               as piirdaatumid,
+				du.sequence::varchar    as jarjekord,
+    			du.out_algusaasta       as algusaasta,
+    			coalesce(du.out_loppaasta, du.out_algusaasta) as loppaasta
 			FROM api_description_unit_mv du
 			WHERE du.parent_id = {$this->quote($code)}
 			ORDER BY du.sequence
