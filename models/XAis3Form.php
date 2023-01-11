@@ -9,7 +9,7 @@
  */
 class XAis3Form extends CFormModel
 {
-	const CACHE_DURATION=0;
+	const CACHE_DURATION=600;
 
 	/**
 	 * Find descriptive units data by parent reference
@@ -54,13 +54,13 @@ class XAis3Form extends CFormModel
 				du.name         as pealkiri,
 				du.period       as piirdaatumid
 			FROM api_description_unit_mv du
-				INNER JOIN api_description_unit_mv du2 
+				INNER JOIN api_description_unit_mv du2
 					ON du.parent_id = du2.id
 			WHERE du2.fns_search = lower({$this->quote($reference)})
 			ORDER BY du.sequence;
 		";
 
-		return Yii::app()->ais3db->createCommand($sql)->queryAll();
+		return Yii::app()->ais3db->cache(self::CACHE_DURATION)->createCommand($sql)->queryAll();
 	}
 
 	/**
@@ -108,15 +108,15 @@ class XAis3Form extends CFormModel
 				du.name                 as pealkiri,
 				du.period               as piirdaatumid,
 				du.sequence::varchar    as jarjekord,
-    			du.out_algusaasta       as algusaasta,
-    			coalesce(du.out_loppaasta, du.out_algusaasta) as loppaasta
+				du.out_algusaasta       as algusaasta,
+				coalesce(du.out_loppaasta, du.out_algusaasta) as loppaasta
 			FROM api_description_unit_mv du
 			WHERE du.parent_id = {$this->quote($code)}
 			ORDER BY du.sequence
 			$limit_condition;
 		";
 
-		return Yii::app()->ais3db->createCommand($sql)->queryAll();
+		return Yii::app()->ais3db->cache(self::CACHE_DURATION)->createCommand($sql)->queryAll();
 	}
 
 	/**
@@ -168,7 +168,7 @@ class XAis3Form extends CFormModel
 			$condition
 		";
 
-		return Yii::app()->ais3db->createCommand($sql)->{$queryMethod}();
+		return Yii::app()->ais3db->cache(self::CACHE_DURATION)->createCommand($sql)->{$queryMethod}();
 	}
 
 	/**
@@ -235,7 +235,43 @@ class XAis3Form extends CFormModel
 				du.name                 as pealkiri
 			FROM api_description_unit_mv du
 			WHERE du.id = {$this->quote($id)}
-			ORDER BY du.sequence
+		";
+
+		return Yii::app()->ais3db->cache(self::CACHE_DURATION)->createCommand($sql)->queryRow();
+	}
+
+	/**
+	 * Find descriptive unit data and years
+	 * @param integer unit id
+	 * @return array of unit data
+	 * Example:
+	 * array(
+	 *  [kood]=>200100000839
+	 *  [kirjeldusyksus]=>NULL
+	 *  [tyyp]=>ARH
+	 *  [leidandmed]=>EAA.1248
+	 *  [piirdaatumid]=>1516-1935
+	 *  [pealkiri]=>EELK Ambla kogudus
+	 *  [jarjekord]=>1
+	 *  [algusaasta]=>1516
+	 *  [loppaasta]=>1935
+	 * )
+	 */
+	public function findUnitWithYearsById($id)
+	{
+		$sql = "
+			SELECT
+			    du.id::varchar          as kood,
+			    du.parent_id::varchar   as kirjeldusyksus,
+			    du.out_tyyp             as tyyp,
+			    du.name                 as pealkiri,
+			    du.fns                  as leidandmed,
+			    du.sequence::varchar    as jarjekord,
+			    du.period               as piirdaatumid,
+			    du.out_algusaasta       as algusaasta,
+			    coalesce(du.out_loppaasta, du.out_algusaasta) as loppaasta
+			FROM api_description_unit_mv du
+			WHERE du.id = {$this->quote($id)}
 		";
 
 		return Yii::app()->ais3db->cache(self::CACHE_DURATION)->createCommand($sql)->queryRow();
@@ -257,7 +293,7 @@ class XAis3Form extends CFormModel
 		$sql = "
 			SELECT DISTINCT dus.room_name
 			FROM api_description_unit_mv du
-				RIGHT JOIN description_unit_storage_mv dus 
+				RIGHT JOIN description_unit_storage_mv dus
 					ON du.id = dus.description_unit_id
 			WHERE du.archival_fond_token_search = lower({$this->quote($reference)});
 		";
@@ -382,7 +418,7 @@ class XAis3Form extends CFormModel
 				coalesce(dus.building_id, 24)	as yksus -- if null, return 24 (Noora)
 				FROM api_description_unit_mv du
 					LEFT JOIN description_unit_storage_mv dus ON du.id = dus.description_unit_id
-				WHERE du.fns_search 
+				WHERE du.fns_search
 					BETWEEN lower({$this->quote($fromReference)}) AND lower({$this->quote($toReference)})
 				ORDER BY du.fns_search
 				LIMIT $limit
@@ -408,13 +444,13 @@ class XAis3Form extends CFormModel
 				SELECT string_agg(a.fns, ',') as leidandmed
 				FROM (
 					SELECT du.fns FROM api_description_unit_mv du
-						WHERE du.fns_search 
+						WHERE du.fns_search
 							BETWEEN lower({$this->quote($fromReference)}) AND lower({$this->quote($toReference)})
 					ORDER BY du.fns_search
 				) a
 			";
 
-			return Yii::app()->ais3db->createCommand($sql)->queryScalar();
+			return Yii::app()->ais3db->cache(self::CACHE_DURATION)->createCommand($sql)->queryScalar();
 		}
 		else
 			return null;
@@ -442,7 +478,7 @@ class XAis3Form extends CFormModel
 				 ) a;
 			";
 
-			return Yii::app()->ais3db->createCommand($sql)->queryScalar();
+			return Yii::app()->ais3db->cache(self::CACHE_DURATION)->createCommand($sql)->queryScalar();
 		}
 		else
 			return null;
@@ -468,7 +504,7 @@ class XAis3Form extends CFormModel
 				 ) a;
 			";
 
-			return Yii::app()->ais3db->createCommand($sql)->queryScalar();
+			return Yii::app()->ais3db->cache(self::CACHE_DURATION)->createCommand($sql)->queryScalar();
 		}
 		else
 			return null;
