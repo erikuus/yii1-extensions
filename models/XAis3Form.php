@@ -323,8 +323,9 @@ class XAis3Form extends CFormModel
 				dus.shelf_name 	    as laudi,
 				coalesce(dus.building_id, 24)	as yksus -- if null, return 24 (Noora)
 			FROM api_description_unit_mv du
-				RIGHT JOIN description_unit_storage_mv dus on du.id = dus.description_unit_id
-			WHERE du.fns_search = lower({$this->quote($reference)});
+				LEFT JOIN description_unit_storage_mv dus on du.id = dus.description_unit_id
+			WHERE du.unit_level < 7
+				AND du.fns_search = lower({$this->quote($reference)});
 		";
 
 		return Yii::app()->ais3db->cache(self::CACHE_DURATION)->createCommand($sql)->queryRow();
@@ -359,7 +360,8 @@ class XAis3Form extends CFormModel
 				coalesce(dus.building_id, 24)	as yksus -- if null, return 24 (Noora)
 			FROM api_description_unit_mv du
 				LEFT JOIN description_unit_storage_mv dus on du.id = dus.description_unit_id
-			WHERE du.fns_search = lower({$this->quote($reference)});
+			WHERE du.unit_level < 7
+				AND du.fns_search = lower({$this->quote($reference)});
 		";
 
 		return Yii::app()->ais3db->cache(self::CACHE_DURATION)->createCommand($sql)->queryRow();
@@ -418,8 +420,8 @@ class XAis3Form extends CFormModel
 				coalesce(dus.building_id, 24)	as yksus -- if null, return 24 (Noora)
 				FROM api_description_unit_mv du
 					LEFT JOIN description_unit_storage_mv dus ON du.id = dus.description_unit_id
-				WHERE du.fns_search
-					BETWEEN lower({$this->quote($fromReference)}) AND lower({$this->quote($toReference)})
+				WHERE du.unit_level < 7
+					AND du.fns_search BETWEEN lower({$this->quote($fromReference)}) AND lower({$this->quote($toReference)})
 				ORDER BY du.fns_search
 				LIMIT $limit
 			";
