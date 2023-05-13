@@ -45,6 +45,10 @@ class XGoogleBboxMap extends CWidget
 	 */
 	public $height='300px';
 	/**
+	 * @var string the css style definitions for map canvas div
+	 */
+	public $cssStyles='margin: 10px 0';
+	/**
 	 * @var CModel the data model associated with this widget.
 	 */
 	public $model;
@@ -76,6 +80,10 @@ class XGoogleBboxMap extends CWidget
 	 * @var string The model attribute name for the select rectangle NE longitude
 	 */
 	public $ne_lon='ne_lon';
+	/**
+	 * @var string the map style definitions
+	 */
+	public $styles='[]';
 
 	/**
 	 * Initializes the widget.
@@ -97,7 +105,7 @@ class XGoogleBboxMap extends CWidget
 	{
 		$id=$this->getId();
 		$this->registerClientScript();
-		echo "<div id=\"{$id}_map_canvas\" style=\"width:".$this->width."; height:".$this->height."; overflow:hidden\"></div>\n";
+		echo "<div id=\"{$id}_map_canvas\" style=\"width:{$this->width}px; height:{$this->height}px; overflow:hidden; {$this->cssStyles}\"></div>\n";
 	}
 
 	/**
@@ -205,10 +213,11 @@ class XGoogleBboxMap extends CWidget
 		$cs->registerScript(__CLASS__.'#'.$id,"
 			function {$id}_initialize() {
 				var mapOptions = {
-					zoom: {$initZoom},
+					zoom: $initZoom,
 					mapTypeId: google.maps.MapTypeId.ROADMAP,
 					panControl: true,
-					streetViewControl: false
+					streetViewControl: false,
+					styles: $this->styles
 				};
 
 				// if map is inside hidden div you need to set size in constructor
