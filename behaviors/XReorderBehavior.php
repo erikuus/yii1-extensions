@@ -205,17 +205,22 @@ class XReorderBehavior extends CActiveRecordBehavior
 	 */
 	protected function getMaxSort()
 	{
-		$owner=$this->getOwner();
-		$alias=$owner->getTableAlias();
-		$model=$owner->find(array(
-			'condition'=>"{$alias}.{$this->sort} IS NOT NULL AND {$this->groupCondition}",
-			'order'=>"{$alias}.{$this->sort} DESC",
-			'limit'=>1,
-		));
-		if($model===null)
-			return 0;
+		if($this->groupCondition)
+		{
+			$owner=$this->getOwner();
+			$alias=$owner->getTableAlias();
+			$model=$owner->find(array(
+				'condition'=>"{$alias}.{$this->sort} IS NOT NULL AND {$this->groupCondition}",
+				'order'=>"{$alias}.{$this->sort} DESC",
+				'limit'=>1,
+			));
+			if($model===null)
+				return 0;
+			else
+				return $model->{$this->sort};
+		}
 		else
-			return $model->{$this->sort};
+			return null;
 	}
 
 	/**
@@ -251,18 +256,21 @@ class XReorderBehavior extends CActiveRecordBehavior
 	 */
 	protected function repairSort($condition)
 	{
-		$owner=$this->getOwner();
-		$alias=$owner->getTableAlias();
-		$sort=1;
-		$models=$owner->findAll(array(
-			'condition'=>"{$alias}.{$this->sort} IS NOT NULL AND $condition",
-			'order'=>"{$alias}.{$this->sort}"
-		));
-		foreach($models as $model)
+		if($condition)
 		{
-			$model->{$this->sort}=$sort;
-			$model->update(array($this->sort));
-			$sort++;
+			$owner=$this->getOwner();
+			$alias=$owner->getTableAlias();
+			$sort=1;
+			$models=$owner->findAll(array(
+				'condition'=>"{$alias}.{$this->sort} IS NOT NULL AND $condition",
+				'order'=>"{$alias}.{$this->sort}"
+			));
+			foreach($models as $model)
+			{
+				$model->{$this->sort}=$sort;
+				$model->update(array($this->sort));
+				$sort++;
+			}
 		}
 	}
 }
