@@ -69,9 +69,9 @@ class XTawkMessenger extends CWidget
 	 */
 	public $source;
 	/**
-	 * @var array $visitor the list of user data for tawk API
+	 * @var array $user the list of user data for tawk API
 	 */
-	public $visitor=array();
+	public $userInfo=array();
 	/**
 	 * @var boolean $visible whether the widget is visible. Defaults to true.
 	 */
@@ -109,7 +109,6 @@ class XTawkMessenger extends CWidget
 	 */
 	public function run()
 	{
-		// check visibility
 		if(!$this->visible)
 			return;
 
@@ -122,15 +121,20 @@ class XTawkMessenger extends CWidget
 		if($this->exceptDays!==array() && $this->checkDay($this->exceptDays))
 			return;
 
-		// define visitor
-		$tawkApiVisitor=$this->visitor!==array() ? 'Tawk_API.visitor='.CJavaScript::encode($this->visitor).';' : null;
+		$visitor=null;
 
-		// prepare widget code
+		if(isset($this->userInfo['name']))
+		{
+			$data=CJavaScript::encode($this->userInfo);
+			$visitor="Tawk_API.visitor=$data;";
+		}
+
+
 		$script =
 <<<SCRIPT
 	<!--Start of Tawk.to Script-->
 	var Tawk_API=Tawk_API||{};
-	{$tawkApiVisitor}
+	{$visitor}
 	var Tawk_LoadStart=new Date();
 	(function(){
 	var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
@@ -143,7 +147,6 @@ class XTawkMessenger extends CWidget
 	<!--End of Tawk.to Script-->
 SCRIPT;
 
-		// register widget code
 		Yii::app()->clientScript->registerScript(__CLASS__, $script, CClientScript::POS_END);
 	}
 
