@@ -34,6 +34,7 @@ class XNavBar extends CWidget
 	 * <li>icon: string, specifies the menu item icon tag class.</li>
 	 * <li>label: string, required, specifies the menu item label. When {@link encodeLabel} is true, the label
 	 * will be HTML-encoded.</li>
+	 * <li>badge: string, specifies the the menu item badge
 	 * <li>url: string or array, optional, specifies the URL of the menu item. It is passed to {@link CHtml::normalizeUrl}
 	 * to generate a valid URL. If this is not set, the menu item will be rendered as a span text.</li>
 	 * <li>visible: boolean, optional, whether this menu item is visible. Defaults to true.
@@ -45,6 +46,11 @@ class XNavBar extends CWidget
 	 * </ul>
 	 */
 	public $items=array();
+	/**
+	 * @var array, optional, additional HTML attributes to be merged with
+	 * linkOptions set for individual item in $this->item['linkOptions'].
+	 */
+	public $itemLinkOptions=array();
 	/**
 	 * @var string the template used to render an individual menu item. In this template,
 	 * the token "{menu}" will be replaced with the corresponding menu link or text.
@@ -60,6 +66,11 @@ class XNavBar extends CWidget
 	 * @var boolean whether the labels for menu items should be HTML-encoded. Defaults to true.
 	 */
 	public $encodeLabel=true;
+	/**
+	 * @var boolean whether the labels for menu items should have either label or icon but not both.
+	 * Defaults to false.
+	 */
+	public $compact=false;
 	/**
 	 * @var string the menu's root container tag name. Defaults 'div'.
 	 * If this property is set to null, no container is used.
@@ -77,6 +88,10 @@ class XNavBar extends CWidget
 	 * @var string the CSS class to be appended to the active menu item.Defaults to 'active'.
 	 */
 	public $activeCssClass='active';
+	/**
+	 * @var string the CSS class to be appended to the menu item badge. Defaults to 'sup'.
+	 */
+	public $badgeCssClass='sup';
 
 	/**
 	 * Initializes the menu widget.
@@ -134,6 +149,12 @@ class XNavBar extends CWidget
 	{
 		foreach($items as $item)
 		{
+			if($this->compact && isset($item['icon']) && $item['label'])
+				unset($item['icon']);
+
+			if($this->itemLinkOptions!==array())
+				$item['linkOptions']=array_merge($item['linkOptions'], $this->itemLinkOptions);
+
 			if(isset($item['active']) && $item['active'] && $this->activeCssClass)
 			{
 				if(empty($item['linkOptions']['class']))
@@ -145,8 +166,11 @@ class XNavBar extends CWidget
 			if(isset($item['icon']))
 			{
 				$icon='<i class="'.$item['icon'].'"></i>';
-				$item['label']=$item['label'] ? $icon.' '.$item['label'] : '&nbsp;'.$icon.'&nbsp;';
+				$item['label']=$item['label'] ? $icon.' '.$item['label'].' ' : '&nbsp;'.$icon.'&nbsp;';
 			}
+
+			if(isset($item['badge']) && $item['badge'])
+				$item['label'].=CHtml::tag('span',array('class'=>$this->badgeCssClass), $item['badge']);
 
 			if(isset($item['url']))
 				$menu=CHtml::link($item['label'],$item['url'],isset($item['linkOptions']) ? $item['linkOptions'] : array());
