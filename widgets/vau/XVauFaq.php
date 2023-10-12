@@ -1,14 +1,14 @@
 <?php
 /**
- * XVauHelpdesk class file
+ * XVauFaq class file
  *
- * Widget to implement a VAU Helpdesk service
+ * Widget to implement a VAU FAQ service
  *
  * Example of usage:
  * <pre>
- *     $this->widget('ext.widgets.vau.XVauHelpdesk', array(
- *         'label'=>Yii::t('ui','FAQ and Feedback'),
- *         'visible'=>Yii::app()->params['vauHelpdesk'],
+ *     $this->widget('ext.widgets.vau.XVauFaq', array(
+ *         'label'=>Yii::t('ui','FAQ'),
+ *         'visible'=>Yii::app()->params['vauFaq'],
  *         'lang'=>Yii::app()->language,
  *     ));
  * </pre>
@@ -16,22 +16,31 @@
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 2.0.0
  */
-class XVauHelpdesk extends CWidget
+class XVauFaq extends CWidget
 {
 	/**
 	 * @var boolean whether the portlet is visible. Defaults to true.
 	 */
 	public $visible=true;
 	/**
-	 * @var string name of the helpdesk link.
+	 * @var string name of the faq link.
 	 */
 	public $label;
 	/**
-	 * @var array additional HTML attributes of helpdesk link.
+	 * @var array additional HTML attributes of faq link.
 	 */
 	public $htmlOptions=array();
 	/**
-	 * @var string the name of language (et|en) for VAU helpdesk.
+	 * @var array list of url params for link. Possible option names include the following:
+	 * dialog=1: display all subjects in dialog layout
+	 * subjectIds=1,3,10: dispaly subjects with given id only
+	 * btnAll=1: display "Show all" button
+	 * btnAsk=1: display "Ask Question" button
+	 * color=0000B4: customize color
+	 */
+	public $urlParams=array();
+	/**
+	 * @var string the name of language (et|en) for VAU fag.
 	 */
 	public $lang;
 	/**
@@ -39,8 +48,8 @@ class XVauHelpdesk extends CWidget
 	 */
 	public $devUrl;
 
-	private $_cssClass='vauHelpdesk';
-	private $_vauUrl='http://www.ra.ee/vau/index.php/helpdesk/message/feedback?';
+	private $_cssClass='vauFaq';
+	private $_vauUrl='https://www.ra.ee/vau/index.php/et/helpdesk/faq/index';
 
 	public function run()
 	{
@@ -49,14 +58,12 @@ class XVauHelpdesk extends CWidget
 
 		$this->registerClientScript();
 
-		$urlParams=array(
-			'language'=>$this->lang,
-			'url'=>$this->controller->createAbsoluteUrl('',$_GET),
-			'dialog'=>1
-		);
-
 		$url=$this->devUrl ? $this->devUrl : $this->_vauUrl;
-		$url.=http_build_query($urlParams);
+
+		if(!isset($this->urlParams['language']))
+			$this->urlParams['language']=$this->lang;
+
+		$url.=http_build_query($this->urlParams);
 
 		if(!isset($this->htmlOptions['class']))
 			$this->htmlOptions['class']=$this->_cssClass;
