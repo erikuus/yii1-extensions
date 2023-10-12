@@ -26,6 +26,11 @@ class XLangMenu extends CWidget
 	 */
 	public $items=array();
 	/**
+	 * @var array, optional, additional HTML attributes to be merged with
+	 * linkOptions set for individual item in $this->item['linkOptions'].
+	 */
+	public $itemLinkOptions=array();
+	/**
 	 * @var boolean whether to encode label
 	 */
 	public $encodeLabel=true;
@@ -58,7 +63,7 @@ class XLangMenu extends CWidget
 				if($this->encodeLabel===true)
 					$label=CHtml::encode($label);
 
-				echo CHtml::link($label, $url);
+				echo CHtml::link($label, $url, $this->itemLinkOptions);
 
 				if($count < $itemsCount)
 					echo '<span class="sep">'.$this->separator.'</span>';
