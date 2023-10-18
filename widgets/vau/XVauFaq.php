@@ -49,7 +49,7 @@ class XVauFaq extends CWidget
 	public $devUrl;
 
 	private $_cssClass='vauFaq';
-	private $_vauUrl='https://www.ra.ee/vau/index.php/et/helpdesk/faq/index';
+	private $_vauUrl='https://www.ra.ee/vau/index.php/et/helpdesk/faq/index?';
 
 	public function run()
 	{
