@@ -27,6 +27,10 @@ class XVauHelpdesk extends CWidget
 	 */
 	public $label;
 	/**
+	 * @var string the title attribute of helpdesk link.
+	 */
+	public $title;
+	/**
 	 * @var array additional HTML attributes of helpdesk link.
 	 */
 	public $htmlOptions=array();
@@ -57,6 +61,9 @@ class XVauHelpdesk extends CWidget
 
 		$url=$this->devUrl ? $this->devUrl : $this->_vauUrl;
 		$url.=http_build_query($urlParams);
+
+		if(!isset($this->htmlOptions['title']))
+			$this->htmlOptions['title']=$this->title;
 
 		if(!isset($this->htmlOptions['class']))
 			$this->htmlOptions['class']=$this->_cssClass;
