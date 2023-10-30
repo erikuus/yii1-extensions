@@ -47,17 +47,17 @@ class XNavBar extends CWidget
 	 */
 	public $items=array();
 	/**
+	 * @var string the template used to render an individual menu item. In this template,
+	 * the tokens "{icon}{label}{badge}" will be replaced with the corresponding value.
+	 * If this property is not set, each menu will be rendered without any decoration.
+	 * This property will be overridden by the 'template' option set in individual menu items via {@items}.
+	 */
+	public $itemTemplate='&nbsp;{icon}&nbsp;{label} {badge}';
+	/**
 	 * @var array, optional, additional HTML attributes to be merged with
 	 * linkOptions set for individual item in $this->item['linkOptions'].
 	 */
 	public $itemLinkOptions=array();
-	/**
-	 * @var string the template used to render an individual menu item. In this template,
-	 * the token "{menu}" will be replaced with the corresponding menu link or text.
-	 * If this property is not set, each menu will be rendered without any decoration.
-	 * This property will be overridden by the 'template' option set in individual menu items via {@items}.
-	 */
-	public $itemTemplate;
 	/**
 	 * @var boolean whether the widget is visible. Defaults to true.
 	 */
@@ -66,11 +66,6 @@ class XNavBar extends CWidget
 	 * @var boolean whether the labels for menu items should be HTML-encoded. Defaults to true.
 	 */
 	public $encodeLabel=true;
-	/**
-	 * @var boolean whether the labels for menu items should have either label or icon but not both.
-	 * Defaults to false.
-	 */
-	public $compact=false;
 	/**
 	 * @var string the menu's root container tag name. Defaults 'div'.
 	 * If this property is set to null, no container is used.
@@ -149,9 +144,6 @@ class XNavBar extends CWidget
 	{
 		foreach($items as $item)
 		{
-			if($this->compact && isset($item['icon']) && $item['label'])
-				unset($item['icon']);
-
 			if($this->itemLinkOptions!==array())
 				$item['linkOptions']=array_merge($item['linkOptions'], $this->itemLinkOptions);
 
@@ -163,28 +155,26 @@ class XNavBar extends CWidget
 					$item['linkOptions']['class'].=' '.$this->activeCssClass;
 			}
 
-			if(isset($item['icon']))
-			{
-				$icon='<i class="'.$item['icon'].'"></i>';
-				$item['label']=$item['label'] ? $icon.' '.$item['label'].' ' : '&nbsp;'.$icon.'&nbsp;';
-			}
+			$icon=isset($item['icon']) ? '<i class="'.$item['icon'].'"></i>' : null;
 
-			if(isset($item['badge']) && $item['badge'])
-				$item['label'].=CHtml::tag('span',array('class'=>$this->badgeCssClass), $item['badge']);
+			$badge=isset($item['badge']) ? CHtml::tag('span',array('class'=>$this->badgeCssClass), $item['badge']) : null;
+
+			$template=isset($item['template']) ? $item['template'] : $this->itemTemplate;
+			$label=strtr($template,array('{icon}'=>$icon, '{badge}'=>$badge, '{label}'=>$item['label']));
 
 			if(isset($item['url']))
-				$menu=CHtml::link($item['label'],$item['url'],isset($item['linkOptions']) ? $item['linkOptions'] : array());
+				echo CHtml::link($this->trim($label),$item['url'],isset($item['linkOptions']) ? $item['linkOptions'] : array());
 			else
-				$menu=CHtml::tag('span',isset($item['linkOptions']) ? $item['linkOptions'] : array(), $item['label']);
-
-			if(isset($this->itemTemplate) || isset($item['template']))
-			{
-				$template=isset($item['template']) ? $item['template'] : $this->itemTemplate;
-				echo strtr($template,array('{menu}'=>$menu));
-			}
-			else
-				echo $menu;
+				echo CHtml::tag('span',isset($item['linkOptions']) ? $item['linkOptions'] : array(), $this->trim($label));
 		}
+	}
+
+	/**
+	 * Trims the label.
+	 */
+	protected function trim($label)
+	{
+		return str_replace('&nbsp; ', '&nbsp;', $label);
 	}
 
 	/**
