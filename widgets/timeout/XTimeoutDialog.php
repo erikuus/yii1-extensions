@@ -22,7 +22,7 @@ class XTimeoutDialog extends CJuiWidget
 	 * If false, no CSS file will be used. Otherwise, the specified CSS file
 	 * will be included when using this widget.
 	 */
-	public $cssFile;	
+	public $customCssFile;
 	/**
 	 * @var boolean $visible whether the widget is visible. Defaults to true.
 	 */
@@ -109,10 +109,10 @@ class XTimeoutDialog extends CJuiWidget
 			$assets = Yii::app()->getAssetManager()->publish(dirname(__FILE__) . '/assets');
 			$cs->registerScriptFile($assets . '/js/timeout-dialog.js');
 
-			if($this->cssFile===null)
+			if($this->customCssFile===null)
 				$cs->registerCssFile($assets . '/css/timeout-dialog.css');
-			elseif($this->cssFile!==false)
-				Yii::app()->clientScript->registerCssFile($this->cssFile);
+			elseif($this->customCssFile!==false)
+				$cs->registerCssFile($this->customCssFile);
 		}
 	}
 
