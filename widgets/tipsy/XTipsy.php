@@ -41,6 +41,7 @@ class XTipsy extends CWidget
 	public $items=array();
 	public $htmlOptions=array();
 
+	public $className;
 	public $delayIn;
 	public $delayOut;
 	public $fade;
@@ -89,92 +90,73 @@ class XTipsy extends CWidget
 			else
 				$tipsyID=$item['id'];
 
-			if(isset($this->delayIn))
+			if($this->className)
+				$params['className']=$this->className;
+
+			if(isset($item['delayIn']))
+				$params['delayIn']=$item['delayIn'];
+			elseif($this->delayIn)
 				$params['delayIn']=$this->delayIn;
 			else
 				$params['delayIn']=50;
 
-			if(isset($item['delayIn']))
-				$params['delayIn']=$item['delayIn'];
-
-			// OPTION: delayOut
-			if(isset($this->delayOut))
-				$params['delayOut']=$this->delayOut;
-			else
-				$params['delayOut']=50; //DEFAULT
-
 			if(isset($item['delayOut']))
 				$params['delayOut']=$item['delayOut'];
-
-			// OPTION: fade
-			if(isset($this->fade))
-				$params['fade']=$this->fade;
+			elseif($this->delayOut)
+				$params['delayOut']=$this->delayOut;
+			else
+				$params['delayOut']=50;
 
 			if(isset($item['fade']))
 				$params['fade']=$item['fade'];
-
-			// OPTION: fallback
-			if(isset($this->fallback))
-				$params['fallback']=$this->fallback;
+			elseif($this->fade)
+				$params['fade']=$this->fade;
 
 			if(isset($item['fallback']))
 				$params['fallback']=$item['fallback'];
-
-			// OPTION: gravity
-			if(isset($this->gravity))
-				$params['gravity']=$this->gravity;
+			elseif($this->fallback)
+				$params['fallback']=$this->fallback;
 
 			if(isset($item['gravity']))
 				$params['gravity']=$item['gravity'];
-
-			// OPTION: html
-			if(isset($this->html))
-				$params['html']=$this->html;
+			elseif($this->gravity)
+				$params['gravity']=$this->gravity;
 
 			if(isset($item['html']))
 				$params['html']=$item['html'];
-
-			// OPTION: offset
-			if(isset($this->offset))
-				$params['offset']=$this->offset;
+			elseif($this->html)
+				$params['html']=$this->html;
 
 			if(isset($item['offset']))
 				$params['offset']=$item['offset'];
-
-			// OPTION: opacity
-			if(isset($this->opacity))
-				$params['opacity']=$this->opacity;
-			else
-				$params['opacity']='0.8'; //DEFAULT
+			elseif($this->offset)
+				$params['offset']=$this->offset;
 
 			if(isset($item['opacity']))
 				$params['opacity']=$item['opacity'];
-
-			// OPTION: title
-			if(isset($this->title))
-				$params['title']=$this->title;
+			elseif($this->opacity)
+				$params['opacity']=$this->opacity;
+			else
+				$params['opacity']='0.8';
 
 			if(isset($item['title']))
 				$params['title']=$item['title'];
+			elseif($this->title)
+				$params['title']=$this->title;
 
-			// OPTION: trigger
-			if(isset($this->trigger))
+			if(isset($item['trigger']))
+				$params['trigger']=$item['trigger'];
+			elseif($this->trigger)
 				$params['trigger']=$this->trigger;
 			else
 				$params['trigger']='hover';
 
-			if(isset($item['trigger']))
-				$params['trigger']=$item['trigger'];
-
-			// OPTION: live
-			if(isset($this->live))
+			if(isset($item['live']))
+				$params['live']=$item['live'];
+			elseif($this->live)
 				$params['live']=$this->live;
 			else
 				$params['live']=false;
-
-			if(isset($item['live']))
-				$params['live']=$item['live'];
-
 
 			// GENERATE JS CODE
 			if(!empty($tipsyID))
