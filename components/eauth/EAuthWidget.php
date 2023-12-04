@@ -106,16 +106,21 @@ class EAuthWidget extends CWidget
 	/**
 	 * @var string the HTML tag content for the service item icon. Defaults to '<i></i>'.
 	 */
-	public $iconTagContent='<i></i>';
+	public $iconTagContent;
 	/**
 	 * Default CSS class for the service item icon. Defaults to 'auth-icon'.
 	 */
 	public $iconCssClass='auth-icon';
 	/**
 	 * @var array the list that matches service id to css class that will be added to icon tag.
-	 * This can be used to display special font icons for every service instead of image icons.
+	 * This can be used to display special font icons for every service.
 	 */
 	public $iconCssClassMap=array();
+	/**
+	 * @var array the list that matches service id to content that will be added to icon tag.
+	 * This can be used to display special image icons for every service.
+	 */
+	public $iconContentMap=array();
 	/**
 	 * @var array HTML attributes for the service item icon.
 	 */
@@ -194,8 +199,13 @@ class EAuthWidget extends CWidget
 				else
 					$iconHtmlOptions['class'].=' '.$service->id;
 
+				if(isset($this->iconContentMap[$service->id]))
+					$iconTagContent=$this->iconContentMap[$service->id];
+				else
+					$iconTagContent=$this->iconTagContent;
+
 				// build link label from icon and title tag
-				$icon=CHtml::openTag($this->iconTagName, $iconHtmlOptions).$this->iconTagContent.CHtml::closeTag($this->iconTagName);
+				$icon=CHtml::openTag($this->iconTagName, $iconHtmlOptions).$iconTagContent.CHtml::closeTag($this->iconTagName);
 				$title=CHtml::tag($this->titleTagName, $this->titleHtmlOptions, $service->title);
 
 				if($this->linkTemplate)
