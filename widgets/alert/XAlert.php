@@ -42,6 +42,10 @@ class XAlert extends CWidget
 	/**
 	 * @var string the CSS class for alert box. Defaults to 'alertBox'.
 	 */
+	public $containerCssClass='alertContainer';	
+	/**
+	 * @var string the CSS class for alert box. Defaults to 'alertBox'.
+	 */
 	public $boxCssClass='alertBox';
 	/**
 	 * @var string the CSS class for success message. Defaults to 'alertSuccessMessage'.
@@ -55,6 +59,14 @@ class XAlert extends CWidget
 	 * @var string the CSS class for error message. Defaults to 'alertErrorMessage'.
 	 */
 	public $errorCssClass='alertErrorMessage';
+	/**
+	 * @var string the CSS class for close button Defaults to 'close'.
+	 */
+	public $closeCssClass='close';
+	/**
+	 * @var string the content of close link. Defaults to '&times;'.
+	 */
+	public $closeContent='&times;';
 	/**
 	 * @var array list of alerts. Each alert is specified as an array of name-value pairs.
 	 * Possible option names include the following:
@@ -85,17 +97,21 @@ class XAlert extends CWidget
 	 */
 	public function run()
 	{
+		$messages=array();
 		foreach($this->alerts as $key=>$type)
 		{
 			if(Yii::app()->user->hasFlash($key))
 			{
 				$message=Yii::app()->user->getFlash($key);
 				if(in_array($type, array_keys($this->types)))
-					echo "<div class=\"{$this->boxCssClass} {$this->types[$type]}\">{$message}<a class=\"close\" href=\"\">&times;</a></div>";
+					$messages[]="<div class=\"{$this->boxCssClass} {$this->types[$type]}\">{$message}<a class=\"{$this->closeCssClass}\" href=\"\">{$this->closeContent}</a></div>";
 				else
-					echo $message;
+					$messages[]=$message;
 			}
 		}
+
+		if($messages)
+			echo CHtml::tag('div',array('class'=>$this->containerCssClass),implode("\n", $messages));
 	}
 
 	/**
