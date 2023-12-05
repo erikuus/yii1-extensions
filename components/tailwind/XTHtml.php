@@ -14,11 +14,11 @@ class XTHtml extends CHtml
 	 * @var string the CSS class for highlighting error inputs. Form inputs will be appended
 	 * with this CSS class if they have input errors.
 	 */
-	public static $errorCss='text-red-500 border-red-300 hover:border-red-400 focus:border-red-600 focus:ring-red-200 focus:ring-red-200';
+	public static $errorCss='border-red-300 hover:border-red-400 focus:border-red-600 focus:ring-red-200 focus:ring-red-200';
 	/**
 	 * @var string the CSS class for displaying link.
 	 */
-	public static $linkCssClass='text-base font-medium text-blue-600 hover:text-blue-500 focus:active:text-blue-700';
+	public static $linkCssClass='font-medium text-blue-600 hover:text-blue-500 focus:active:text-blue-700';
 	/**
 	 * @var string the CSS class for displaying link.
 	 */
