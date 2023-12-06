@@ -81,8 +81,19 @@
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 1.0.0
  */
-class XPinalBasic extends CApplicationComponent
+
+require_once dirname(__FILE__).'/vendor/NTLMStream.php';
+require_once dirname(__FILE__).'/vendor/NTLMSoapClient.php';
+
+class XPinal extends CApplicationComponent
 {
+	/**
+	 * @var boolean whether to register NTLM sream wrapper
+	 * If wsdl and xsd files are behind NTLM Authentication we
+	 * need to register NTLM sream wrapper for SoapClient to work.
+	 */
+	public $registerWrapper=true;
+
 	/**
 	 * @var string the URI of the WSDL file or NULL if working in non-WSDL mode
 	 */
@@ -93,9 +104,21 @@ class XPinalBasic extends CApplicationComponent
 	 * Note that 'login' and 'password' are required.
 	 * Also note that 'ssl' stream context may be required for PHP 5.6+
 	 * For example:
+	 * $context = array(
+	 *     'ssl' => array(
+	 *         'ciphers'=>'RC4-SHA',
+	 *         'verify_peer'=>false,
+	 *         'verify_peer_name'=>false
+	 *     )
+	 * );
 	 * $soapOptions = array(
-	 *     'username'=>'some_name',
+	 *     'login'=>'some_name',
 	 *     'password'=>'some_password',
+	 *     'cache_wsdl'=>WSDL_CACHE_NONE,
+	 *     'cache_ttl'=>86400,
+	 *     'trace'=>true,
+	 *     'exceptions'=>true,
+	 *     'stream_context' => stream_context_create($context)
 	 * );
 	 */
 	public $soapOptions=array();
@@ -106,7 +129,7 @@ class XPinalBasic extends CApplicationComponent
 	public $viewUrl;
 
 	/**
-	 * @var PinalSoapClient object
+	 * @var NTLMSoapClient object
 	 */
 	private $_soapClient;
 
@@ -132,22 +155,16 @@ class XPinalBasic extends CApplicationComponent
 	{
 		if($this->_soapClient===null)
 		{
-			$base64Credentials = base64_encode($this->soapOptions['username'] . ':' . $this->soapOptions['password']);
+			if($this->registerWrapper)
+			{
+				stream_wrapper_unregister('https');
+				stream_wrapper_register('https', 'PinalNTLMStream') or die('Failed to register protocol');
+			}
 
-			$options = array(
-				'http' => array(
-					'header' => "Authorization: Basic " . $base64Credentials
-				)
-			);
+			$this->_soapClient=new NTLMSoapClient($this->soapWSDL, $this->soapOptions);
 
-			$context = stream_context_create($options);
-
-			$this->_soapClient=new SoapClient($this->soapWSDL, array(
-				'stream_context' => $context,
-				'cache_wsdl' => WSDL_CACHE_NONE,
-				'trace' => true,
-				'exceptions' => true
-			));
+			if($this->registerWrapper)
+				stream_wrapper_restore('https');
 		}
 
 		return $this->_soapClient;
@@ -357,5 +374,20 @@ class XPinalBasic extends CApplicationComponent
 			return $app->controller->renderFile($file, $data, true);
 		else // CConsoleApplication
 			return $app->command->renderFile($file, $data, true); // get console application command is available since 1.1.14
+	}
+}
+
+class PinalNTLMStream extends NTLMStream
+{
+	protected $login;
+	protected $password;
+
+	public function __construct()
+	{
+		if(Yii::app()->hasComponent('pinal'))
+			$this->login=Yii::app()->pinal->soapOptions['login'];
+
+		if(Yii::app()->hasComponent('pinal'))
+			$this->password=Yii::app()->pinal->soapOptions['password'];
 	}
 }
