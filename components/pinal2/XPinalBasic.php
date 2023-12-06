@@ -81,17 +81,8 @@
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 1.0.0
  */
-require_once dirname(__FILE__).'/vendor/PinalSoapClient.php';
-
-class XPinal extends CApplicationComponent
+class XPinalBasic extends CApplicationComponent
 {
-	/**
-	 * @var boolean whether to register NTLM sream wrapper
-	 * If wsdl and xsd files are behind NTLM Authentication we
-	 * need to register NTLM sream wrapper for SoapClient to work.
-	 */
-	public $registerWrapper=true;
-
 	/**
 	 * @var string the URI of the WSDL file or NULL if working in non-WSDL mode
 	 */
@@ -102,21 +93,9 @@ class XPinal extends CApplicationComponent
 	 * Note that 'login' and 'password' are required.
 	 * Also note that 'ssl' stream context may be required for PHP 5.6+
 	 * For example:
-	 * $context = array(
-	 *     'ssl' => array(
-	 *         'ciphers'=>'RC4-SHA',
-	 *         'verify_peer'=>false,
-	 *         'verify_peer_name'=>false
-	 *     )
-	 * );
 	 * $soapOptions = array(
-	 *     'login'=>'some_name',
+	 *     'username'=>'some_name',
 	 *     'password'=>'some_password',
-	 *     'cache_wsdl'=>WSDL_CACHE_NONE,
-	 *     'cache_ttl'=>86400,
-	 *     'trace'=>true,
-	 *     'exceptions'=>true,
-	 *     'stream_context' => stream_context_create($context)
 	 * );
 	 */
 	public $soapOptions=array();
@@ -152,7 +131,24 @@ class XPinal extends CApplicationComponent
 	public function getClient()
 	{
 		if($this->_soapClient===null)
-			$this->_soapClient=new PinalSoapClient($this->soapWSDL, $this->soapOptions);
+		{
+			$base64Credentials = base64_encode($this->soapOptions['username'] . ':' . $this->soapOptions['password']);
+
+			$options = array(
+				'http' => array(
+					'header' => "Authorization: Basic " . $base64Credentials
+				)
+			);
+
+			$context = stream_context_create($options);
+
+			$this->_soapClient=new SoapClient($this->soapWSDL, array(
+				'stream_context' => $context,
+				'cache_wsdl' => WSDL_CACHE_NONE,
+				'trace' => true,
+				'exceptions' => true
+			));
+		}
 
 		return $this->_soapClient;
 	}
