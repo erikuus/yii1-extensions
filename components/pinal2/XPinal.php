@@ -12,21 +12,10 @@
  * <pre>
  * 'components'=>array(
  *     'pinal'=> array(
- *         'class'=>'ext.components.pinal.XPinal',
- *         'soapWSDL'=>'https://pinal.hm.ee:8080/RMService.svc?wsdl',
- *         'soapOptions'=>array(
- *             'login'=>'some_name',
- *             'password'=>'some_password',
- *             'trace'=>true,
- *             'exceptions'=>true,
- *             'stream_context' => stream_context_create(array(
- *                 'ssl' => array(
- *                     'ciphers'=>'RC4-SHA',
- *                     'verify_peer'=>false,
- *                     'verify_peer_name'=>false
- *                 )
- *             ))
- *         ),
+ *         'class'=>'ext.components.pinal2.XPinal',
+ *         'soapWSDL'=>'http://path/to/wsdl',
+ *         'soapUsername'=>'some_username',
+ *         'soapPassword'=>'some_password'
  *         'viewUrl'=>'https://pinal.hm.ee/dhs/Active/_layouts/15/RM/ViewDocument.aspx?ID='
  *     )
  * )
@@ -82,7 +71,7 @@
  * @version 1.0.0
  */
 
-class XPinal3 extends CApplicationComponent
+class XPinal extends CApplicationComponent
 {
 	/**
 	 * @var string the URI of the WSDL file or NULL if working in non-WSDL mode
@@ -90,14 +79,14 @@ class XPinal3 extends CApplicationComponent
 	public $soapWSDL;
 
 	/**
-	 * @var an array of soap client options
-	 * For example:
-	 * $soapOptions = array(
-	 *     'username'=>'some_name',
-	 *     'password'=>'some_password',
-	 * );
+	 * @var string the username for SOAP client
 	 */
-	public $soapOptions=array();
+	public $soapUsername;
+
+	/**
+	 * @var string the password for SOAP client
+	 */
+	public $soapPassword;
 
 	/**
 	 * @var string url that points to Pinal document view
@@ -119,8 +108,11 @@ class XPinal3 extends CApplicationComponent
 		if(!$this->soapWSDL)
 			throw new CException('"soapWSDL" has to be set!');
 
-		if($this->soapOptions===array())
-			throw new CException('"soapOptions" has to be set!');
+		if(!$this->soapUsername)
+			throw new CException('"soapUsername" has to be set!');
+
+		if(!$this->soapPassword)
+			throw new CException('"soapPassword" has to be set!');
 	}
 
 	/**
@@ -131,10 +123,8 @@ class XPinal3 extends CApplicationComponent
 	{
 		if($this->_soapClient===null)
 		{
-			// Encode credentials
-			$base64Credentials = base64_encode($this->soapOptions['username'] . ':' . $this->soapOptions['password']);
+			$base64Credentials = base64_encode($this->soapUsername . ':' . $this->soapPassword);
 
-			// Create a stream context with HTTP Basic authentication header
 			$options = array(
 				'http' => array(
 					'header' => "Authorization: Basic " . $base64Credentials
@@ -142,7 +132,6 @@ class XPinal3 extends CApplicationComponent
 			);
 			$context = stream_context_create($options);
 
-			// Create a new SOAP client instance with the stream context
 			$this->_soapClient=new SoapClient($this->soapWSDL, array(
 				'stream_context'=>$context,
 				'cache_wsdl'=>WSDL_CACHE_NONE,
