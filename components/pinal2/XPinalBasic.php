@@ -359,18 +359,3 @@ class XPinalBasic extends CApplicationComponent
 			return $app->command->renderFile($file, $data, true); // get console application command is available since 1.1.14
 	}
 }
-
-class PinalNTLMStream extends NTLMStream
-{
-	protected $login;
-	protected $password;
-
-	public function __construct()
-	{
-		if(Yii::app()->hasComponent('pinal'))
-			$this->login=Yii::app()->pinal->soapOptions['login'];
-
-		if(Yii::app()->hasComponent('pinal'))
-			$this->password=Yii::app()->pinal->soapOptions['password'];
-	}
-}
