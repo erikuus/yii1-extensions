@@ -85,7 +85,7 @@
 require_once dirname(__FILE__).'/vendor/NTLMStream.php';
 require_once dirname(__FILE__).'/vendor/NTLMSoapClient.php';
 
-class XPinal extends CApplicationComponent
+class XPinal2 extends CApplicationComponent
 {
 	/**
 	 * @var boolean whether to register NTLM sream wrapper
