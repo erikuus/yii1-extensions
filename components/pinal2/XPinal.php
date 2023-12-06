@@ -152,18 +152,7 @@ class XPinal extends CApplicationComponent
 	public function getClient()
 	{
 		if($this->_soapClient===null)
-		{
-			if($this->registerWrapper)
-			{
-				stream_wrapper_unregister('https');
-				stream_wrapper_register('https', 'PinalNTLMStream') or die('Failed to register protocol');
-			}
-
 			$this->_soapClient=new PinalSoapClient($this->soapWSDL, $this->soapOptions);
-
-			if($this->registerWrapper)
-				stream_wrapper_restore('https');
-		}
 
 		return $this->_soapClient;
 	}
