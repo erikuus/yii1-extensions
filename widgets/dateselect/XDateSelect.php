@@ -121,6 +121,9 @@ class XDateSelect extends CInputWidget
 	// Specifies how year select element is rendered
 	public $yearTemplate='{select}';
 
+	// Specifies css class for all select elements
+	public $cssClass;	
+
 	private $_monthNamesLocale;
 
 	public function init()
@@ -307,6 +310,11 @@ class XDateSelect extends CInputWidget
 				$monthResult.=' '.$this->allExtra;
 			}
 
+			if(null!==$this->cssClass)
+			{
+				$monthResult.=' class="'.$this->cssClass.'"';
+			}
+
 			$monthResult.='>'."\n";
 
 			$monthResult.=$this->htmlOptions(array('output'=>$month_names,'values'=>$month_values,'selected'=>$this->monthEmpty && (!$this->model[$this->attribute] || !$this->time[1]) ? null : strftime($this->monthValueFormat,mktime(0,0,0,(int)$this->time[1],1,2000)),'print_result'=>false));
@@ -351,6 +359,12 @@ class XDateSelect extends CInputWidget
 			{
 				$dayResult.=' '.$this->dayExtra;
 			}
+
+			if(null!==$this->cssClass)
+			{
+				$dayResult.=' class="'.$this->cssClass.'"';
+			}
+
 			$dayResult.='>'."\n";
 			$dayResult.=$this->htmlOptions(array('output'=>$days,'values'=>$day_values,'selected'=>$this->dayEmpty && (!$this->model[$this->attribute] || !$this->time[2]) ?  null : $this->time[2],'print_result'=>false));
 			$dayResult.='</select>';
@@ -413,6 +427,11 @@ class XDateSelect extends CInputWidget
 				if(null!==$this->yearExtra)
 				{
 					$yearResult.=' '.$this->yearExtra;
+				}
+
+				if(null!==$this->cssClass)
+				{
+					$yearResult.=' class="'.$this->cssClass.'"';
 				}
 
 				$yearResult.='>'."\n";
