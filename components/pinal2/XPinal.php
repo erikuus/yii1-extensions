@@ -251,7 +251,7 @@ class XPinal extends CApplicationComponent
 		try
 		{
 			$params=new SoapVar($addFileXml, XSD_ANYXML);
-			return $this->getClient()->AddFile($params);;
+			return $this->getClient()->AddFile($params);
 		}
 		catch(SoapFault $fault)
 		{
