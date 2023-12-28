@@ -75,6 +75,10 @@ class XScrollUp extends CWidget
 			case 'pill':
 				$cs->registerCssFile($assets.'/css/themes/pill.css');
 				break;
+			case 'svg':
+				$cs->registerCssFile($assets.'/css/themes/svg.css');
+				$this->options['scrollImg']=true;
+				break;
 			default:
 				$cs->registerCssFile($assets.'/css/themes/tab.css');
 				break;
