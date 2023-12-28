@@ -34,7 +34,7 @@ class XSearchForm extends CFormModel
 		$params=array();
 		foreach ($_GET as $name=>$value)
 		{
-			if (in_array($name, $this->safeAttributeNames))
+			if(!is_array($value) && in_array($name, $this->safeAttributeNames))
 				$params[$name]=mb_detect_encoding($value, 'UTF-8', true) ? $value : utf8_encode($value);
 		}
 		return $params;
