@@ -69,9 +69,6 @@ class XHEditorUpload extends CAction
 	 */
 	public $returnMessageType=2;
 
-	/**
-	 * Fills treeview based on the current user input.
-	 */
 	public function run()
 	{
 		if(!is_dir($this->rootDir))
@@ -177,19 +174,11 @@ class XHEditorUpload extends CAction
 		echo "{'err':'".$this->jsonString($err)."','msg':".$msg."}";
 	}
 
-	/**
-	 * @param string
-	 * @return JSON string
-	 */
 	protected function jsonString($str)
 	{
 		return preg_replace("/([\\\\\/'])/",'\\\$1',$str);
 	}
 
-	/**
-	 * @param bytes
-	 * @return filesize in bytes, KB, MB or GB
-	 */
 	protected function formatBytes($bytes)
 	{
 		if($bytes >= 1073741824)
