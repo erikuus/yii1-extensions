@@ -88,37 +88,82 @@ class XDokobitPostbackAction extends CAction
 	public $logCategory='ext.components.dokobit.documents.XDokobitPostbackAction';
 
 	/**
-	 * Receives postback data in JSON from Dokobit Documents Gateway server
-	 * and passes it to callback function.
+	 * Receives postback data in JSON from Dokobit Documents Gateway server,
+	 * decodes it, and passes it to callback function.
 	 *
-	 * Example of postback data:
-	 * {
-	 *    "status": "ok",
-	 *    "token": "MFs8jeKFZCd9zUyHFXvm",
-	 *    "action": "signing_completed|signer_signed|signing_archived|signing_archive_failed",
-	 *    "file": "https://developers.dokobit.com/sc/test.pdf",
-	 *    "file_digest": "HEX encoded SHA256 file hash",
-	 *    "valid_to": "2020-01-01 00:00:00",
-	 *    "signer": "60001019906",
-	 *    "signer_info": {
-	 *        "code": "60001019906",
-	 *        "phone": "+37000000766",
-	 *        "country_code": "lt",
-	 *        "signing_option": "mobile",
-	 *        "signing_time": "2020-01-01T00:00:00+02:00",
-	 *        "type": "qes|aes|es (qualified electronic signature, advanced electronic signature, electronic signature)"
-	 *    }
-	 *}
+	 * Examples of postback data that will be passed to success callback:
+	 *
+	 * ```php
+	 * array
+	 * (
+	 *    'action' => 'signer_signed',
+	 *    'token' => 'd73286680a815e4deb1cc895c01a1c8074499442',
+	 *    'signer' => 132074,
+	 *    'signer_info' => array
+	 *        (
+	 *            'code' => '37307302715',
+	 *            'country_code' => 'EE',
+	 *            'certificate' => array
+	 *                (
+	 *                    'name' => '/C=EE/CN=UU,ER,37307302715/SN=UU/GN=ER/serialNumber=PNOEE-37307302715',
+	 *                    'subject' => array
+	 *                        (
+	 *                            'country' => 'EE',
+	 *                            'common_name' => 'UU,ER,37307301111',
+	 *                            'surname' => 'UU',
+	 *                            'name' => 'ER',
+	 *                            'serial_number' => 'PNOEE-37307301111',
+	 *                        ),
+	 *
+	 *                    'issuer' => array
+	 *                        (
+	 *                            'country' => 'EE',
+	 *                            'organisation' => 'SK ID Solutions AS',
+	 *                            'common_name' => 'ESTEID2018',
+	 *                        ),
+	 *
+	 *                    'valid_from' => '2022-03-18T09:06:06+02:00',
+	 *                    'valid_to' => '2027-03-17T23:59:59+02:00',
+	 *                    'value' => '...',
+	 *                ),
+	 *
+	 *            'signing_time' => '2024-01-26T15:35:55+02:00',
+	 *            'signing_option' => 'stationary',
+	 *            'type' => 'qes',
+	 *        ),
+	 *
+	 *    'status' => 'ok',
+	 *    'file' => 'https://gateway.dokobit.com/api/signing/d73286680a815e4deb1cc895c01a1c8074499442/download/132074',
+	 *    'file_digest' => 'fc5a551b1192f018d8eb23247a191cd7c9896b43688a8c2038752681b9d34cd0',
+	 *    'valid_to' => '2035-02-24 00:00:00',
+	 *    'signature_id' => 'S-6B361E74966B2A6224A2611F4C2304553C7F766982DEC9D461960650D377CD6A',
+	 *)
+	 * ```
+	 *
+	 * ```php
+	 * array
+	 * (
+	 *     'action' => 'signing_completed',
+	 *     'token' => 'd73286680a815e4deb1cc895c01a1c8074499442',
+	 *     'status' => 'ok',
+	 *     'file' => 'https://gateway.dokobit.com/api/signing/d73286680a815e4deb1cc895c01a1c8074499442/download',
+	 *     'file_digest' => 'fc5a551b1192f018d8eb23247a191cd7c9896b43688a8c2038752681b9d34cd0',
+	 *     'valid_to' => '2035-02-24 00:00:00',
+	 * )
+	 * ```
+	 *
+	 * @return array the postback data
 	 */
 	public function run()
 	{
 		try
 		{
-			$data=file_get_contents('php://input');
+			$body=file_get_contents('php://input');
+			$data=json_decode($body, true);
 			if($data)
-				$this->controller->{$this->successCallback}($_POST['callback_token'],$data);
+				$this->controller->{$this->successCallback}($data);
 			else
-				$this->controller->{$this->failureCallback}($_POST['callback_token']);
+				$this->controller->{$this->failureCallback}();
 		}
 		catch(CException $e)
 		{
