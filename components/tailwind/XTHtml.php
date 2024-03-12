@@ -21,9 +21,9 @@ class XTHtml extends CHtml
 
 	public static $linkCssClass='font-medium text-blue-600 hover:text-blue-500 focus:active:text-blue-700';
 
-	public static $buttonCssClass='focus-visible::ring-2 focus-visible::ring-green-300 cursor-pointer rounded bg-gray-900 py-3 pl-3 pr-4 text-center text-base font-medium text-white hover:bg-gray-700';
+	public static $buttonCssClass='focus-visible::ring-2 focus-visible::ring-green-300 cursor-pointer rounded bg-gray-900 py-3 px-4 text-center text-base font-medium text-white hover:bg-gray-700';
 
-	public static $buttonLinkCssClass='focus-visible::ring-2 focus-visible::ring-green-300 cursor-pointer border border-gray-200 rounded bg-white py-3 pl-3 pr-4 text-center text-base font-medium text-gray-900 hover:bg-gray-100';
+	public static $buttonLinkCssClass='focus-visible::ring-2 focus-visible::ring-green-300 cursor-pointer border border-gray-200 rounded bg-white py-3 px-4 text-center text-base font-medium text-gray-900 hover:bg-gray-100';
 
 	public static $labelCssClass='mb-2 block text-base font-semibold leading-6 text-gray-800';
 
