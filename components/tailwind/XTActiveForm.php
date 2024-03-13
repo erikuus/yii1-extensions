@@ -115,11 +115,11 @@ SCRIPT;
 		if($html==='')
 		{
 			if($header===null)
-				$header='<p>'.Yii::t('yii','Please fix the following input errors:').'</p>';
+				$header='<p class="'.XTHtml::$errorSummaryHeaderCss.'">'.Yii::t('yii','Please fix the following input errors:').'</p>';
 			if(!isset($htmlOptions['class']))
 				$htmlOptions['class']=XTHtml::$errorSummaryCss;
 			$htmlOptions['style']=isset($htmlOptions['style']) ? rtrim($htmlOptions['style'],';').';display:none' : 'display:none';
-			$html=XTHtml::tag('div',$htmlOptions,$header."\n<ul><li>dummy</li></ul>".$footer);
+			$html=XTHtml::tag('div',$htmlOptions,$header."\n<ul class=\"".XTHtml::$errorSummaryListCss."\"><li>dummy</li></ul>".$footer);
 		}
 
 		$this->summaryID=$htmlOptions['id'];
