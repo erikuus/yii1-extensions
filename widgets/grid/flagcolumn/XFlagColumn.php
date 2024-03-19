@@ -46,6 +46,7 @@ class XFlagColumn extends CGridColumn
 	public $callbackUrl = array('flag');
 	public $htmlOptions = array('class'=>'flag-column');
 	public $flagClass = "flag-link";
+	public $flagClasses;
 
 	private $_assets;
 
@@ -88,7 +89,7 @@ SCRIPT;
 		$no = $this->icons ? CHtml::image($this->_assets . '/checkbox-unchecked.png') : $this->noFlag;
 
 		echo CHtml::link(!empty($value) ? $yes : $no, $link, array(
-			'class' => $this->flagClass,
+			'class' => $this->flagClass.$this->flagClasses,
 		));
 	}
 
