@@ -92,6 +92,10 @@ class ETaggableBehavior extends CActiveRecordBehavior {
 	 * @var boolean whether delete tags that have no bindings
 	 */
 	public $deleteTagsWithNoBindings = false;
+	/**
+	 * @var integer maximum char length of tag
+	 */
+	public $tagMaxTagLength=256;
 
 	private $tags = array();
 	private $originalTags = array();
@@ -705,6 +709,12 @@ class ETaggableBehavior extends CActiveRecordBehavior {
 	 * @return void
 	 */
 	protected function createTag($tag) {
+		$tag = trim($tag);
+
+		// Check if the tag exceeds the maximum length
+		if (mb_strlen($tag) > $this->tagMaxTagLength) {
+			return false;
+		}
 
 		$builder = $this->getConnection()->getCommandBuilder();
 
@@ -716,7 +726,6 @@ class ETaggableBehavior extends CActiveRecordBehavior {
 		}
 
 		$builder->createInsertCommand($this->tagTable, $values)->execute();
-
 	}
 	/**
 	 * Updates counter information in database.
