@@ -1,10 +1,10 @@
 <?php
 /**
- * XFButtonColumn class file.
+ * XTButtonColumn class file.
  *
- * Inserts button column based on Foundation CSS Framework icon set.
+ * Inserts button column based on Tailwind CSS Framework.
  *
- * The following shows how to use XFBooleanColumn:
+ * The following shows how to use XTButtonColumn:
  *
  * In view:
  * <pre>
@@ -14,15 +14,7 @@
  *    'filter'=>$model,
  *    'columns'=>array(
  *        array(
- *            'class'=>'ext.components.foundation.widgets.XTButtonColumn',
- *            'template'=>'{view} {update} {settings}',
- *            'buttons'=>array(
- *                'settings'=>array(
- *                    'label'=>Yii::t('ui','Settings'),
- *                    'url'=>'array("setting","id"=>$data->id)',
- *                    'icon'=>'fi-widget',
- *                ),
- *            ),
+ *            'class'=>'ext.components.tailwind.XTButtonColumn',
  *        ),
  *    ),
  * ));
@@ -43,7 +35,7 @@ class XTButtonColumn extends CButtonColumn
 	/**
 	 * @var string the view button icon.
 	 */
-	public $viewButtonIcon='fi-magnifying-glass';
+	public $viewButtonIcon='<svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M15.5 14H14.71L14.43 13.73C15.41 12.59 16 11.11 16 9.5C16 5.91 13.09 3 9.5 3C5.91 3 3 5.91 3 9.5C3 13.09 5.91 16 9.5 16C11.11 16 12.59 15.41 13.73 14.43L14 14.71V15.5L19 20.49L20.49 19L15.5 14ZM9.5 14C7.01 14 5 11.99 5 9.5C5 7.01 7.01 5 9.5 5C11.99 5 14 7.01 14 9.5C14 11.99 11.99 14 9.5 14Z"></path></svg>';
 	/**
 	 * @var string the update button icon.
 	 */
