@@ -16,14 +16,16 @@ class XTActiveForm extends XDynamicForm
 
 	public $enableChecboxToggle=false;
 
-	public $errorMessageCssClass='mt-2 text-sm text-red-500';
+	public $errorMessageCssClass='errorMessage mt-2 text-sm text-red-500';
 
 	public $labelCssClass='mb-2 block text-base font-semibold leading-6 text-gray-800';
 
 	public $fieldCssClass='block w-full rounded border border-gray-200 px-4 py-3 text-gray-900 hover:border-gray-300 focus:border-gray-500 focus:outline-none focus:ring-2 focus:ring-green-300 sm:text-base sm:leading-6 disabled:bg-gray-50 disabled:text-gray-400 disabled:border-gray-100
 	';
 
-	public $radioCssClass='h-4 w-4 mr-3 text-green-500 focus:ring-offset-0 focus:ring-2 border-gray-200 hover:border-gray-300 focus:border-gray-500 focus:ring-green-300 focus:ring-green-300';
+	public $radioCssClass='h-4 w-4 -mt-0.5 mr-3 text-green-500 focus:ring-offset-0 focus:ring-2 border-gray-200 hover:border-gray-300 focus:border-gray-500 focus:ring-green-300 focus:ring-green-300';
+
+	public $checkboxCssClass='h-4 w-4 -mt-0.5 rounded-sm text-green-500 focus:ring-offset-0 focus:ring-2 border-gray-200 hover:border-gray-300 focus:border-gray-500 focus:ring-green-300 focus:ring-green-300';
 
 	public $htmlOptions=array('class'=>'space-y-6');
 
@@ -74,6 +76,12 @@ class XTActiveForm extends XDynamicForm
 	{
 		$htmlOptions=$this->assignClass($htmlOptions, $this->radioCssClass);
 		return XTHtml::activeRadioButtonList($model,$attribute,$data,$htmlOptions);
+	}
+
+	public function checkBox($model,$attribute,$htmlOptions=array())
+	{
+		$htmlOptions=$this->assignClass($htmlOptions, $this->checkboxCssClass);
+		return XTHtml::activeCheckBox($model,$attribute,$htmlOptions);
 	}
 
 	public function DynamicDropDownList($model, $attribute, $data, $htmlOptions=array())
