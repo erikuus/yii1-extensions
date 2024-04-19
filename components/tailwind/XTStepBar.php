@@ -38,14 +38,21 @@ class XTStepBar extends CWidget
 	 * @var string the CSS class for the desktop widget container. Defaults to 'hidden md:block mb-12 md:mx-6'.
 	 */
 	public $desktopContainerCssClass='hidden md:block mb-12 md:mx-6';
+	/**
+	 * @var boolean whether the widget is visible. Defaults to true.
+	 */
+	public $visible=true;
 
 	/**
 	 * Calls {@link renderStepBar} to render the menu.
 	 */
 	public function run()
 	{
-		$this->renderMobileStepBar($this->steps);
-		$this->renderDesktopStepBar($this->steps);
+		if($this->visible)
+		{
+			$this->renderMobileStepBar($this->steps);
+			$this->renderDesktopStepBar($this->steps);
+		}
 	}
 
 	/**
