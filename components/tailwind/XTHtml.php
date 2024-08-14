@@ -73,6 +73,18 @@ class XTHtml extends CHtml
 		return self::tag('input',$htmlOptions);
 	}
 
+	public static function htmlButton($label='button',$htmlOptions=array())
+	{
+		$htmlOptions=self::assignClass($htmlOptions, self::$buttonCssClass);
+
+		if(!isset($htmlOptions['name']))
+			$htmlOptions['name']=self::ID_PREFIX.self::$count++;
+		if(!isset($htmlOptions['type']))
+			$htmlOptions['type']='button';
+		self::clientChange('click',$htmlOptions);
+		return self::tag('button',$htmlOptions,$label);
+	}
+
 	public static function activeLabel($model,$attribute,$htmlOptions=array())
 	{
 		$htmlOptions=self::assignClass($htmlOptions, self::$labelCssClass);
