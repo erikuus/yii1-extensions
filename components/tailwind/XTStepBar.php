@@ -39,6 +39,14 @@ class XTStepBar extends CWidget
 	 */
 	public $desktopContainerCssClass='hidden md:block mb-12 md:mx-6';
 	/**
+	 * @var string the CSS class for the desktop widget numbers container. Defaults to 'flex items-center justify-between mx-20'.
+	 */
+	public $desktopNumbersContainerCssClass='flex items-center justify-between mx-20';
+	/**
+	 * @var string the CSS class for the desktop widget labels container. Defaults to 'flex justify-between mx-1'.
+	 */
+	public $desktopLabelsContainerCssClass='flex justify-between mx-1';
+	/**
 	 * @var boolean whether the widget is visible. Defaults to true.
 	 */
 	public $visible=true;
@@ -114,10 +122,10 @@ class XTStepBar extends CWidget
 		if(count($steps))
 		{
 			echo "<div class=\"{$this->desktopContainerCssClass}\">\n";
-				echo "<div class=\"flex items-center justify-between mx-20\">\n";
+				echo "<div class=\"{$this->desktopNumbersContainerCssClass}\">\n";
 					$this->renderDesktopStepsNumbers($steps);
 				echo "</div>\n";
-				echo "<div class=\"flex justify-between mx-1\">\n";
+				echo "<div class=\"{$this->desktopLabelsContainerCssClass}\">\n";
 					$this->renderDesktopStepsLabels($steps);
 				echo "</div>\n";
 			echo "</div>\n";
