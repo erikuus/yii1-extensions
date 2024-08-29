@@ -34,6 +34,7 @@ class XFileForm extends CFormModel
 		'sam'=>'SAMA',
 		'lka'=>'EELKKA',
 		'eam'=>'EAM',
+		'vra'=>'RGIA',
 		'-0-'=>'-',
 		'-1-'=>'/',
 		'-2-'=>'_',
@@ -315,10 +316,12 @@ class XFileForm extends CFormModel
 	 */
 	protected function trimNull($str)
 	{
-		if($str=ltrim($str, '0'))
-			return $str;
-		else
-			return 0;
+		$str = ltrim($str, '0'); // Remove leading zeros
+		if ($str !== '') {       // Check if the string is not empty after trimming
+			return $str;         // Return the trimmed string
+		} else {
+			return 0;            // Return 0 if the string is empty after trimming
+		}
 	}
 
 	/**
