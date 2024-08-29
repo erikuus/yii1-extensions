@@ -62,12 +62,12 @@ class XFileForm extends CFormModel
 		$inventory   = isset($pathPartsReverse[1]) ? $pathPartsReverse[1] : null;
 		$volume      = isset($pathPartsReverse[0]) ? $pathPartsReverse[0] : null;
 
-		return implode('.',array_filter(array(
+		return implode('.',array(
 			$this->dirToCode(strtolower(substr($archiveFond, 0, 3))),
 			$this->dirToCode(substr($archiveFond, 3)),
 			$this->dirToCode($inventory),
 			$this->dirToCode($volume)
-		)));
+		));
 	}
 
 	/**
@@ -316,12 +316,11 @@ class XFileForm extends CFormModel
 	 */
 	protected function trimNull($str)
 	{
-		$str = ltrim($str, '0'); // Remove leading zeros
-		if ($str !== '') {       // Check if the string is not empty after trimming
-			return $str;         // Return the trimmed string
-		} else {
-			return 0;            // Return 0 if the string is empty after trimming
-		}
+		$str = ltrim($str, '0');
+		if ($str)
+			return $str;
+		else
+			return 0;
 	}
 
 	/**
