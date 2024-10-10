@@ -103,7 +103,7 @@ class XSslUrlManager extends CUrlManager
 			$hostInfo = $secureRoute ? $this->secureHostInfo : $this->hostInfo;
 
 			if ((strpos($hostInfo, 'https') === 0) xor $sslRequest)
-				$request->redirect($hostInfo . $request->url, true, 301);
+				$request->redirect($hostInfo . $request->url, true, 308);
 		}
 		return $route;
 	}
