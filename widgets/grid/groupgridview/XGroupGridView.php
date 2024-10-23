@@ -23,6 +23,7 @@ class XGroupGridView extends CGridView {
 
 	public $extraRowColumns = array();
 	public $extraRowExpression;
+	public $extraRowCssClass = 'extrarow';
 
 	private $_changes;
 
@@ -250,7 +251,7 @@ class XGroupGridView extends CGridView {
 		$colspan = count($this->columns);
 
 		echo '<tr>';
-		echo '<td class="extrarow" colspan="'.$colspan.'">'.$content.'</td>';
+		echo '<td class="'.$this->extraRowCssClass.'" colspan="'.$colspan.'">'.$content.'</td>';
 		echo '</tr>';
 	}
 
