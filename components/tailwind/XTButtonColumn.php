@@ -4,22 +4,6 @@
  *
  * Inserts button column based on Tailwind CSS Framework.
  *
- * The following shows how to use XTButtonColumn:
- *
- * In view:
- * <pre>
- * $this->widget('zii.widgets.grid.CGridView', array(
- *    'id'=>'person-grid',
- *    'dataProvider'=>$model->search(),
- *    'filter'=>$model,
- *    'columns'=>array(
- *        array(
- *            'class'=>'ext.components.tailwind.XTButtonColumn',
- *        ),
- *    ),
- * ));
- * </pre>
- *
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 1.0
  */
