@@ -1,6 +1,5 @@
 <?php
 /**
-/**
  * XTActiveForm class file.
  *
  * XTFlagColumn extends XFlagColumn adding SVG icons
