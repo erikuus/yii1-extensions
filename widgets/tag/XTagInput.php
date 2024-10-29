@@ -26,6 +26,14 @@ Yii::import('zii.widgets.jui.CJuiInputWidget');
 
 class XTagInput extends CJuiInputWidget
 {
+	/**
+	 * @var mixed the CSS file used for the widget. Defaults to null, meaning
+	 * using the default CSS file included together with the widget.
+	 * If false, no CSS file will be used. Otherwise, the specified CSS file
+	 * will be included when using this widget.
+	 */
+	public $customCssFile;
+
     /**
      * Run this widget.
      * This method registers necessary CSS and JS files and renders the needed JS and HTML code.
@@ -53,7 +61,12 @@ class XTagInput extends CJuiInputWidget
 
         $assets=CHtml::asset(dirname(__FILE__).DIRECTORY_SEPARATOR.'assets');
         $cs=Yii::app()->getClientScript();
-        $cs->registerCssFile($assets.'/jquery.tagit.css');
+
+		if($this->customCssFile===null)
+			$cs->registerCssFile($assets.'/jquery.tagit.css');
+		elseif($this->customCssFile!==false)
+			$cs->registerCssFile($this->customCssFile);
+
 		$cs->registerScriptFile($assets.'/tag-it.js', CClientScript::POS_END); // Position is important here!
 		$cs->registerScript(__CLASS__.'#'.$id, $js);
 	}
