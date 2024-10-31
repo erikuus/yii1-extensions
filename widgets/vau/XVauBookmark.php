@@ -57,7 +57,7 @@ class XVauBookmark extends CWidget
 	public $lang;
 
 	private $_cssClass='vauBookmark';
-	private $_vauUrl='http://www.ra.ee/vau/index.php';
+	private $_vauUrl='https://www.ra.ee/vau/index.php';
 
 	/**
 	 * @var string the name of GET parameter that should be removed from url.
