@@ -26,7 +26,7 @@ class XTReorderColumn extends CGridColumn
 	/**
 	 * @var string button css class
 	 */
-	public $buttonCssClass='inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-gray-500 hover:bg-green-100 hover:text-gray-800';	
+	public $buttonCssClass='inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-gray-500 hover:bg-green-100 hover:text-gray-800';
 	/**
 	 * @var string the up icon.
 	 */
@@ -119,7 +119,8 @@ SCRIPT;
 		$url=CHtml::normalizeUrl($this->callbackUrl);
 
 		echo CHtml::link($icon, $url, array(
-			'class'=>$this->triggerCssClass.' '.$this->buttonCssClass
+			'class'=>$this->triggerCssClass.' '.$this->buttonCssClass,
+			'title'=>$move
 		));
 	}
 }

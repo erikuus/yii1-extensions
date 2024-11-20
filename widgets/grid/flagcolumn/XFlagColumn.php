@@ -90,6 +90,7 @@ SCRIPT;
 
 		echo CHtml::link(!empty($value) ? $yes : $no, $link, array(
 			'class' => $this->flagClass.$this->flagClasses,
+			'title' => !empty($value) ? 'Yes' : 'No'
 		));
 	}
 

@@ -14,9 +14,15 @@ class XTCheckBoxColumn extends CCheckBoxColumn
 {
 	public $htmlOptions=array('class'=>'w-4');
 
-	public $headerCheckBoxHtmlOptions=array('class'=>'ml-2 h-4 w-4 rounded-sm text-green-500 focus:ring-offset-0 focus:ring-2 border-gray-200 hover:border-gray-300 focus:border-gray-500 focus:ring-green-300 focus:ring-green-300');
+	public $headerCheckBoxHtmlOptions=array(
+		'class'=>'ml-2 h-4 w-4 rounded-sm text-green-500 focus:ring-offset-0 focus:ring-2 border-gray-200 hover:border-gray-300 focus:border-gray-500 focus:ring-green-300 focus:ring-green-300',
+		'aria-label'=>'Select all'
+	);
 
-	public $checkBoxHtmlOptions=array('class'=>'ml-2 h-4 w-4 rounded-sm text-green-500 focus:ring-offset-0 focus:ring-2 border-gray-200 hover:border-gray-300 focus:border-gray-500 focus:ring-green-300 focus:ring-green-300');
+	public $checkBoxHtmlOptions=array(
+		'class'=>'ml-2 h-4 w-4 rounded-sm text-green-500 focus:ring-offset-0 focus:ring-2 border-gray-200 hover:border-gray-300 focus:border-gray-500 focus:ring-green-300 focus:ring-green-300',
+		'aria-label'=>'Select row'
+	);
 
 
 	protected function renderHeaderCellContent()

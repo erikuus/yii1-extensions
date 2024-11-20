@@ -148,7 +148,8 @@ SCRIPT;
 		$url=CHtml::normalizeUrl($this->callbackUrl);
 
 		echo CHtml::link(CHtml::image($icon), $url, array(
-			'class'=>$this->cssClass
+			'class'=>$this->cssClass,
+			'title'=>$move
 		));
 	}
 }
