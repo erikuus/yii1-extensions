@@ -97,13 +97,13 @@ class XTStepBar extends CWidget
 						echo "<div class=\"w-px bg-gray-200\"></div>\n";
 					echo "</div>\n";
 
-					$bullet=(isset($step['active']) && $step['active']) ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 text-green-500"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>' : '<div class="h-1.5 w-1.5 rounded-full bg-gray-100 ring-1 ring-gray-200"></div>';
+					$bullet=(isset($step['active']) && $step['active']) ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 text-green-600"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>' : '<div class="h-1.5 w-1.5 rounded-full bg-gray-100 ring-1 ring-gray-200"></div>';
 
 					echo "<div class=\"relative flex mt-2 h-6 w-6 flex-none items-center justify-center bg-white\">\n";
 						echo $bullet;
 					echo "</div>\n";
 
-					$color=(isset($step['active']) && $step['active']) ? 'text-green-500' : 'text-gray-200';
+					$color=(isset($step['active']) && $step['active']) ? 'text-green-600' : 'text-gray-200';
 
 					echo "<div class=\"flex-auto leading-5\">\n";
 						echo "<div class=\"block mt-3 ml-0.5 rounded-md font-bold text-sm uppercase $color\">\n";
@@ -147,7 +147,7 @@ class XTStepBar extends CWidget
 		{
 			if(!isset($step['visible']) || $step['visible'])
 			{
-				$circleColor=(isset($step['active']) && $step['active']) ? 'bg-green-500 text-white' : 'text-gray-200 border-2 border-gray-200';
+				$circleColor=(isset($step['active']) && $step['active']) ? 'bg-green-600 text-white' : 'text-gray-500 border-2 border-gray-200';
 
 				echo "<div class=\"w-10 h-10 flex items-center justify-center rounded-full $circleColor\">\n";
 					echo $stepNumber;
@@ -155,7 +155,7 @@ class XTStepBar extends CWidget
 
 				if($step!=$lastStep)
 				{
-					$lineColor=(isset($step['active']) && $step['active']) ? 'border-green-500' : 'border-gray-200';
+					$lineColor=(isset($step['active']) && $step['active']) ? 'border-green-600' : 'border-gray-200';
 
 					echo "<div class=\"flex-auto border-t-2 $lineColor\"></div>\n";
 				}
@@ -176,7 +176,7 @@ class XTStepBar extends CWidget
 		{
 			if(!isset($step['visible']) || $step['visible'])
 			{
-				$color=(isset($step['active']) && $step['active']) ? 'text-green-500' : 'text-gray-200';
+				$color=(isset($step['active']) && $step['active']) ? 'text-green-600' : 'text-gray-500';
 
 				echo "<span class=\"w-48 text-center font-bold text-sm uppercase mt-3 $color\">\n";
 					echo $step['label'];
