@@ -281,7 +281,7 @@ class XDokobitLoginAction extends CAction
 						$this->flash(Yii::t('XDokobitLoginAction.identity', 'Login failed! Certificate has expired.'));
 						break;
 					case XDokobitUserIdentity::ERROR_SYNC_DATA:
-						$this->log('Failed data sync: '.$userData);
+						$this->log('Failed data sync: '.$userData.' ErrorMessage: '.$identity->errorMessage);
 						$this->flash(Yii::t('XDokobitLoginAction.identity', 'Login failed! Authentication was successfull, but data synchronization failed.'));
 						break;
 					case XDokobitUserIdentity::ERROR_UNAVAILABLE:
