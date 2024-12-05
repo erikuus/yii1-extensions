@@ -279,7 +279,10 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 								}
 
 								if(!$user->save())
+								{
 									$this->errorCode=self::ERROR_SYNC_DATA;
+									$this->errorMessage=json_encode($user->getErrors(), JSON_PRETTY_PRINT);
+								}
 							}
 							else
 								$this->errorCode=self::ERROR_UNAUTHORIZED;
@@ -316,7 +319,10 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 							}
 
 							if(!$user->save())
+							{
 								$this->errorCode=self::ERROR_SYNC_DATA;
+								$this->errorMessage=json_encode($user->getErrors(), JSON_PRETTY_PRINT);
+							}
 						}
 
 						// if there are no errors
