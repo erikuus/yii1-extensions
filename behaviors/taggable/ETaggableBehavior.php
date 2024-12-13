@@ -11,35 +11,6 @@
  * @version 1.5
  * @package yiiext.behaviors.model.taggable
  */
-/**
- * IMPORTANT WHEN UPGRADING!!!
- *
- * Removed ´ that throws error when using postgre database
- *
- * Removed $criteria->mergeWith($this->getScopeCriteria());
- * from getFindByTagsCriteria($tags)
- * because of inevitable table alias conflict
- *
- * Added new property "tagTableSeq" and changed in afterSave method
- * from $this->getConnection()->getLastInsertID()
- * to $this->getConnection()->getLastInsertID($this->tagTableSeq)
- * so that this behavior can be used with postgre database
- *
- * Added new method deleteTagsWithNoBindings()
- * Added new property deleteTagsWithNoBindings
- * If set true, tags with no bindings will be
- * deleted in afterSave and afterDelete method
- *
- * Added bugfix to removeTags()	method
- * so that also last single tag can be removed
- * if($this->tags===array())
- *     $this->tags[]='';
- *
- * Changed inside php sprintf function
- * %d to '%s' to enable primary key of text type
- *
- * @author Erik Uus <erik.uus@gmail.com>
- */
 class ETaggableBehavior extends CActiveRecordBehavior {
 	/**
 	 * @var string tags table name.
@@ -220,9 +191,6 @@ class ETaggableBehavior extends CActiveRecordBehavior {
 
 		$tags = $this->toTagsArray($tags);
 		$this->tags = array_diff($this->tags, $tags);
-
-		if($this->tags===array())
-			$this->tags[]='';
 
 		return $this->getOwner();
 	}
