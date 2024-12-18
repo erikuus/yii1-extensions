@@ -160,6 +160,12 @@ class XEcom extends CApplicationComponent
 	 */
 	public $forceAutoRequest;
 
+	// Unused properties to maintain parity with XStripe
+	public $cancelUrl;
+	public $productName;
+	public $productDescription;
+	public $productMetadata=array();
+
 	/**
 	 * Render form with hidden fields and autosubmit
 	 */
