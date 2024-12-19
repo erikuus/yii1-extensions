@@ -1,6 +1,6 @@
 <?php
 
-require_once(Yii::getPathOfAlias('application.vendor.autoload').'.php'); // Include Composer autoload if needed
+require_once(Yii::getPathOfAlias('ext.vendor.autoload').'.php');
 
 use Stripe\Stripe;
 use Stripe\Checkout\Session as StripeSession;
@@ -8,6 +8,12 @@ use Stripe\PaymentIntent;
 
 /**
  * XStripe component for handling Stripe payments.
+ *
+ * XStripe provides an official Stripe PHP SDK. You can install it via Composer:
+ * composer require stripe/stripe-php
+ *
+ * If you install SDK it into application/vendor, change autoload include
+ * require_once(Yii::getPathOfAlias('application.vendor.autoload').'.php');
  */
 class XStripe extends CApplicationComponent
 {
@@ -94,6 +100,13 @@ class XStripe extends CApplicationComponent
      * @var string|null
      */
     public $errorMessage;
+
+	/**
+	 * Whether to force request as auto
+	 *
+	 * @var boolean
+	 */
+	public $forceAutoRequest;
 
     // Unused properties to maintain parity with XEcom
     public $requestId;
@@ -190,12 +203,15 @@ class XStripe extends CApplicationComponent
     }
 
     /**
-     * In old XEcom, isAutoRequest indicates if request was initiated automatically after successful payment.
-     * For Stripe Checkout, no automated background calls are made directly to `validate` (unless using webhooks).
-     * Return true to keep compatibility.
+     * In XEcom and XIpizza, isAutoRequest indicates if request was initiated automatically after successful payment.
+     * For Stripe Checkout, no automated background calls are made directly to `validate`.
+     * As we can not use webhooks in dev, we can force autorequest flag so that our app handles everything with one request.
      */
     public function isAutoRequest()
     {
-        return true;
+		if($this->forceAutoRequest===true)
+			return true;
+		else
+			return false;
     }
 }
