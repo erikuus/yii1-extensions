@@ -1,12 +1,8 @@
-# Ecplipse generated files #
-######################
-.project
-.cache/
-.settings/
 # Specific excludes #
 ######################
 modules/au/
 modules/rbam/
+vendor
 # OS generated files #
 ######################
 Thumbs.db
