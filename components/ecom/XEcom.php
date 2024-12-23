@@ -164,7 +164,7 @@ class XEcom extends CApplicationComponent
 	public $cancelUrl;
 	public $productName;
 	public $productDescription;
-	public $productMetadata=array();
+	public $metadata=array();
 
 	/**
 	 * Render form with hidden fields and autosubmit

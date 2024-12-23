@@ -88,11 +88,11 @@ class XStripe extends CApplicationComponent
     public $productDescription;
 
     /**
-     * Metadata associated with the product for additional information.
+     * Metadata associated with the session.
      *
      * @var array
      */
-    public $productMetadata = [];
+    public $metadata = [];
 
     /**
      * Error message from the last operation, if any.
@@ -140,8 +140,7 @@ class XStripe extends CApplicationComponent
                         'unit_amount' => $this->amount,
                         'product_data' => [
                             'name' => $this->productName ?: 'Order',
-                            'description' => $this->productDescription,
-                            'metadata' => $this->productMetadata,
+                            'description' => $this->productDescription
                         ],
                     ],
                     'quantity' => 1,
@@ -149,7 +148,8 @@ class XStripe extends CApplicationComponent
                 'mode' => 'payment',
                 'success_url' => $this->returnUrl . $separator . 'session_id={CHECKOUT_SESSION_ID}',
                 'cancel_url' => $this->cancelUrl,
-                'locale' => $this->language ?: 'en'
+                'locale' => $this->language ?: 'en',
+                'metadata' => $this->metadata
             ]);
 
             // Redirect the user to Stripe Checkout

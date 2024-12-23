@@ -45,6 +45,8 @@
  * ```
  */
 
+require_once(Yii::getPathOfAlias('ext.vendor.autoload').'.php');
+
 use Stripe\Stripe;
 use Stripe\Webhook;
 use Stripe\Exception\SignatureVerificationException;
@@ -92,12 +94,12 @@ class XStripeWebhookAction extends CAction
         // Read the request body
         $body=@file_get_contents('php://input');
 
+
         // Retrieve Stripe signature from headers
         $sigHeader=isset($_SERVER['HTTP_STRIPE_SIGNATURE']) ? $_SERVER['HTTP_STRIPE_SIGNATURE'] : null;
 
         if($sigHeader===null)
         {
-            $this->log('Missing Stripe signature header.');
             $this->handleFailure();
             return;
         }
