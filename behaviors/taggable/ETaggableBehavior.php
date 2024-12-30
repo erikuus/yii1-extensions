@@ -178,6 +178,10 @@ class ETaggableBehavior extends CActiveRecordBehavior {
 	 */
 	public function setTags($tags) {
 		$tags = $this->toTagsArray($tags);
+		// Truncate tags exceeding max length
+		$tags = array_map(function($tag) {
+			return mb_substr(trim($tag), 0, $this->tagMaxTagLength);
+		}, $tags);
 		$this->tags = array_unique($tags);
 
 		return $this->getOwner();
@@ -191,6 +195,10 @@ class ETaggableBehavior extends CActiveRecordBehavior {
 		$this->loadTags();
 
 		$tags = $this->toTagsArray($tags);
+		// Truncate tags exceeding max length
+		$tags = array_map(function($tag) {
+			return mb_substr(trim($tag), 0, $this->tagMaxTagLength);
+		}, $tags);
 		$this->tags = array_unique(array_merge($this->tags, $tags));
 
 		return $this->getOwner();
