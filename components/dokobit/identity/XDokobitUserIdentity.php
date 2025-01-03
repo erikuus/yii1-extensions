@@ -266,7 +266,20 @@ class XDokobitUserIdentity extends CBaseUserIdentity
 								$user->{$countryCodeAttributeName}=$countryCode;
 
 								if($usernameAttributeName)
-									$user->{$usernameAttributeName}=$code.'@'.$countryCode;
+								{
+									$defaultUsername=$code.'@'.$countryCode;
+
+									$existingUser=CActiveRecord::model($modelName)->findByAttributes(array($usernameAttributeName=>$defaultUsername));
+
+									if($existingUser!==null)
+									{
+										$random=rand(1000, 9999);
+										$randomUsername=$code.'_'.$random.'@'.$countryCode;
+										$user->{$usernameAttributeName}=$randomUsername;
+									}
+									else
+										$user->{$usernameAttributeName}=$defaultUsername;
+								}
 
 								if($birthdayAttributeName && $countryCode=='ee')
 									$user->{$birthdayAttributeName}=$this->getBirthdayFromCode($code);
