@@ -8,6 +8,11 @@
  * To use, configure your Stripe webhook endpoint in the Stripe Dashboard and set the
  * 'webhookSecret' property to your Stripe webhook signing secret.
  *
+ * Configure Webhooks in Stripe Dashboard:
+ * - Go to Developers > Webhooks in your Stripe Dashboard.
+ * - Click Add endpoint and enter your webhook URL (e.g., https://www.yourdomain.com/index.php/payment/webhook).
+ * - Select the event types you want to listen to, such as checkout.session.completed.
+ *
  * ```php
  * public function actions()
  * {

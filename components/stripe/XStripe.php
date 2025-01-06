@@ -108,7 +108,9 @@ class XStripe extends CApplicationComponent
 	 */
 	public $forceAutoRequest;
 
-    // Unused properties to maintain parity with XEcom
+    /**
+     * Unused properties to maintain parity with XEcom
+     */
     public $requestId;
     public $datetime;
 
