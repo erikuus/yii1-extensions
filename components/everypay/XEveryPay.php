@@ -107,6 +107,13 @@ class XEveryPay extends CApplicationComponent
 	public $metadata = array();
 
 	/**
+	 * Whether to force request as auto
+	 *
+	 * @var boolean
+	 */
+	public $forceAutoRequest;	
+
+	/**
 	 * Unused properties to maintain parity with XStripe
 	 */
 	public $cancelUrl;
@@ -300,12 +307,15 @@ class XEveryPay extends CApplicationComponent
 	}
 
 	/**
-	 * Returns true if we detect an automatic server-to-server request from EveryPay (webhook).
-	 * By default, v4 one-off does NOT automatically post back, so we return false.
+	 * In XEcom and XIpizza, isAutoRequest indicates if request was initiated automatically after successful payment.
+	 * For Stripe Checkout, no automated background calls are made directly to `validate`.
+	 * As we can not use webhooks in dev, we can force autorequest flag so that our app handles everything with one request.
 	 */
 	public function isAutoRequest()
 	{
-		// If you implement webhooks, detect them here. For now, return false.
-		return false;
+		if($this->forceAutoRequest===true)
+			return true;
+		else
+			return false;
 	}
 }
