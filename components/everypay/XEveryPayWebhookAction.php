@@ -73,7 +73,7 @@ class XEveryPayWebhookAction extends CAction
 	{
 		// Read the request body
 		$rawBody = @file_get_contents('php://input');
-		$this->log('EveryPay webhook raw body: ' . $rawBody, 'trace');
+		$this->log('EveryPay webhook raw body: ' . $rawBody, $this->logLevel);
 
 		// Optionally verify the request came from EveryPay checking a "secret token" in GET param
 		if($this->secretToken!==null)
