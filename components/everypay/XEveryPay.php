@@ -37,7 +37,7 @@ class XEveryPay extends CApplicationComponent
 	/**
 	 * @var bool If true, uses test (demo) endpoints; otherwise uses live endpoints
 	 */
-	public $testMode = false;
+	public $testMode=false;
 
 	/**
 	 * @var string Language code
@@ -45,7 +45,7 @@ class XEveryPay extends CApplicationComponent
 	public $language;
 
 	/**
-	 * @var int Payment amount in cents (1.00 EUR = 100)
+	 * @var int Payment amount in cents (1.00 EUR=100)
 	 */
 	public $amount;
 
@@ -72,7 +72,7 @@ class XEveryPay extends CApplicationComponent
 	/**
 	 * @var bool If true, automatically redirects to the Payment URL after creation
 	 */
-	public $autoRedirect = true;
+	public $autoRedirect=true;
 
 	/**
 	 * @var string The Payment Link returned by EveryPay on successful creation
@@ -87,7 +87,7 @@ class XEveryPay extends CApplicationComponent
 	/**
 	 * @var array Additional metadata we embed into integration_details
 	 */
-	public $metadata = array();
+	public $metadata=array();
 
 	/**
 	 * Whether to force request as auto
@@ -95,6 +95,11 @@ class XEveryPay extends CApplicationComponent
 	 * @var boolean
 	 */
 	public $forceAutoRequest;
+
+    /**
+     * @var array|null Stores the full decoded status response from EveryPay.
+     */
+    public $statusResponse=null;
 
 	/**
 	 * Unused properties to maintain parity with XStripe
@@ -111,10 +116,10 @@ class XEveryPay extends CApplicationComponent
 	/**
 	 * v4 Endpoints (One-off payments)
 	 */
-	protected $testUrlV4       = 'https://igw-demo.every-pay.com/api/v4/payments/oneoff';
-	protected $liveUrlV4       = 'https://pay.every-pay.eu/api/v4/payments/oneoff';
-	protected $testStatusUrlV4 = 'https://igw-demo.every-pay.com/api/v4/payments/';
-	protected $liveStatusUrlV4 = 'https://pay.every-pay.eu/api/v4/payments/';
+	protected $testUrlV4='https://igw-demo.every-pay.com/api/v4/payments/oneoff';
+	protected $liveUrlV4='https://pay.every-pay.eu/api/v4/payments/oneoff';
+	protected $testStatusUrlV4='https://igw-demo.every-pay.com/api/v4/payments/';
+	protected $liveStatusUrlV4='https://pay.every-pay.eu/api/v4/payments/';
 
 	/**
 	 * Creates a payment on EveryPay using v4 (nonce + timestamp).
@@ -125,7 +130,7 @@ class XEveryPay extends CApplicationComponent
 		try
 		{
 			// Convert from cents to a float
-			$amountFloat = number_format($this->amount / 100, 2, '.', '');
+			$amountFloat=number_format($this->amount / 100, 2, '.', '');
 
 			// v4 requires:
 			// - 'nonce' (uniqid)
@@ -133,11 +138,11 @@ class XEveryPay extends CApplicationComponent
 			// - 'account_name'
 			// - 'api_username'
 			// - 'order_reference'
-			$nonce     = uniqid();
-			$timestamp = date('c'); // ISO 8601
+			$nonce    =uniqid();
+			$timestamp=date('c'); // ISO 8601
 
 			// Build request array
-			$requestData = array(
+			$requestData=array(
 				'api_username'    => $this->apiUsername,
 				'account_name'    => $this->accountName,
 				'amount'          => $amountFloat,
@@ -150,19 +155,19 @@ class XEveryPay extends CApplicationComponent
 
 			// If a currency is required or different from default
 			if(!empty($this->currency))
-				$requestData['currency'] = $this->currency;
+				$requestData['currency']=$this->currency;
 
 			// Store metadata in integration_details
-			$requestData['integration_details'] = $this->metadata;
+			$requestData['integration_details']=$this->metadata;
 
 			// Determine correct endpoint
-			$apiUrl = $this->testMode ? $this->testUrlV4 : $this->liveUrlV4;
+			$apiUrl=$this->testMode ? $this->testUrlV4 : $this->liveUrlV4;
 
 			// Build x-www-form-urlencoded payload (per v4 docs)
-			$postFields = http_build_query($requestData, '', '&', PHP_QUERY_RFC3986);
+			$postFields=http_build_query($requestData, '', '&', PHP_QUERY_RFC3986);
 
 			// Initialize cURL
-			$ch = curl_init($apiUrl);
+			$ch=curl_init($apiUrl);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			curl_setopt($ch, CURLINFO_HEADER_OUT, true);
 			curl_setopt($ch, CURLOPT_POST, true);
@@ -174,29 +179,29 @@ class XEveryPay extends CApplicationComponent
 			));
 			curl_setopt($ch, CURLOPT_USERPWD, $this->apiUsername . ':' . $this->apiSecret);
 
-			$responseData = curl_exec($ch);
-			$curlError    = curl_error($ch);
+			$responseData=curl_exec($ch);
+			$curlError   =curl_error($ch);
 			curl_close($ch);
 
 			if($curlError)
 			{
-				$this->errorMessage = 'EveryPay cURL error: ' . $curlError;
+				$this->errorMessage='EveryPay cURL error: ' . $curlError;
 				Yii::log($this->errorMessage, CLogger::LEVEL_ERROR);
 				throw new CHttpException(500, 'Payment processing error');
 			}
 
 			// Parse JSON response
-			$decoded = json_decode($responseData, true);
-			if (!empty($decoded['payment_link']))
+			$decoded=json_decode($responseData, true);
+			if(!empty($decoded['payment_link']))
 			{
-				$this->paymentLink = $decoded['payment_link'];
+				$this->paymentLink=$decoded['payment_link'];
 
-				if ($this->autoRedirect)
+				if($this->autoRedirect)
 					Yii::app()->controller->redirect($this->paymentLink);
 			}
 			else
 			{
-				$this->errorMessage = isset($decoded['error_message'])
+				$this->errorMessage=isset($decoded['error_message'])
 					? $decoded['error_message']
 					: 'Could not create payment link.';
 
@@ -210,9 +215,9 @@ class XEveryPay extends CApplicationComponent
 			}
 
 		}
-		catch (Exception $e)
+		catch(Exception $e)
 		{
-			$this->errorMessage = $e->getMessage();
+			$this->errorMessage=$e->getMessage();
 
 			Yii::log(
 				'XEveryPay submitPayment exception: ' . $e->getMessage(),
@@ -231,65 +236,69 @@ class XEveryPay extends CApplicationComponent
 	public function validatePayment()
 	{
 		// Typically we expect EveryPay to pass payment_reference or order_reference in GET/POST
-		$paymentReference = Yii::app()->request->getParam('payment_reference');
+		$paymentReference=Yii::app()->request->getParam('payment_reference');
 
 		if(!$paymentReference)
-			$paymentReference = Yii::app()->request->getParam('order_reference');
+			$paymentReference=Yii::app()->request->getParam('order_reference');
 
 		if(!$paymentReference)
 		{
-			$this->errorMessage = 'No payment_reference provided for validation.';
+			$this->errorMessage='No payment_reference provided for validation.';
 			return false;
 		}
 
 		// Build status URL
-		$statusUrlBase = $this->testMode ? $this->testStatusUrlV4 : $this->liveStatusUrlV4;
-		$statusUrl     = $statusUrlBase . urlencode($paymentReference) . '?api_username=' . urlencode($this->apiUsername);
+		$statusUrlBase=$this->testMode ? $this->testStatusUrlV4 : $this->liveStatusUrlV4;
+		$statusUrl    =$statusUrlBase . urlencode($paymentReference) . '?api_username=' . urlencode($this->apiUsername);
 
 		try
 		{
-			$ch = curl_init($statusUrl);
+			$ch=curl_init($statusUrl);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			curl_setopt($ch, CURLOPT_HTTPHEADER, array(
 				'Content-Type: application/json'
 			));
 			curl_setopt($ch, CURLOPT_USERPWD, $this->apiUsername . ':' . $this->apiSecret);
 
-			$responseData = curl_exec($ch);
-			$curlError    = curl_error($ch);
+			$responseData=curl_exec($ch);
+			$curlError   =curl_error($ch);
 			curl_close($ch);
 
 			if($curlError)
 			{
-				$this->errorMessage = 'EveryPay cURL GET error: ' . $curlError;
+				$this->errorMessage='EveryPay cURL GET error: ' . $curlError;
 				Yii::log($this->errorMessage, CLogger::LEVEL_ERROR);
 				return false;
 			}
 
 			// Decode response
-			$decoded = json_decode($responseData, true);
+			$decoded=json_decode($responseData, true);
+			
+			// Store response for webhook action
+			$this->statusResponse = $decoded;
+
 			if(!isset($decoded['payment_state']))
 			{
-				$this->errorMessage = 'Unexpected EveryPay status response: ' . var_export($decoded, true);
+				$this->errorMessage='Unexpected EveryPay status response: ' . var_export($decoded, true);
 				Yii::log($this->errorMessage, CLogger::LEVEL_ERROR);
 				return false;
 			}
 
 			// e.g. "settled", "failed", "abandoned", "outdated", etc.
-			$this->paymentState = $decoded['payment_state'];
+			$this->paymentState=$decoded['payment_state'];
 
-			if($this->paymentState === 'settled')
+			if($this->paymentState==='settled')
 				return true;
 			else
 			{
-				$this->errorMessage = 'EveryPay Payment State: ' . $this->paymentState;
+				$this->errorMessage='EveryPay Payment State: ' . $this->paymentState;
 				return false;
 			}
 
 		}
-		catch (Exception $e)
+		catch(Exception $e)
 		{
-			$this->errorMessage = 'Validate Payment Exception: ' . $e->getMessage();
+			$this->errorMessage='Validate Payment Exception: ' . $e->getMessage();
 			Yii::log($this->errorMessage, CLogger::LEVEL_ERROR);
 			return false;
 		}
