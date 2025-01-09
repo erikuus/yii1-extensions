@@ -1,38 +1,21 @@
 <?php
 /**
- * EveryPay v4 Payment Component for Yii1
+ * XEveryPay component for handling EveryPay payments.
  *
  * Example usage in config/main.php:
  *
  * 'components' => array(
  *     'creditcard' => array(
- *         'class'       => 'application.components.everypay.XEveryPay',
+ *         'class' => 'ext.components.everypay.XEveryPay',
  *         'apiUsername' => 'username',
- *         'apiSecret'   => 'secret',
- *         'accountName' => 'account',
- *         'testMode'    => true,
- *     ),
- *     // ...
- * ),
+ *         'apiSecret' => 'secret',
+ *         'accountName' => 'account'
+ *     )
+ * )
  *
- * Then in PaymentBaseController you can do:
- *   $transaction = Yii::app()->creditcard; // now points to XEveryPay
- *   $transaction->language = Yii::app()->language;
- *   $transaction->amount = $payment->total * 100;  // cents
- *   $transaction->currency = $payment->currency;
- *   $transaction->returnUrl = $this->createAbsoluteUrl('validate', array('id'=>$payment->id,'type'=>$payment->type));
- *   $transaction->cancelUrl = $this->createAbsoluteUrl('cancel', array('id'=>$payment->id));
- *   $transaction->requestId = $payment->request_id; // set your unique request ID
- *   $transaction->submitPayment();
- *
- * Then in actionValidate:
- *   $transaction = Yii::app()->creditcard;
- *   if($transaction->validatePayment()) {
- *       // Payment success
- *   } else {
- *       // Payment failure: $transaction->errorMessage has reason
- *   }
- *
+ * @link https://support.every-pay.com/
+ * @author Erik Uus <erik.uus@gmail.com>
+ * @version 1.0.0
  */
 class XEveryPay extends CApplicationComponent
 {
@@ -111,7 +94,7 @@ class XEveryPay extends CApplicationComponent
 	 *
 	 * @var boolean
 	 */
-	public $forceAutoRequest;	
+	public $forceAutoRequest;
 
 	/**
 	 * Unused properties to maintain parity with XStripe
@@ -198,7 +181,7 @@ class XEveryPay extends CApplicationComponent
 			{
 				$this->errorMessage = 'EveryPay cURL error: ' . $curlError;
 				Yii::log($this->errorMessage, CLogger::LEVEL_ERROR);
-				return;
+				throw new CHttpException(500, 'Payment processing error');
 			}
 
 			// Parse JSON response
@@ -212,25 +195,30 @@ class XEveryPay extends CApplicationComponent
 			}
 			else
 			{
-				// Something went wrong
 				$this->errorMessage = isset($decoded['error_message'])
 					? $decoded['error_message']
 					: 'Could not create payment link.';
 
 				Yii::log(
-					'XEveryPay submitPayment error: ' . var_export($decoded, true),
+					'XEveryPay submitPayment error: ' . var_export($decoded, true).PHP_EOL.
+					'Request data: ' . var_export($requestData, true),
 					CLogger::LEVEL_ERROR
 				);
+
+				throw new CHttpException(500, 'Payment processing error');
 			}
 
 		}
 		catch (Exception $e)
 		{
 			$this->errorMessage = $e->getMessage();
+
 			Yii::log(
 				'XEveryPay submitPayment exception: ' . $e->getMessage(),
 				CLogger::LEVEL_ERROR
 			);
+
+			throw new CHttpException(500, 'Payment processing error');
 		}
 	}
 

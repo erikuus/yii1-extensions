@@ -48,6 +48,10 @@
  *     // Handle failures, e.g., log or notify
  * }
  * ```
+ *
+ * @link https://www.stripe.com
+ * @author Erik Uus <erik.uus@gmail.com>
+ * @version 1.0.0
  */
 
 require_once(Yii::getPathOfAlias('ext.vendor.autoload').'.php');

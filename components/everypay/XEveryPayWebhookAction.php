@@ -23,6 +23,10 @@
  * }
  *
  * Then define handleEveryPaySuccess($data) and handleEveryPayFailure() in your controller.
+ *
+ * @link https://support.every-pay.com/
+ * @author Erik Uus <erik.uus@gmail.com>
+ * @version 1.0.0
  */
 class XEveryPayWebhookAction extends CAction
 {

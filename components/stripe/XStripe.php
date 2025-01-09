@@ -9,11 +9,19 @@ use Stripe\PaymentIntent;
 /**
  * XStripe component for handling Stripe payments.
  *
- * XStripe provides an official Stripe PHP SDK. You can install it via Composer:
- * composer require stripe/stripe-php
+ * Example usage in config/main.php:
  *
- * If you install SDK it into application/vendor, change autoload include
- * require_once(Yii::getPathOfAlias('application.vendor.autoload').'.php');
+ * 'components' => array(
+ *     'creditcard' => array(
+ *         'class' => 'ext.components.stripe.XStripe',
+ *         'apiKey' => 'ak',
+ *         'publishableKey' => 'pk'
+ *     )
+ * )
+ *
+ * @link https://www.stripe.com
+ * @author Erik Uus <erik.uus@gmail.com>
+ * @version 1.0.0
  */
 class XStripe extends CApplicationComponent
 {
