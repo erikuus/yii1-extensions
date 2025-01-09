@@ -2,8 +2,9 @@
 /**
  * XEveryPayWebhookAction class file.
  *
- * XEveryPayWebhookAction handles webhook POST requests from EveryPay
- * and passes the decoded data to a specified callback function in the controller.
+ * This action handles EveryPay webhook POST requests (form-encoded data),
+ * validates the payment status using the specified EveryPay component,
+ * and calls success or failure callbacks based on the result.
  *
  * Usage example in your controller:
  *
@@ -12,131 +13,134 @@
  *     return array(
  *         'everypayWebhook'=>array(
  *             'class'=>'ext.components.everypay.XEveryPayWebhookAction',
- *             'successCallback'=>'handleEveryPaySuccess',
- *             'failureCallback'=>'handleEveryPayFailure',
- *             // optional secret token for verifying the request
- *             // 'secretToken' => 'abc123',
- *             'log'=>true,
- *             'logCategory'=>'payment.everypay.webhook'
- *         )
+ *             'componentName'=>'creditcard', // name of the EveryPay component in Yii config
+ *             'successCallback'=>'handleEveryPayPaymentSuccess', // method in controller to call on success
+ *             'failureCallback'=>'handleEveryPayPaymentFailure', // method in controller to call on failure
+ *         ),
  *     );
  * }
  *
- * Then define handleEveryPaySuccess($data) and handleEveryPayFailure() in your controller.
+ * public function handleEveryPayPaymentSuccess($data)
+ * {
+ *     // Handle successful payment logic here.
+ * }
  *
- * @link https://support.every-pay.com/
- * @author Erik Uus <erik.uus@gmail.com>
- * @version 1.0.0
+ * public function handleEveryPayPaymentFailure()
+ * {
+ *     // Handle failure logic here.
+ * }
  */
 class XEveryPayWebhookAction extends CAction
 {
 	/**
-	 * @var string $successCallback The name of the controller method called on success.
-	 * The method should accept 1 parameter: an associative array of the decoded request data.
+	 * @var string The name of the EveryPay component as configured in Yii (e.g., 'everypay').
+	 */
+	public $componentName='everypay';
+
+	/**
+	 * @var string $successCallback The controller method called on successful validation.
+	 * This method should accept one parameter: the array of parsed POST data.
 	 */
 	public $successCallback;
 
 	/**
-	 * @var string $failureCallback The name of the controller method called on failure.
+	 * @var string $failureCallback The controller method called on failure.
 	 */
 	public $failureCallback;
 
 	/**
 	 * @var bool $log Whether to log events and errors.
-	 * Defaults to false.
 	 */
 	public $log=false;
 
 	/**
-	 * @var string $logLevel The level for log messages (trace, info, warning, error, etc.).
-	 * Defaults to 'error'.
+	 * @var string $logLevel The log level (e.g., 'trace', 'info', 'error').
 	 */
 	public $logLevel='error';
 
 	/**
-	 * @var string $logCategory The category for log messages.
-	 * Defaults to 'ext.components.everypay.XEveryPayWebhookAction'.
+	 * @var string $logCategory The category for logging messages.
 	 */
-	public $logCategory='ext.components.everypay.XEveryPayWebhookAction';
+	public $logCategory = 'ext.components.everypay.XEveryPayWebhookAction';
 
 	/**
-	 * @var string|null $secretToken (Optional) If set, we check for a matching header, param, or
-	 * something else as a basic form of verification that this request is from EveryPay.
-	 * Adjust usage below to match how you want to verify authenticity.
-	 */
-	public $secretToken;
-
-	/**
-	 * Run the action: parse EveryPay webhook request, call success or failure callback.
+	 * Main entry point: parse POST data, validate payment, call success/failure callbacks.
 	 */
 	public function run()
 	{
-		// Read the request body
-		$rawBody = @file_get_contents('php://input');
-		$this->log('EveryPay webhook raw body: ' . $rawBody, $this->logLevel);
+		// Read the raw POST body
+		$rawBody=@file_get_contents('php://input');
+		$this->log('EveryPay webhook raw body: ' . $rawBody, 'trace');
 
-		// Optionally verify the request came from EveryPay checking a "secret token" in GET param
-		if($this->secretToken!==null)
-		{
-			$token=Yii::app()->request->getParam('token');
-			if($token!==$this->secretToken)
-			{
-				$this->log('Invalid token in EveryPay webhook request!', $this->logLevel);
-				$this->handleFailure();
-				http_response_code(400);
-				return;
-			}
-		}
+		// Parse the form-encoded data
+		$decoded=array();
+		parse_str($rawBody, $decoded);
+		$this->log('EveryPay webhook parsed form data: ' . var_export($decoded, true), 'trace');
 
-		// Decode JSON
-		$decoded=json_decode($rawBody, true);
-		if(json_last_error()!==JSON_ERROR_NONE)
-		{
-			$this->log('EveryPay webhook JSON parse error: ' . json_last_error_msg(), $this->logLevel);
-			$this->handleFailure();
-			// Send an HTTP status code
-			http_response_code(400);
-			return;
-		}
-
-		// Additional checks on the structure
+		// Check for required parameters
 		if(empty($decoded['payment_reference']) && empty($decoded['order_reference']))
 		{
-			$this->log('EveryPay webhook missing payment_reference/order_reference', $this->logLevel);
+			$this->log('EveryPay webhook missing payment_reference/order_reference', 'error');
 			$this->handleFailure();
 			http_response_code(400);
 			return;
 		}
 
-		// Call success callback
-		if($this->successCallback && method_exists($this->controller, $this->successCallback))
+		// Set request parameters so validatePayment() can find them
+		if(isset($decoded['payment_reference']))
+			$_REQUEST['payment_reference'] = $decoded['payment_reference'];
+
+		if(isset($decoded['order_reference']))
+			$_REQUEST['order_reference'] = $decoded['order_reference'];
+
+		// Get the configured EveryPay component
+		$everyPay=Yii::app()->getComponent($this->componentName);
+		if(!$everyPay)
 		{
-			$this->controller->{$this->successCallback}($decoded);
+			$this->log("No EveryPay component found with name '{$this->componentName}'!", 'error');
+			$this->handleFailure();
+			http_response_code(500);
+			return;
+		}
+
+		// Validate payment using the component
+		if ($everyPay->validatePayment())
+		{
+			// Payment is settled
+			if($this->successCallback && method_exists($this->controller, $this->successCallback))
+				$this->controller->{$this->successCallback}($everyPay->statusResponse);
+			else
+				$this->log('No successCallback defined or not callable', $this->logLevel);
+
 			http_response_code(200);
 		}
 		else
 		{
-			$this->log('No success callback defined or not callable', $this->logLevel);
-			// Typically return 200 so EveryPay does not keep retrying infinitely.
+			// Payment validation failed or not settled
+			$this->log('EveryPay payment validation failed: ' . $everyPay->errorMessage, $this->logLevel);
+			$this->handleFailure();
 			http_response_code(200);
 		}
 	}
 
 	/**
-	 * Logs a message if logging is enabled.
+	 * Helper to log messages if logging is enabled.
+	 * @param string $message
+	 * @param string $level
 	 */
-	protected function log($message, $level='info')
+	protected function log($message, $level = 'info')
 	{
-		if($this->log===true)
+		if($this->log === true)
 			Yii::log($message, $level, $this->logCategory);
 	}
 
 	/**
-	 * Handle failures by calling the failure callback if defined.
+	 * Calls the failure callback if defined.
 	 */
 	protected function handleFailure()
 	{
-		if($this->failureCallback && method_exists($this->controller, $this->failureCallback))
+		if ($this->failureCallback && method_exists($this->controller, $this->failureCallback)) {
 			$this->controller->{$this->failureCallback}();
+		}
 	}
 }
