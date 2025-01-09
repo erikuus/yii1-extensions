@@ -145,6 +145,7 @@ class XEveryPay extends CApplicationComponent
 				'nonce'           => $nonce,
 				'timestamp'       => $timestamp,
 				'customer_url'    => $this->returnUrl,
+				'locale'          => $this->language,
 			);
 
 			// If a currency is required or different from default
