@@ -85,11 +85,6 @@ class XEveryPay extends CApplicationComponent
 	public $paymentState;
 
 	/**
-	 * @var array Additional metadata we embed into integration_details
-	 */
-	public $metadata=array();
-
-	/**
 	 * Whether to force request as auto
 	 *
 	 * @var boolean
@@ -107,6 +102,7 @@ class XEveryPay extends CApplicationComponent
 	public $cancelUrl;
 	public $productName;
 	public $productDescription;
+	public $metadata;
 
 	/**
 	 * Unused properties to maintain parity with XEcom
@@ -156,9 +152,6 @@ class XEveryPay extends CApplicationComponent
 			// If a currency is required or different from default
 			if(!empty($this->currency))
 				$requestData['currency']=$this->currency;
-
-			// Store metadata in integration_details
-			$requestData['integration_details']=$this->metadata;
 
 			// Determine correct endpoint
 			$apiUrl=$this->testMode ? $this->testUrlV4 : $this->liveUrlV4;
@@ -224,11 +217,7 @@ class XEveryPay extends CApplicationComponent
 	 */
 	public function validatePayment()
 	{
-		// Typically we expect EveryPay to pass payment_reference or order_reference in GET/POST
 		$paymentReference=Yii::app()->request->getParam('payment_reference');
-
-		if(!$paymentReference)
-			$paymentReference=Yii::app()->request->getParam('order_reference');
 
 		if(!$paymentReference)
 		{
@@ -239,7 +228,7 @@ class XEveryPay extends CApplicationComponent
 
 		// Build status URL
 		$statusUrlBase=$this->testMode ? $this->testStatusUrlV4 : $this->liveStatusUrlV4;
-		$statusUrl    =$statusUrlBase . urlencode($paymentReference) . '?api_username=' . urlencode($this->apiUsername);
+		$statusUrl=$statusUrlBase.urlencode($paymentReference).'?api_username=' . urlencode($this->apiUsername);
 
 		try
 		{
