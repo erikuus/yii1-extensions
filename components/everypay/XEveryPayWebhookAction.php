@@ -70,68 +70,62 @@ class XEveryPayWebhookAction extends CAction
 	{
 		// Read the raw POST body
 		$rawBody=@file_get_contents('php://input');
-		$this->log('EveryPay webhook raw body: ' . $rawBody, 'trace');
 
 		// Parse the form-encoded data
 		$decoded=array();
 		parse_str($rawBody, $decoded);
-		$this->log('EveryPay webhook parsed form data: ' . var_export($decoded, true), 'trace');
 
 		// Check for required parameters
-		if(empty($decoded['payment_reference']) && empty($decoded['order_reference']))
+		if(empty($decoded['payment_reference']))
 		{
-			$this->log('EveryPay webhook missing payment_reference/order_reference', 'error');
+			$this->log('EveryPay webhook missing payment_reference');
 			$this->handleFailure();
 			http_response_code(400);
 			return;
 		}
 
-		// Set request parameters so validatePayment() can find them
+		// Set request parameter so validatePayment() can find it
 		if(isset($decoded['payment_reference']))
 			$_REQUEST['payment_reference'] = $decoded['payment_reference'];
-
-		if(isset($decoded['order_reference']))
-			$_REQUEST['order_reference'] = $decoded['order_reference'];
 
 		// Get the configured EveryPay component
 		$everyPay=Yii::app()->getComponent($this->componentName);
 		if(!$everyPay)
 		{
-			$this->log("No EveryPay component found with name '{$this->componentName}'!", 'error');
+			$this->log('No EveryPay component found with name '.$this->componentName);
 			$this->handleFailure();
 			http_response_code(500);
 			return;
 		}
 
 		// Validate payment using the component
-		if ($everyPay->validatePayment())
+		if($everyPay->validatePayment())
 		{
 			// Payment is settled
 			if($this->successCallback && method_exists($this->controller, $this->successCallback))
 				$this->controller->{$this->successCallback}($everyPay->statusResponse);
 			else
-				$this->log('No successCallback defined or not callable', $this->logLevel);
+				$this->log('No successCallback defined or not callable');
 
 			http_response_code(200);
 		}
 		else
 		{
 			// Payment validation failed or not settled
-			$this->log('EveryPay payment validation failed: ' . $everyPay->errorMessage, $this->logLevel);
+			$this->log('EveryPay payment validation failed: '.$everyPay->errorMessage);
 			$this->handleFailure();
 			http_response_code(200);
 		}
 	}
 
 	/**
-	 * Helper to log messages if logging is enabled.
+	 * Logs a message if logging is enabled.
 	 * @param string $message
-	 * @param string $level
 	 */
-	protected function log($message, $level = 'info')
+	protected function log($message)
 	{
-		if($this->log === true)
-			Yii::log(__CLASS__.' '.$message, $level, $this->logCategory);
+		if($this->log===true)
+			Yii::log(__CLASS__.' '.$message, $this->logLevel, $this->logCategory);
 	}
 
 	/**
