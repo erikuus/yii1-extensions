@@ -159,6 +159,6 @@ class XStripeWebhookAction extends CAction
 	protected function log($message)
 	{
 		if($this->log===true)
-			Yii::log($message, $this->logLevel, $this->logCategory);
+			Yii::log(__CLASS__.' '.$message, $this->logLevel, $this->logCategory);
 	}
 }

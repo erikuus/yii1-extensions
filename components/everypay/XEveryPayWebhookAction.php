@@ -131,7 +131,7 @@ class XEveryPayWebhookAction extends CAction
 	protected function log($message, $level = 'info')
 	{
 		if($this->log === true)
-			Yii::log($message, $level, $this->logCategory);
+			Yii::log(__CLASS__.' '.$message, $level, $this->logCategory);
 	}
 
 	/**
@@ -139,8 +139,7 @@ class XEveryPayWebhookAction extends CAction
 	 */
 	protected function handleFailure()
 	{
-		if ($this->failureCallback && method_exists($this->controller, $this->failureCallback)) {
+		if($this->failureCallback && method_exists($this->controller, $this->failureCallback))
 			$this->controller->{$this->failureCallback}();
-		}
 	}
 }

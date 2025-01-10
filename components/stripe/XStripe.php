@@ -165,9 +165,8 @@ class XStripe extends CApplicationComponent
 			// Redirect the user to Stripe Checkout
 			Yii::app()->controller->redirect($session->url);
 		} catch (Exception $e) {
-			$this->errorMessage = $e->getMessage();
-			Yii::log('Stripe Payment Error: ' . $e->getMessage(), CLogger::LEVEL_ERROR);
-			throw new CHttpException(500, 'Payment processing error');
+			$this->log('Stripe Payment Error: ' . $e->getMessage());
+			throw new CHttpException(500);
 		}
 	}
 
@@ -183,6 +182,7 @@ class XStripe extends CApplicationComponent
 
 		if (!$sessionId) {
 			$this->errorMessage = 'Missing session_id for payment validation.';
+			$this->log('Stripe Validation Error: ' . $this->errorMessage);
 			return false;
 		}
 
@@ -193,6 +193,7 @@ class XStripe extends CApplicationComponent
 			// The session contains a payment_intent if the payment succeeded or is pending
 			if (empty($session->payment_intent)) {
 				$this->errorMessage = 'No payment intent found for this session.';
+				$this->log('Stripe Validation Error: ' . $this->errorMessage);
 				return false;
 			}
 
@@ -203,11 +204,12 @@ class XStripe extends CApplicationComponent
 				return true;
 			} else {
 				$this->errorMessage = 'Payment not successful. Status: ' . $paymentIntent->status;
+				$this->log('Stripe Validation Error: ' . $this->errorMessage);
 				return false;
 			}
 		} catch (Exception $e) {
 			$this->errorMessage = $e->getMessage();
-			Yii::log('Stripe Validation Error: ' . $e->getMessage(), CLogger::LEVEL_ERROR);
+			$this->log('Stripe Validation Error: ' . $this->errorMessage);
 			return false;
 		}
 	}
@@ -223,5 +225,14 @@ class XStripe extends CApplicationComponent
 			return true;
 		else
 			return false;
+	}
+
+	/**
+	 * Logs a message.
+	 * @param string $message
+	 */
+	protected function log($message)
+	{
+		Yii::log(__CLASS__.' '.$message, CLogger::LEVEL_ERROR);
 	}
 }

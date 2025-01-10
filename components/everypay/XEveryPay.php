@@ -96,10 +96,10 @@ class XEveryPay extends CApplicationComponent
 	 */
 	public $forceAutoRequest;
 
-    /**
-     * @var array|null Stores the full decoded status response from EveryPay.
-     */
-    public $statusResponse=null;
+	/**
+	 * @var array|null Stores the full decoded status response from EveryPay.
+	 */
+	public $statusResponse=null;
 
 	/**
 	 * Unused properties to maintain parity with XStripe
@@ -185,9 +185,8 @@ class XEveryPay extends CApplicationComponent
 
 			if($curlError)
 			{
-				$this->errorMessage='EveryPay cURL error: ' . $curlError;
-				Yii::log($this->errorMessage, CLogger::LEVEL_ERROR);
-				throw new CHttpException(500, 'Payment processing error');
+				$this->log('EveryPay cURL error: '.$curlError);
+				throw new CHttpException(500);
 			}
 
 			// Parse JSON response
@@ -201,30 +200,20 @@ class XEveryPay extends CApplicationComponent
 			}
 			else
 			{
-				$this->errorMessage=isset($decoded['error_message'])
-					? $decoded['error_message']
-					: 'Could not create payment link.';
-
-				Yii::log(
-					'XEveryPay submitPayment error: ' . var_export($decoded, true).PHP_EOL.
-					'Request data: ' . var_export($requestData, true),
-					CLogger::LEVEL_ERROR
+				$this->log(
+					'Could not create payment link.'.PHP_EOL.
+					'Response data: '.var_export($responseData, true).PHP_EOL.
+					'Request data: '.var_export($requestData, true)
 				);
 
-				throw new CHttpException(500, 'Payment processing error');
+				throw new CHttpException(500);
 			}
 
 		}
 		catch(Exception $e)
 		{
-			$this->errorMessage=$e->getMessage();
-
-			Yii::log(
-				'XEveryPay submitPayment exception: ' . $e->getMessage(),
-				CLogger::LEVEL_ERROR
-			);
-
-			throw new CHttpException(500, 'Payment processing error');
+			$this->log('XEveryPay submitPayment exception: ' .$e->getMessage());
+			throw new CHttpException(500);
 		}
 	}
 
@@ -244,6 +233,7 @@ class XEveryPay extends CApplicationComponent
 		if(!$paymentReference)
 		{
 			$this->errorMessage='No payment_reference provided for validation.';
+			$this->log($this->errorMessage);
 			return false;
 		}
 
@@ -267,20 +257,20 @@ class XEveryPay extends CApplicationComponent
 			if($curlError)
 			{
 				$this->errorMessage='EveryPay cURL GET error: ' . $curlError;
-				Yii::log($this->errorMessage, CLogger::LEVEL_ERROR);
+				$this->log($this->errorMessage);
 				return false;
 			}
 
 			// Decode response
 			$decoded=json_decode($responseData, true);
-			
+
 			// Store response for webhook action
 			$this->statusResponse = $decoded;
 
 			if(!isset($decoded['payment_state']))
 			{
 				$this->errorMessage='Unexpected EveryPay status response: ' . var_export($decoded, true);
-				Yii::log($this->errorMessage, CLogger::LEVEL_ERROR);
+				$this->log($this->errorMessage);
 				return false;
 			}
 
@@ -292,6 +282,7 @@ class XEveryPay extends CApplicationComponent
 			else
 			{
 				$this->errorMessage='EveryPay Payment State: ' . $this->paymentState;
+				$this->log($this->errorMessage);
 				return false;
 			}
 
@@ -299,7 +290,7 @@ class XEveryPay extends CApplicationComponent
 		catch(Exception $e)
 		{
 			$this->errorMessage='Validate Payment Exception: ' . $e->getMessage();
-			Yii::log($this->errorMessage, CLogger::LEVEL_ERROR);
+			$this->log($this->errorMessage);
 			return false;
 		}
 	}
@@ -315,5 +306,14 @@ class XEveryPay extends CApplicationComponent
 			return true;
 		else
 			return false;
+	}
+
+	/**
+	 * Logs a message.
+	 * @param string $message
+	 */
+	protected function log($message)
+	{
+		Yii::log(__CLASS__.' '.$message, CLogger::LEVEL_ERROR);
 	}
 }
