@@ -19,16 +19,6 @@
  *         ),
  *     );
  * }
- *
- * public function handleEveryPayPaymentSuccess($data)
- * {
- *     // Handle successful payment logic here.
- * }
- *
- * public function handleEveryPayPaymentFailure()
- * {
- *     // Handle failure logic here.
- * }
  */
 class XEveryPayWebhookAction extends CAction
 {
@@ -68,6 +58,8 @@ class XEveryPayWebhookAction extends CAction
 	 */
 	public function run()
 	{
+		$webhookUid=uniqid('wh_', true);
+
 		// Read the raw POST body
 		$rawBody=@file_get_contents('php://input');
 
@@ -78,8 +70,12 @@ class XEveryPayWebhookAction extends CAction
 		// Check for required parameters
 		if(empty($decoded['payment_reference']))
 		{
-			$this->log('EveryPay webhook missing payment_reference');
-			$this->handleFailure();
+			$logMessage=
+				"Posted data is missing payment_reference: ".PHP_EOL.
+				"rawBody: ".$rawBody;
+
+			$this->log($logMessage);
+			$this->handleFailure($logMessage, $webhookUid);
 			http_response_code(400);
 			return;
 		}
@@ -93,7 +89,6 @@ class XEveryPayWebhookAction extends CAction
 		if(!$everyPay)
 		{
 			$this->log('No EveryPay component found with name '.$this->componentName);
-			$this->handleFailure();
 			http_response_code(500);
 			return;
 		}
@@ -103,7 +98,7 @@ class XEveryPayWebhookAction extends CAction
 		{
 			// Payment is settled
 			if($this->successCallback && method_exists($this->controller, $this->successCallback))
-				$this->controller->{$this->successCallback}($everyPay->statusResponse);
+				$this->controller->{$this->successCallback}($everyPay->statusResponse, $webhookUid);
 			else
 				$this->log('No successCallback defined or not callable');
 
@@ -112,10 +107,26 @@ class XEveryPayWebhookAction extends CAction
 		else
 		{
 			// Payment validation failed or not settled
-			$this->log('EveryPay payment validation failed: '.$everyPay->errorMessage);
-			$this->handleFailure();
+			$logMessage=
+				"EveryPay payment validation with EveryPay component failed: ".PHP_EOL.
+				"errorMessage: ".$everyPay->errorMessage.$rawBody.PHP_EOL.
+				"rawBody: ".$rawBody;
+
+			$this->log($logMessage);
+			$this->handleFailure($logMessage, $webhookUid);
 			http_response_code(200);
 		}
+	}
+
+	/**
+	 * Calls the failure callback if defined.
+	 * @param string $message
+	 * @param string $webhookUid
+	 */
+	protected function handleFailure($message, $webhookUid)
+	{
+		if($this->failureCallback && method_exists($this->controller, $this->failureCallback))
+			$this->controller->{$this->failureCallback}($message, $webhookUid);
 	}
 
 	/**
@@ -126,14 +137,5 @@ class XEveryPayWebhookAction extends CAction
 	{
 		if($this->log===true)
 			Yii::log(__CLASS__.' '.$message, $this->logLevel, $this->logCategory);
-	}
-
-	/**
-	 * Calls the failure callback if defined.
-	 */
-	protected function handleFailure()
-	{
-		if($this->failureCallback && method_exists($this->controller, $this->failureCallback))
-			$this->controller->{$this->failureCallback}();
 	}
 }
