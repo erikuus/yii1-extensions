@@ -270,8 +270,7 @@ class XEveryPay extends CApplicationComponent
 				return true;
 			else
 			{
-				$this->errorMessage='EveryPay Payment State: ' . $this->paymentState;
-				$this->log($this->errorMessage);
+				$this->errorMessage=Yii::t('XEveryPay.everypay', 'Payment not completed!');
 				return false;
 			}
 

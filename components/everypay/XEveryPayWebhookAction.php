@@ -108,11 +108,10 @@ class XEveryPayWebhookAction extends CAction
 		{
 			// Payment validation failed or not settled
 			$logMessage=
-				"EveryPay payment validation with EveryPay component failed: ".PHP_EOL.
-				"errorMessage: ".$everyPay->errorMessage.$rawBody.PHP_EOL.
+				"EveryPay payment validation failed: ".PHP_EOL.
+				"errorMessage: ".$everyPay->errorMessage.PHP_EOL.
 				"rawBody: ".$rawBody;
 
-			$this->log($logMessage);
 			$this->handleFailure($logMessage, $webhookUid);
 			http_response_code(200);
 		}
