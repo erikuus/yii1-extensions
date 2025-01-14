@@ -240,7 +240,7 @@ class XEveryPay extends CApplicationComponent
 			curl_setopt($ch, CURLOPT_USERPWD, $this->apiUsername . ':' . $this->apiSecret);
 
 			$responseData=curl_exec($ch);
-			$curlError   =curl_error($ch);
+			$curlError=curl_error($ch);
 			curl_close($ch);
 
 			if($curlError)
