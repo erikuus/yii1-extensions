@@ -19,6 +19,10 @@
  *         ),
  *     );
  * }
+ *
+ * @link https://www.stripe.com
+ * @author Erik Uus <erik.uus@gmail.com>
+ * @version 1.0.0
  */
 class XEveryPayWebhookAction extends CAction
 {
@@ -109,8 +113,7 @@ class XEveryPayWebhookAction extends CAction
 			// Payment validation failed or not settled
 			$logMessage=
 				"EveryPay payment validation failed: ".PHP_EOL.
-				"errorMessage: ".$everyPay->errorMessage.PHP_EOL.
-				"rawBody: ".$rawBody;
+				"errorMessage: ".$everyPay->errorMessage;
 
 			$this->handleFailure($logMessage, $webhookUid);
 			http_response_code(200);
