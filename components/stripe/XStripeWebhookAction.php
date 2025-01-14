@@ -27,28 +27,6 @@
  * }
  * ```
  *
- * In your controller:
- *
- * ```php
- * public function handlePostbackSuccess($event)
- * {
- *     // $event is a Stripe\Event object
- *     // Process the event as needed, for example:
- *     if($event->type === 'checkout.session.completed')
- *     {
- *         $session = $event->data->object;
- *         // Retrieve your custom data from metadata
- *         $session->metadata->payment_id
- *         // Update payment status in your database
- *     }
- * }
- *
- * public function handlePostbackFailure()
- * {
- *     // Handle failures, e.g., log or notify
- * }
- * ```
- *
  * @link https://www.stripe.com
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 1.0.0
@@ -100,6 +78,8 @@ class XStripeWebhookAction extends CAction
 	 */
 	public function run()
 	{
+		$webhookUid=uniqid('wh_', true);
+
 		// Read the request body
 		$body=@file_get_contents('php://input');
 
@@ -108,7 +88,8 @@ class XStripeWebhookAction extends CAction
 
 		if($sigHeader===null)
 		{
-			$this->handleFailure();
+			$logMessage='Missing signature HTTP_STRIPE_SIGNATURE';
+			$this->handleFailure($logMessage, $webhookUid);
 			return;
 		}
 
@@ -122,34 +103,38 @@ class XStripeWebhookAction extends CAction
 			);
 
 			// Successfully verified
-			$this->controller->{$this->successCallback}($event);
+			$this->controller->{$this->successCallback}($event, $webhookUid);
 			http_response_code(200);
 
 		}
 		catch(SignatureVerificationException $e)
 		{
 			// Invalid signature
-			$this->log('Signature verification failed: ' . $e->getMessage());
-			$this->handleFailure();
+			$logMessage='Signature verification failed: ' . $e->getMessage();
+			$this->log($logMessage);
+			$this->handleFailure($logMessage, $webhookUid);
 			http_response_code(400);
 
 		}
 		catch(Exception $e)
 		{
 			// Other errors
-			$this->log('Error handling Stripe webhook: ' . $e->getMessage());
-			$this->handleFailure();
+			$logMessage='Error handling Stripe webhook: ' . $e->getMessage();
+			$this->log($logMessage);
+			$this->handleFailure($logMessage, $webhookUid);
 			http_response_code(400);
 		}
 	}
 
 	/**
 	 * Handle failures by calling the failure callback if defined.
+	 * @param string $message
+	 * @param string $webhookUid
 	 */
-	protected function handleFailure()
+	protected function handleFailure($message, $webhookUid)
 	{
 		if($this->failureCallback && method_exists($this->controller, $this->failureCallback))
-			$this->controller->{$this->failureCallback}();
+			$this->controller->{$this->failureCallback}($message, $webhookUid);
 	}
 
 	/**
