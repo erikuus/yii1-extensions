@@ -39,12 +39,16 @@ class XVauHelpdesk extends CWidget
 	 */
 	public $lang;
 	/**
+	 * @var string the value of subject field in feedback form.
+	 */
+	public $subject;
+	/**
 	 * @var string the dev url (if set used instead _vauUrl)
 	 */
 	public $devUrl;
 
 	private $_cssClass='vauHelpdesk';
-	private $_vauUrl='http://www.ra.ee/vau/index.php/helpdesk/message/feedback?';
+	private $_vauUrl='https://www.ra.ee/vau/index.php/helpdesk/message/feedback?';
 
 	public function run()
 	{
@@ -55,6 +59,7 @@ class XVauHelpdesk extends CWidget
 
 		$urlParams=array(
 			'language'=>$this->lang,
+			'subject'=>$this->subject ? $this->subject : $this->controller->pageTitle,
 			'url'=>$this->controller->createAbsoluteUrl('',$_GET),
 			'dialog'=>1
 		);
