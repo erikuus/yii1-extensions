@@ -154,7 +154,7 @@ class XLeafletInputMap extends CInputWidget
 
         // Optional hint text
         if ($this->enableHintText) {
-            echo Yii::t('app', 'Draw a rectangle on the map (or edit/move it). The bounding box coordinates will be stored automatically.');
+            echo Yii::t(__CLASS__ . '.' . __CLASS__, 'Click the rectangle button to draw a box. Click the edit button to move or resize it.');
         }
 
         // The map container
@@ -165,9 +165,8 @@ class XLeafletInputMap extends CInputWidget
 
         // Clear link
         if ($this->enableClearMap) {
-            echo CHtml::link(Yii::t('app', 'Clear map'), '#', [
-                'onclick' => $id . '_clearMap(); return false;',
-                'style'   => 'margin-left:10px;'
+            echo CHtml::link(Yii::t(__CLASS__ . '.' . __CLASS__, 'Clear map'), '#', [
+                'onclick' => $id . '_clearMap(); return false;'
             ]);
         }
 
@@ -287,7 +286,7 @@ class XLeafletInputMap extends CInputWidget
         },
         edit: {
             featureGroup: drawnItems,
-            remove: true
+            remove: false
         }
     });
     map.addControl(drawControl);
