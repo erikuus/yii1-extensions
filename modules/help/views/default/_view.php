@@ -1,4 +1,4 @@
-<div class="prose">
+<div class="prose pr-4">
 	<h2>
 		<?php echo $model->{'title_'.Yii::app()->language}; ?>
 		<?php if($this->module->editOnPage): ?>
