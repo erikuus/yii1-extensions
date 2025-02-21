@@ -159,12 +159,17 @@ class XTipsy extends CWidget
 				$params['live']=false;
 
 			// GENERATE JS CODE
-			if(!empty($tipsyID))
+			if (!empty($tipsyID))
 			{
-				$jsCode="\$('".$tipsyID."').tipsy(".CJavaScript::encode($params).");";
-				$scriptList[]=$jsCode;
+				// Only initialize Tipsy if this is NOT a touch device
+				$jsCode = "
+					if (!('ontouchstart' in window)) {
+						$('{$tipsyID}').tipsy(" . CJavaScript::encode($params) . ");
+					}
+				";
+				$scriptList[] = $jsCode;
 			}
-		} //END foreach($items as $item)
+		}
 
 		if(!empty($scriptList))
 		{
