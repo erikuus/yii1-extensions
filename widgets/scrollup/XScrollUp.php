@@ -92,7 +92,7 @@ class XScrollUp extends CWidget
 	{
 		$options=(isset($this->options)) ? $this->options : array();
 
-		$js="$.scrollUp(".CJavaScript::encode($options).");";
+		$js = "if (!('ontouchstart' in window)) { $.scrollUp(" . CJavaScript::encode($options) . "); }";
 
 		Yii::app()->clientScript->registerScript('scrollup',$js,CClientScript::POS_READY);
 	}
