@@ -104,7 +104,7 @@ class XAlert extends CWidget
 			{
 				$message=Yii::app()->user->getFlash($key);
 				if(in_array($type, array_keys($this->types)))
-					$messages[]="<div class=\"{$this->boxCssClass} {$this->types[$type]}\">{$message}<a class=\"{$this->closeCssClass}\" href=\"\">{$this->closeContent}</a></div>";
+					$messages[]="<div class=\"{$this->boxCssClass} {$this->types[$type]}\">{$message}<a class=\"{$this->closeCssClass}\" href=\"\" aria-label=\"Close\">{$this->closeContent}</a></div>";
 				else
 					$messages[]=$message;
 			}
