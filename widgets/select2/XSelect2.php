@@ -186,22 +186,38 @@ class XSelect2 extends CInputWidget
 	 * will be included when using this widget.
 	 */
 	public $cssFile;
+
 	/**
 	 * @var array select2 options
 	 */
 	public $options=array();
+
 	/**
 	 * @var array CHtml::dropDownList $data param
 	 */
 	public $data=array();
+
 	/**
 	 * @var array javascript event handlers
 	 */
 	public $events=array();
+
 	/**
 	 * @var boolean should the items of a multiselect list be sortable using jQuery UI
 	 */
 	public $sortable=false;
+	/**
+	 * @var string|null CSS class to be added to the Select2 container.
+	 * Useful for applying compact or custom styling like 'select2-compact'.
+	 * If null, no class is added to the container.
+	 */
+	public $compactClass;
+
+	/**
+	 * @var string|null Additional CSS file to be registered for compact or custom styling.
+	 * If null, no additional file is registered. You can use this to include a file like 'select2-compact.css'.
+	 */
+	public $compactCssFile;
 
 	/**
 	 * Initializes the widget.
@@ -295,6 +311,16 @@ SCRIPT;
 		if($this->sortable)
 			$script.=$sortable;
 
+		if ($this->compactClass)
+		{
+			$script.="jQuery('#{$id}').select2('container').addClass('{$this->compactClass}');\n";
+
+			// When dropdown opens, also apply class to the drop
+			$script .= "jQuery('#{$id}').live('open', function() {
+				jQuery('.select2-drop').addClass('{$this->compactClass}');
+			});\n";
+		}
+
 		if(Yii::app()->request->isAjaxRequest)
 			echo CHtml::script($script);
 		else
@@ -309,11 +335,14 @@ SCRIPT;
 		$cs=Yii::app()->clientScript;
 		$assets=Yii::app()->assetManager->publish(dirname(__FILE__).DIRECTORY_SEPARATOR.'assets');
 
-		// register css file
+		// register css files
 		if($this->cssFile===null)
 			$cs->registerCssFile($assets.'/select2.css');
 		elseif($this->cssFile!==false)
 			$cs->registerCssFile($this->cssFile);
+
+		if($this->compactCssFile)
+			$cs->registerCssFile($this->compactCssFile);
 
 		// register js files
 		if($this->sortable)
