@@ -333,8 +333,8 @@ class XAis3Form extends CFormModel
 
 	/**
 	 * Find item data alongside with storage info
-	 * @param string item reference code
-	 * @return array item and storage data
+	 * @param mixed $reference unit reference code(s)
+	 * @return array (or multiple array) item and storage data
 	 * Example:
 	 * array (
 	 *  [leidandmed] => EAA.308.2.118
@@ -348,6 +348,20 @@ class XAis3Form extends CFormModel
 	 */
 	public function findItemWithStorage($reference)
 	{
+		if(is_array($reference))
+		{
+			array_walk($reference, array($this, 'walkQuote'));
+			$list = implode(',',$reference);
+			$list = mb_strtolower($list);
+			$condition = "AND du.fns_search IN ($list)";
+			$queryMethod='queryAll';
+		}
+		else
+		{
+			$condition = "AND du.fns_search = lower({$this->quote($reference)})";
+			$queryMethod='queryRow';
+		}
+
 		$sql = "
 			SELECT
 				du.fns              as leidandmed,
@@ -361,10 +375,10 @@ class XAis3Form extends CFormModel
 			FROM api_description_unit_mv du
 				LEFT JOIN description_unit_storage_mv dus on du.id = dus.description_unit_id
 			WHERE du.unit_level < 7
-				AND du.fns_search = lower({$this->quote($reference)});
+			$condition
 		";
 
-		return Yii::app()->ais3db->cache(self::CACHE_DURATION)->createCommand($sql)->queryRow();
+		return Yii::app()->ais3db->cache(self::CACHE_DURATION)->createCommand($sql)->{$queryMethod}();
 	}
 
 	/**
