@@ -20,7 +20,7 @@
  *     );
  * }
  *
- * @link https://www.stripe.com
+ * @link https://support.every-pay.com/
  * @author Erik Uus <erik.uus@gmail.com>
  * @version 1.0.0
  */
@@ -66,6 +66,13 @@ class XEveryPayWebhookAction extends CAction
 
 		// Read the raw POST body
 		$rawBody=@file_get_contents('php://input');
+
+		// If there's no body at all, just ignore it (204 No Content)
+		if(empty(trim($rawBody)))
+		{
+			http_response_code(204);
+			return;
+		}
 
 		// Parse the form-encoded data
 		$decoded=array();
