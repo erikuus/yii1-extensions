@@ -67,13 +67,6 @@ class XEveryPayWebhookAction extends CAction
 		// Read the raw POST body
 		$rawBody=@file_get_contents('php://input');
 
-		// If there's no body at all, just ignore it (204 No Content)
-		if(empty(trim($rawBody)))
-		{
-			http_response_code(204);
-			return;
-		}
-
 		// Parse the form-encoded data
 		$decoded=array();
 		parse_str($rawBody, $decoded);
@@ -85,7 +78,7 @@ class XEveryPayWebhookAction extends CAction
 				"Posted data is missing payment_reference: ".PHP_EOL.
 				"rawBody: ".$rawBody;
 
-			$this->log($logMessage);
+			//$this->log($logMessage);
 			$this->handleFailure($logMessage, $webhookUid);
 			http_response_code(400);
 			return;
