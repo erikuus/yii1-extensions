@@ -82,7 +82,7 @@ class Email extends CApplicationComponent {
 	/**
 	 * @var string MTA command line parameter. It is useful when setting the correct Return-Path header when using sendmail.
 	 */
-	public $additionalParams='-fadmin.vau@ra.ee';
+	public $additionalParams='-fnoreply.vau@ra.ee';
 	/**
 	 * @var string the Carbon Copy - list of email's that should receive a copy of the email
 	 * The Recipient WILL be able to see this list.
