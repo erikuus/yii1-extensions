@@ -78,7 +78,11 @@ class Email extends CApplicationComponent {
 	 * @var string the return-path address
 	 */
 	public $returnPath;
-
+	/**
+	 * @var string contact email address to display in message body for user inquiries.
+	 * This is NOT added to email headers, only appended to the message body.
+	 */
+	public $contactEmail;
 	/**
 	 * @var string MTA command line parameter. It is useful when setting the correct Return-Path header when using sendmail.
 	 */
@@ -175,9 +179,34 @@ class Email extends CApplicationComponent {
 				$message = $arg1;
 		}
 
+		// Append contact email footer if set
+		if ($this->contactEmail !== null)
+			$message = $this->appendContactFooter($message);
+
 		//process 'to' attribute
 		$to = $this->processAddresses($this->to);
 		return $to ? $this->mail($to, $this->subject, $message) : false;
+	}
+
+	/**
+	 * Appends contact email footer to message body
+	 * @param string $message the original message
+	 * @return string message with contact footer
+	 */
+	private function appendContactFooter($message)
+	{
+		$contactText = Yii::t('Email.email', 'If you have any questions, please contact us at');
+		
+		if ($this->type === 'text/html')
+		{
+			$footer = '<br><br>---<br><br><p>' . $contactText . ': <a href="mailto:' . 
+					  CHtml::encode($this->contactEmail) . '">' . 
+					  CHtml::encode($this->contactEmail) . '</a></p>';
+		}
+		else
+			$footer = "\n\n---\n\n" . $contactText . ': ' . $this->contactEmail;
+		
+		return $message . $footer;
 	}
 
 	private function mail($to, $subject, $message)
