@@ -180,8 +180,12 @@ class Email extends CApplicationComponent {
 		}
 
 		// Append contact email footer if set
-		if ($this->contactEmail !== null)
+		if($this->contactEmail !== null)
 			$message = $this->appendContactFooter($message);
+
+		// Default Reply-To to contactEmail if not set
+		if($this->replyTo === null && $this->contactEmail !== null)
+			$this->replyTo = $this->contactEmail;
 
 		//process 'to' attribute
 		$to = $this->processAddresses($this->to);
@@ -197,7 +201,7 @@ class Email extends CApplicationComponent {
 	{
 		$contactText = Yii::t('Email.email', 'If you have any questions, please contact us at');
 		
-		if ($this->type === 'text/html')
+		if($this->type === 'text/html')
 		{
 			$footer = '<br><br>---<br><br><p>' . $contactText . ': <a href="mailto:' . 
 					  CHtml::encode($this->contactEmail) . '">' . 
