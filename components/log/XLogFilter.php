@@ -27,6 +27,7 @@
 class XLogFilter extends CLogFilter
 {
 	public $ignoreCategories; // =array('category','category.*','some.category.tree.*');
+	public $ignorePatterns; // =array('SQLSTATE[23505]', '/regex pattern/');
 
 	public function filter(&$logs)
 	{
@@ -36,21 +37,51 @@ class XLogFilter extends CLogFilter
 			foreach($logs as $logKey=>$log)
 			{
 				$logCategory=$log[2]; //log category
-				foreach($this->ignoreCategories as $nocat)
+				$logMessage=$log[0]; //log message
+				
+				// Check if category should be ignored
+				if($this->ignoreCategories)
 				{
-					// Exact match
-					if($logCategory===$nocat)
+					foreach($this->ignoreCategories as $nocat)
 					{
-						unset($logs[$logKey]);
-						continue;
-					}
-					// Wildcard match
-					else if(strpos($nocat,'.*')!==false)
-					{
-						$nocat=str_replace('.*','',$nocat).'.'; // remove asterix item from array and add dot at the and
-						if(strpos($logCategory.'.',$nocat)!==false)
+						// Exact match
+						if($logCategory===$nocat)
 						{
 							unset($logs[$logKey]);
+							continue 2; // Skip to next log entry
+						}
+						// Wildcard match
+						else if(strpos($nocat,'.*')!==false)
+						{
+							$nocat=str_replace('.*','',$nocat).'.'; // remove asterix item from array and add dot at the and
+							if(strpos($logCategory.'.',$nocat)!==false)
+							{
+								unset($logs[$logKey]);
+								continue 2; // Skip to next log entry
+							}
+						}
+					}
+				}
+				
+				// Check if message matches ignore patterns
+				if($this->ignorePatterns)
+				{
+					foreach($this->ignorePatterns as $pattern)
+					{
+						// Regex pattern (starts and ends with /)
+						if(preg_match('/^\/.*\/$/', $pattern))
+						{
+							if(preg_match($pattern, $logMessage))
+							{
+								unset($logs[$logKey]);
+								continue 2; // Skip to next log entry
+							}
+						}
+						// Simple substring match
+						else if(strpos($logMessage, $pattern) !== false)
+						{
+							unset($logs[$logKey]);
+							continue 2; // Skip to next log entry
 						}
 					}
 				}
