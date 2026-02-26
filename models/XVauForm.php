@@ -67,7 +67,7 @@ class XVauForm extends CFormModel
 
 	/**
 	 * @param string item reference code
-	 * @return boolean whether item has access restriction
+	 * @return boolean whether item has public access
 	 */
 	public function checkBlacklist($reference)
 	{
@@ -144,7 +144,7 @@ class XVauForm extends CFormModel
 	{
 		return array(
 			self::PLACE_IN_REPOSITORY=>'Hoidlas',
-			self::PLACE_IN_WORKROOM=>'Tï¿½ï¿½ruumis',
+			self::PLACE_IN_WORKROOM=>'Tööruumis',
 			self::PLACE_PICKUP_REPOSITORY_READINGROOM=>'H<>US',
 			self::PLACE_IN_READINGROOM=>'Uurimissaalis',
 			self::PLACE_PICKUP_IAL_REPOSITORY=>'H<>KL',
