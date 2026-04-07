@@ -204,8 +204,28 @@ class XDbCriteria extends CDbCriteria
 	 */
 	public function formatSearch($str, $symbols=false, $forceContain=false)
 	{
+		$str=mb_strtolower($str);
+
 		if($symbols===true)
-			$str=strtr($str, array('*'=>'%','?'=>'_'));
-		return $forceContain===true ? '%'.mb_strtolower($str).'%' : mb_strtolower($str);
+		{
+			$parts=preg_split('//u',$str,-1,PREG_SPLIT_NO_EMPTY);
+			$escaped='';
+
+			foreach($parts as $part)
+			{
+				if($part==='*')
+					$escaped.='%';
+				elseif($part==='?')
+					$escaped.='_';
+				elseif($part==='\\' || $part==='%' || $part==='_')
+					$escaped.='\\'.$part;
+				else
+					$escaped.=$part;
+			}
+
+			$str=$escaped;
+		}
+
+		return $forceContain===true ? '%'.$str.'%' : $str;
 	}
 }
