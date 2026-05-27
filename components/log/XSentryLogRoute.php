@@ -386,7 +386,7 @@ class XSentryLogRoute extends CLogRoute
 	{
 		$autoloadPath=$this->vendorAutoloadPath;
 		if($autoloadPath===null || $autoloadPath==='')
-			$autoloadPath=dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR.'vendors'.DIRECTORY_SEPARATOR.'autoload.php';
+			$autoloadPath=dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'autoload.php';
 
 		if(is_string($autoloadPath) && file_exists($autoloadPath))
 			require_once $autoloadPath;

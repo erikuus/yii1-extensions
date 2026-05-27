@@ -4,7 +4,7 @@
     "stripe/stripe-php": "16.3.0"
   },
   "config": {
-    "vendor-dir": "vendors",
+    "vendor-dir": "vendor",
     "platform": {
       "php": "5.6.31"
     }
