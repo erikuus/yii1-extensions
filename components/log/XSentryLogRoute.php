@@ -116,9 +116,11 @@ class XSentryLogRoute extends CLogRoute
 	 */
 	public $cache;
 	public $cacheKeyPrefix='sentry.logroute.';
+	public $localFailureLogPath;
 
 	private static $_sdkInitialized=false;
 	private static $_client;
+	private $_lastDispatchFailure;
 
 	/**
 	 * Coerce config into predictable arrays and integers before the first flush.
@@ -309,31 +311,46 @@ class XSentryLogRoute extends CLogRoute
 	 */
 	protected function dispatchPayloadSafely($payload)
 	{
+		$this->_lastDispatchFailure=null;
+
 		try
 		{
 			if(!$this->dispatchPayload($payload))
 			{
 				$this->rollbackThrottleReservation($payload);
-				$this->reportDispatchFailure(new CException('Sentry SDK bootstrap failed.'));
+				$failureContext=$this->consumeLastDispatchFailure();
+				$this->reportDispatchFailure(
+					new CException('Sentry dispatch returned no event id.'),
+					$failureContext
+				);
 			}
 		}
 		catch(Exception $e)
 		{
 			$this->rollbackThrottleReservation($payload);
-			$this->reportDispatchFailure($e);
+			$this->reportDispatchFailure($e,$this->consumeLastDispatchFailure());
 		}
 	}
 
-	protected function reportDispatchFailure($exception)
+	protected function reportDispatchFailure($exception,$context=null)
 	{
-		error_log('XSentryLogRoute dispatch failed: '.$exception->getMessage());
+		$message='XSentryLogRoute dispatch failed: '.$exception->getMessage();
+		if(is_string($context) && $context!=='')
+			$message.=' | '.$context;
+
+		error_log($message);
+		$this->writeLocalFailureLog($message);
 	}
 
 	protected function dispatchPayload($payload)
 	{
 		$client=$this->bootstrapSdk();
 		if(!$client)
+		{
+			if($this->_lastDispatchFailure===null)
+				$this->_lastDispatchFailure=$this->describeBootstrapFailure();
 			return false;
+		}
 
 		$data=array(
 			'level'=>$payload['sentryLevel'],
@@ -352,8 +369,13 @@ class XSentryLogRoute extends CLogRoute
 			$data['environment']=$this->environment;
 
 		$eventId=$client->captureMessage($payload['message'],array(),$data,false,null);
+		if($eventId===null)
+		{
+			$this->_lastDispatchFailure=$this->describeClientFailure($client,$payload);
+			return false;
+		}
 
-		return $eventId!==null;
+		return true;
 	}
 
 	protected function bootstrapSdk()
@@ -371,10 +393,16 @@ class XSentryLogRoute extends CLogRoute
 		if(!class_exists('Raven_Client',false))
 			$this->loadVendorAutoload();
 		if(!class_exists('Raven_Client'))
+		{
+			$this->_lastDispatchFailure=$this->describeBootstrapFailure();
 			return false;
+		}
 		$this->ensureLegacyRavenClientClass();
 		if($this->dsn===null || $this->dsn==='')
+		{
+			$this->_lastDispatchFailure='Sentry DSN is empty.';
 			return false;
+		}
 
 		$options=$this->clientOptions;
 
@@ -388,6 +416,8 @@ class XSentryLogRoute extends CLogRoute
 			$options['sample_rate']=(float)$this->sampleRate;
 		if($this->serverName!==null && $this->serverName!=='')
 			$options['name']=$this->serverName;
+		if(!isset($options['timeout']) || (float)$options['timeout']<=0)
+			$options['timeout']=10;
 
 		if(!isset($options['curl_method']) || $options['curl_method']==='')
 			$options['curl_method']='sync';
@@ -444,12 +474,101 @@ class XSentryRavenClient extends Raven_Client
 
 	protected function loadVendorAutoload()
 	{
+		$autoloadPath=$this->resolveVendorAutoloadPath();
+
+		if(is_string($autoloadPath) && file_exists($autoloadPath))
+			require_once $autoloadPath;
+	}
+
+	protected function resolveVendorAutoloadPath()
+	{
 		$autoloadPath=$this->vendorAutoloadPath;
 		if($autoloadPath===null || $autoloadPath==='')
 			$autoloadPath=dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'autoload.php';
 
-		if(is_string($autoloadPath) && file_exists($autoloadPath))
-			require_once $autoloadPath;
+		return $autoloadPath;
+	}
+
+	protected function describeBootstrapFailure()
+	{
+		$details=array();
+		$autoloadPath=$this->resolveVendorAutoloadPath();
+
+		if($this->dsn===null || $this->dsn==='')
+			$details[]='dsn=missing';
+		if(!class_exists('Raven_Client',false))
+			$details[]='Raven_Client not loaded; autoload='.$autoloadPath.' '.(file_exists($autoloadPath) ? 'exists' : 'missing');
+
+		if(empty($details))
+			$details[]='unknown bootstrap failure';
+
+		return implode('; ',$details);
+	}
+
+	protected function describeClientFailure($client,$payload)
+	{
+		$details=array(
+			'category='.(isset($payload['category']) ? $payload['category'] : 'application'),
+			'fingerprint='.(isset($payload['fingerprint']) ? $payload['fingerprint'] : 'unknown'),
+		);
+
+		if(is_object($client) && method_exists($client,'getLastError'))
+		{
+			$lastError=$client->getLastError();
+			if(is_string($lastError) && $lastError!=='')
+				$details[]='sdk_error='.$lastError;
+		}
+
+		if(is_object($client) && method_exists($client,'getLastSentryError'))
+		{
+			$lastSentryError=$client->getLastSentryError();
+			if($lastSentryError!==null)
+			{
+				$encoded=@json_encode($lastSentryError);
+				$details[]='sentry_response='.($encoded!==false ? $encoded : var_export($lastSentryError,true));
+			}
+		}
+
+		$details[]='captureMessage returned null';
+
+		return implode('; ',$details);
+	}
+
+	protected function consumeLastDispatchFailure()
+	{
+		$failure=$this->_lastDispatchFailure;
+		$this->_lastDispatchFailure=null;
+
+		return $failure;
+	}
+
+	protected function writeLocalFailureLog($message)
+	{
+		$logPath=$this->resolveLocalFailureLogPath();
+		if($logPath===null || $logPath==='')
+			return;
+
+		$dir=dirname($logPath);
+		if(!is_dir($dir) || !is_writable($dir))
+			return;
+
+		$line=gmdate('Y-m-d H:i:s').' UTC '.$message.PHP_EOL;
+		@file_put_contents($logPath,$line,FILE_APPEND);
+	}
+
+	protected function resolveLocalFailureLogPath()
+	{
+		if(is_string($this->localFailureLogPath) && $this->localFailureLogPath!=='')
+			return $this->localFailureLogPath;
+
+		if(Yii::app()===null)
+			return null;
+
+		$runtimePath=Yii::app()->getRuntimePath();
+		if(!is_string($runtimePath) || $runtimePath==='')
+			return null;
+
+		return $runtimePath.DIRECTORY_SEPARATOR.'xsentry-route.log';
 	}
 
 	/**
