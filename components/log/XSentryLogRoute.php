@@ -288,6 +288,13 @@ class XSentryLogRoute extends CLogRoute
 		$cache->set($key,$state,max(1,$state['expires_at']-$now));
 
 		$payload['throttle']=$state;
+		if($decision!=='suppress')
+			$payload['_throttleReservation']=array(
+				'cache'=>$cache,
+				'key'=>$key,
+				'decision'=>$decision,
+				'state'=>$state,
+			);
 
 		return array($decision,$payload);
 	}
@@ -304,10 +311,15 @@ class XSentryLogRoute extends CLogRoute
 	{
 		try
 		{
-			$this->dispatchPayload($payload);
+			if(!$this->dispatchPayload($payload))
+			{
+				$this->rollbackThrottleReservation($payload);
+				$this->reportDispatchFailure(new CException('Sentry SDK bootstrap failed.'));
+			}
 		}
 		catch(Exception $e)
 		{
+			$this->rollbackThrottleReservation($payload);
 			$this->reportDispatchFailure($e);
 		}
 	}
@@ -339,9 +351,9 @@ class XSentryLogRoute extends CLogRoute
 		if($this->environment!==null && $this->environment!=='')
 			$data['environment']=$this->environment;
 
-		$client->captureMessage($payload['message'],array(),$data,false,null);
+		$eventId=$client->captureMessage($payload['message'],array(),$data,false,null);
 
-		return true;
+		return $eventId!==null;
 	}
 
 	protected function bootstrapSdk()
@@ -360,6 +372,7 @@ class XSentryLogRoute extends CLogRoute
 			$this->loadVendorAutoload();
 		if(!class_exists('Raven_Client'))
 			return false;
+		$this->ensureLegacyRavenClientClass();
 		if($this->dsn===null || $this->dsn==='')
 			return false;
 
@@ -376,10 +389,57 @@ class XSentryLogRoute extends CLogRoute
 		if($this->serverName!==null && $this->serverName!=='')
 			$options['name']=$this->serverName;
 
-		self::$_client=new Raven_Client($this->dsn,$options);
+		if(!isset($options['curl_method']) || $options['curl_method']==='')
+			$options['curl_method']='sync';
+
+		self::$_client=new XSentryRavenClient($this->dsn,$options);
 		self::$_sdkInitialized=true;
 
 		return self::$_client;
+	}
+
+	protected function ensureLegacyRavenClientClass()
+	{
+		if(class_exists('XSentryRavenClient',false))
+			return;
+
+		eval('
+class XSentryRavenClient extends Raven_Client
+{
+	public function send(&$data)
+	{
+		if(is_callable($this->send_callback)
+			&& call_user_func_array($this->send_callback,array(&$data))===false)
+			return false;
+
+		if(!$this->server)
+			return false;
+
+		if($this->transport)
+			return call_user_func($this->transport,$this,$data);
+
+		if(rand(1,100)/100.0 > $this->sample_rate)
+			return false;
+
+		$message=$this->encode($data);
+		$headers=array(
+			\'User-Agent\'=>static::getUserAgent(),
+			\'X-Sentry-Auth\'=>$this->getAuthHeader(),
+			\'Content-Type\'=>\'application/octet-stream\',
+		);
+
+		if($this->curl_method===\'async\')
+		{
+			$this->_curl_handler->enqueue($this->server,$message,$headers);
+			return true;
+		}
+
+		if($this->curl_method===\'exec\')
+			return $this->send_http_asynchronous_curl_exec($this->server,$message,$headers);
+
+		return $this->send_http_synchronous($this->server,$message,$headers);
+	}
+}');
 	}
 
 	protected function loadVendorAutoload()
@@ -626,6 +686,15 @@ class XSentryLogRoute extends CLogRoute
 			$decision='send';
 		elseif(!empty($result['summary_due']))
 			$decision='send_summary';
+		if($decision!=='suppress')
+			$payload['_throttleReservation']=array(
+				'cache'=>$cache,
+				'key'=>$key,
+				'physical_key'=>$result['physical_key'],
+				'decision'=>$decision,
+				'state'=>$state,
+				'dbcache'=>true,
+			);
 
 		return array($decision,$payload);
 	}
@@ -664,6 +733,7 @@ class XSentryLogRoute extends CLogRoute
 				return array(
 					'state'=>$state,
 					'summary_due'=>$summaryDue,
+					'physical_key'=>$physicalKey,
 				);
 			}
 			catch(CDbException $e)
@@ -685,7 +755,110 @@ class XSentryLogRoute extends CLogRoute
 				'summary_sent'=>false,
 			),
 			'summary_due'=>false,
+			'physical_key'=>$physicalKey,
 		);
+	}
+
+	protected function rollbackThrottleReservation($payload)
+	{
+		if(!isset($payload['_throttleReservation']) || !is_array($payload['_throttleReservation']))
+			return;
+
+		$reservation=$payload['_throttleReservation'];
+
+		try
+		{
+			if(!empty($reservation['dbcache']))
+				$this->rollbackDbCacheThrottleReservation($reservation);
+			else
+				$this->rollbackCacheThrottleReservation($reservation);
+		}
+		catch(Exception $e)
+		{
+			error_log('XSentryLogRoute throttle rollback failed: '.$e->getMessage());
+		}
+	}
+
+	protected function rollbackCacheThrottleReservation($reservation)
+	{
+		if(empty($reservation['cache']) || !is_object($reservation['cache']) || empty($reservation['key']) || empty($reservation['state']))
+			return;
+
+		$cache=$reservation['cache'];
+		$key=$reservation['key'];
+		$state=$cache->get($key);
+		if(!is_array($state) || empty($state['expires_at']))
+			return;
+		if((int)$state['expires_at']!==(int)$reservation['state']['expires_at'])
+			return;
+		if(empty($state['count']) || (int)$state['count']<1)
+			return;
+
+		$state['count']=max(0,(int)$state['count']-1);
+		if($reservation['decision']==='send_summary')
+			$state['summary_sent']=false;
+
+		if($state['count']===0 && method_exists($cache,'delete'))
+			$cache->delete($key);
+		else
+			$cache->set($key,$state,max(1,(int)$state['expires_at']-$this->currentTime()));
+	}
+
+	protected function rollbackDbCacheThrottleReservation($reservation)
+	{
+		if(empty($reservation['cache']) || !is_object($reservation['cache']) || empty($reservation['physical_key']) || empty($reservation['state']))
+			return;
+
+		$cache=$reservation['cache'];
+		$db=$cache->getDbConnection();
+		$db->setActive(true);
+		$driver=$db->getDriverName();
+		$tableName=$cache->cacheTableName;
+		$physicalKey=$reservation['physical_key'];
+
+		for($attempt=0;$attempt<3;$attempt++)
+		{
+			$transaction=$this->beginThrottleTransaction($db,$driver);
+
+			try
+			{
+				$row=$this->loadThrottleRow($db,$tableName,$physicalKey,$driver);
+				$state=$this->extractThrottleStateFromRowAtTime($cache,$row,$this->currentTime());
+				if((int)$state['expires_at']!==(int)$reservation['state']['expires_at'])
+				{
+					$this->commitThrottleTransaction($db,$transaction,$driver);
+					return;
+				}
+				if(empty($state['count']) || (int)$state['count']<1)
+				{
+					$this->commitThrottleTransaction($db,$transaction,$driver);
+					return;
+				}
+
+				$state['count']=max(0,(int)$state['count']-1);
+				if($reservation['decision']==='send_summary')
+					$state['summary_sent']=false;
+
+				if($state['count']===0)
+					$this->deleteThrottleStateRow($db,$tableName,$physicalKey);
+				else
+					$this->storeThrottleStateRow($db,$tableName,$physicalKey,$cache,$state,$state['expires_at'],true);
+
+				$this->commitThrottleTransaction($db,$transaction,$driver);
+				return;
+			}
+			catch(CDbException $e)
+			{
+				$this->rollbackThrottleTransaction($db,$transaction,$driver);
+				if($attempt===2)
+					throw $e;
+			}
+			catch(Exception $e)
+			{
+				$this->rollbackThrottleTransaction($db,$transaction,$driver);
+				throw $e;
+			}
+		}
 	}
 
 	protected function beginThrottleTransaction($db,$driver)
@@ -778,6 +951,11 @@ class XSentryLogRoute extends CLogRoute
 		$command->bindValue(':expire',$params[':expire']);
 		$command->bindValue(':value',$params[':value'],PDO::PARAM_LOB);
 		$command->execute();
+	}
+
+	protected function deleteThrottleStateRow($db,$tableName,$physicalKey)
+	{
+		$db->createCommand('DELETE FROM '.$tableName.' WHERE id=:id')->execute(array(':id'=>$physicalKey));
 	}
 
 	protected function buildDbCacheKey($cache,$logicalKey)
