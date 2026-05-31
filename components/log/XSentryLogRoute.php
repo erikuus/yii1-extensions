@@ -21,6 +21,23 @@
  *             'throttleWindowSeconds' => 300,
  *             'throttleMaxInitialEvents' => 1,
  *             'summaryThreshold' => 25,
+ *             // Optional: add app-specific fingerprint normalization when one
+ *             // root cause still fragments into many Sentry issues because the
+ *             // final log message contains variable payload details. Keep the
+ *             // raw message in the event for investigation, but collapse the
+ *             // unstable part in the fingerprint headline.
+ *             //
+ *             // Example: PostgreSQL "Character not in repertoire" failures may
+ *             // differ only by the invalid UTF-8 byte sequence. After the
+ *             // shared built-ins run, those suffixes look like `{hex}` tokens.
+ *             // Replacing the full byte list with one placeholder keeps the
+ *             // same incident grouped as one Sentry issue instead of creating
+ *             // separate issues for `0xbf`, `0xc0 0xa7`, `0xf0 0x27 0x27 0xf0`,
+ *             // and similar variants.
+ *             'fingerprintNormalizePatterns' => array(
+ *                 '/invalid byte sequence for encoding "{string}":(?: {hex})+/i'
+ *                     => 'invalid byte sequence for encoding "{string}": {byte_sequence}',
+ *             ),
  *             'dsn' => 'https://example@example.ingest.sentry.io/1',
  *             'environment' => 'prod',
  *             'release' => 'aadresslehed@2026.05.19',
@@ -106,6 +123,10 @@ class XSentryLogRoute extends CLogRoute
 	 * Chooses what makes two log records the "same issue" for throttling/grouping.
 	 */
 	public $fingerprintStrategy='category_message';
+	/**
+	 * Optional regex replacements appended after the built-in fingerprint normalizers.
+	 */
+	public $fingerprintNormalizePatterns=array();
 
 	/**
 	 * Application cache component used to share suppression state across workers.
@@ -121,6 +142,7 @@ class XSentryLogRoute extends CLogRoute
 	private static $_sdkInitialized=false;
 	private static $_client;
 	private $_lastDispatchFailure;
+	private $_validatedFingerprintNormalizePatterns=array();
 
 	/**
 	 * Coerce config into predictable arrays and integers before the first flush.
@@ -135,6 +157,7 @@ class XSentryLogRoute extends CLogRoute
 		$this->throttleWindowSeconds=max(0,(int)$this->throttleWindowSeconds);
 		$this->throttleMaxInitialEvents=max(1,(int)$this->throttleMaxInitialEvents);
 		$this->summaryThreshold=max(0,(int)$this->summaryThreshold);
+		$this->_validatedFingerprintNormalizePatterns=$this->normalizeFingerprintNormalizePatterns($this->fingerprintNormalizePatterns);
 	}
 
 	protected function processLogs($logs)
@@ -613,15 +636,82 @@ class XSentryRavenClient extends Raven_Client
 	protected function normalizeMessage($message)
 	{
 		$message=$this->extractFingerprintHeadline($message);
-		// Replace unstable values that would otherwise turn one broken code path
-		// into thousands of unique fingerprints.
-		$message=preg_replace('#\bin\s+/[^:]+:\d+\b#',' in {path}:{line}',$message);
+		$message=$this->applyFingerprintNormalizePatterns($message,$this->getBuiltInFingerprintNormalizePatterns());
+		$message=$this->applyFingerprintNormalizePatterns($message,$this->_validatedFingerprintNormalizePatterns);
 		$message=preg_replace('/\s+/',' ',trim($message));
-		$message=preg_replace('/\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/i','{uuid}',$message);
-		$message=preg_replace('/\b0x[0-9a-f]+\b/i','{hex}',$message);
-		$message=preg_replace('/\b\d{5,}\b/','{int}',$message);
 
 		return $message;
+	}
+
+	protected function getBuiltInFingerprintNormalizePatterns()
+	{
+		return array(
+			'#\bin\s+/[^:]+:\d+\b#' => ' in {path}:{line}',
+			'/\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/i' => '{uuid}',
+			'/\b0x[0-9a-f]+\b/i' => '{hex}',
+			'/\b\d{5,}\b/' => '{int}',
+			'/"[^"\r\n]{1,200}"/' => '"{string}"',
+			"/'[^'\r\n]{1,200}'/" => "'{string}'",
+			'/\b(?=[[:alnum:]_\/+=-]{12,}\b)(?:(?=[[:alnum:]_\/+=-]*[0-9])(?=[[:alnum:]_\/+=-]*[[:alpha:]])|(?=[[:alnum:]_\/+=-]*[\/+=-]))[[:alnum:]_\/+=-]+\b/' => '{token}',
+		);
+	}
+
+	protected function normalizeFingerprintNormalizePatterns($patterns)
+	{
+		$normalized=array();
+		if(empty($patterns))
+			return $normalized;
+
+		if(!is_array($patterns))
+		{
+			$this->reportFingerprintNormalizationWarning('fingerprintNormalizePatterns must be an array.');
+			return $normalized;
+		}
+
+		foreach($patterns as $pattern=>$replacement)
+		{
+			if(!is_string($pattern) || $pattern==='')
+			{
+				$this->reportFingerprintNormalizationWarning('Skipped fingerprint normalization rule with a non-string pattern key.');
+				continue;
+			}
+			if(!$this->isValidFingerprintNormalizePattern($pattern))
+			{
+				$this->reportFingerprintNormalizationWarning('Skipped invalid fingerprint normalization regex: '.$pattern);
+				continue;
+			}
+			if(is_array($replacement) || is_object($replacement))
+			{
+				$this->reportFingerprintNormalizationWarning('Skipped fingerprint normalization rule with a non-scalar replacement for pattern: '.$pattern);
+				continue;
+			}
+
+			$normalized[$pattern]=(string)$replacement;
+		}
+
+		return $normalized;
+	}
+
+	protected function isValidFingerprintNormalizePattern($pattern)
+	{
+		return @preg_match($pattern,'')!==false;
+	}
+
+	protected function applyFingerprintNormalizePatterns($message,$patterns)
+	{
+		foreach($patterns as $pattern=>$replacement)
+		{
+			$normalized=preg_replace($pattern,$replacement,$message);
+			if($normalized!==null)
+				$message=$normalized;
+		}
+
+		return $message;
+	}
+
+	protected function reportFingerprintNormalizationWarning($message)
+	{
+		error_log('XSentryLogRoute fingerprint normalization warning: '.$message);
 	}
 
 	protected function extractFingerprintHeadline($message)
