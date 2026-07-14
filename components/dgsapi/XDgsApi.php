@@ -27,7 +27,7 @@ class XDgsApi extends CApplicationComponent
 
 		// set the payload
 		curl_setopt($handle, CURLOPT_POST, true);
-		curl_setopt($handle, CURLOPT_POSTFIELDS, $parameters);
+		curl_setopt($handle, CURLOPT_POSTFIELDS, http_build_query($parameters));
 
 		// return body only
 		curl_setopt($handle, CURLOPT_HEADER, 0);
