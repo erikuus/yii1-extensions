@@ -74,4 +74,32 @@ class XDbCache extends CDbCache
 			$this->_sqliteGced=true;
 		}
 	}
+
+	/**
+	 * Removes expired cache rows without turning optional SQLite maintenance
+	 * contention into an application error.
+	 *
+	 * CDbCache::gc() uses CDbCommand, which logs an error before throwing when
+	 * SQLite is busy. Cache garbage collection is best-effort, so use PDO
+	 * directly and let a later request retry it.
+	 */
+	protected function gc()
+	{
+		$db=$this->getDbConnection();
+		if($db->getDriverName()!=='sqlite')
+		{
+			parent::gc();
+			return;
+		}
+
+		try
+		{
+			$sql="DELETE FROM {$this->cacheTableName} WHERE expire>0 AND expire<".time();
+			$db->getPdoInstance()->exec($sql);
+		}
+		catch(Exception $e)
+		{
+			// SQLite cache cleanup is opportunistic; cache reads remain valid.
+		}
+	}
 }
