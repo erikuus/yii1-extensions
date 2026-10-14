@@ -405,6 +405,30 @@ class XErply extends CApplicationComponent
 	}
 
 	/**
+	 * Gets one Erply payment by ID.
+	 * @link https://learn-api.erply.com/requests/getpayments
+	 * @param integer|string $paymentId positive payment ID
+	 * @return array matching payment data, or an empty array if unavailable
+	 * @throws CException if the payment ID is invalid
+	 */
+	public function getPayment($paymentId)
+	{
+		if((!is_int($paymentId) && !is_string($paymentId)) || !preg_match('/^[1-9][0-9]*$/D', (string)$paymentId))
+			throw new CException('Function parameter "paymentId" must be a positive integer!');
+
+		$result=$this->sendRequest('getPayments',array(
+			'paymentID'=>$paymentId
+		));
+
+		if(isset($result['records']) && count($result['records'])===1
+			&& isset($result['records'][0]['paymentID'])
+			&& (string)$result['records'][0]['paymentID']===(string)$paymentId)
+			return $result['records'][0];
+		else
+			return array();
+	}
+
+	/**
 	 * Save payment of card type for sales document
 	 * @link https://erply.com/api/savePayment/
 	 * @param integer $documentID the sales document id
