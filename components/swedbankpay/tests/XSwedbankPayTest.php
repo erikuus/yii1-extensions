@@ -52,6 +52,35 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 		return array('status'=>200, 'body'=>json_encode($value));
 	}
 
+	public function testValidationContractDistinguishesCaptureFailureAndPending()
+	{
+		foreach(array('pending'=>null,'failed'=>false,'captured'=>true) as $result=>$expected)
+		{
+			$client=$this->getMockBuilder('XSwedbankPay')->setMethods(array('confirmPayment'))->getMock();
+			$client->expects($this->once())->method('confirmPayment')->willReturn($result);
+			$this->assertSame($expected,$client->validatePayment());
+			$this->assertSame($result,$client->validationResult);
+			$this->assertFalse($client->isAutoRequest());
+			if($expected === true) $this->assertNull($client->errorMessage);
+			else $this->assertNotEmpty($client->errorMessage);
+		}
+	}
+
+	public function testValidationErrorCannotReusePreviousSuccess()
+	{
+		$client=$this->getMockBuilder('XSwedbankPay')->setMethods(array('confirmPayment'))->getMock();
+		$client->validationResult='captured';
+		$client->expects($this->once())->method('confirmPayment')
+			->willReturnCallback(function() use($client) {
+				$client->validationResult='captured'; // An intervening callback reused the component.
+				$client->errorMessage=null;
+				throw new RuntimeException('Synthetic provider payload must not reach browser');
+			});
+		$this->assertNull($client->validatePayment());
+		$this->assertSame('error',$client->validationResult);
+		$this->assertSame('Payment confirmation could not be verified. Please try again later.',$client->errorMessage);
+	}
+
 	public function testDisabledByDefaultAndTruthyValuesCannotEnable()
 	{
 		foreach(array(false, 1, 'true') as $enabled)
@@ -324,6 +353,64 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 		$client->paymentEvidence($this->id,'VAUTest1',100);
 	}
 
+	public function testInitializedOrderMayOmitTheEmptyFinancialListButPaidCannot()
+	{
+		foreach(array('Initialized','Paid') as $status)
+		{
+			$client=$this->client(); $client->responses=$this->evidenceResponses($status);
+			$client->responses[2]=$this->ok(array('financialTransactions'=>array('id'=>$this->id.'/financialtransactions')));
+			try
+			{
+				$result=$client->paymentEvidence($this->id,'VAUTest1',100,'EUR','VAUTest1C1');
+				$this->assertSame('Initialized',$status);
+				$this->assertFalse($result['captureVerified']);
+			}
+			catch(RuntimeException $e) { $this->assertSame('Paid',$status); }
+		}
+	}
+
+	public function testOptionalAuthorizationMustMatchPaidTransactionBeforeAndAfterCapture()
+	{
+		foreach(array('valid','number','amount','reference','duplicate','reversal','duplicateCapture') as $case)
+		{
+			$client=$this->client();
+			$responses=$this->captureResponses();
+			$authorization=array('type'=>'Authorization','number'=>123,'amount'=>100,'payeeReference'=>'VAUTest1');
+			if($case === 'number') $authorization['number']=124;
+			if($case === 'amount') $authorization['amount']=99;
+			if($case === 'reference') $authorization['payeeReference']='Other';
+			if($case === 'reversal') $authorization['type']='Reversal';
+			foreach(array(4,12) as $index)
+			{
+				$data=json_decode($responses[$index]['body'],true);
+				$data['paid']['number']=123;
+				$responses[$index]=$this->ok($data);
+			}
+			foreach(array(2,10) as $index)
+			{
+				$data=json_decode($responses[$index]['body'],true);
+				$data['financialTransactions']['financialTransactionsList'][]=$authorization;
+				if($case === 'duplicate') $data['financialTransactions']['financialTransactionsList'][]=$authorization;
+				if($case === 'duplicateCapture' && $index === 10)
+					$data['financialTransactions']['financialTransactionsList'][]=$data['financialTransactions']['financialTransactionsList'][0];
+				$responses[$index]=$this->ok($data);
+			}
+			$client->responses=$responses;
+			try
+			{
+				$result=$client->captureOrder($this->id,'VAUTest1',100,'VAUTest1C1');
+				$this->assertSame('valid',$case);
+				$this->assertTrue($result['captureVerified']);
+			}
+			catch(RuntimeException $e)
+			{
+				$this->assertNotSame('valid',$case);
+				if($case !== 'duplicateCapture')
+					foreach($client->calls as $call) $this->assertSame('GET',$call[0]);
+			}
+		}
+	}
+
 	private function captureResponses()
 	{
 		$before=$this->evidenceResponses();
@@ -351,6 +438,10 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 		$this->assertTrue($result['captureVerified']);
 		$this->assertSame('VAUTest1C1',$result['captureReference']);
 		$this->assertCount(13,$client->calls);
+		$paths=array('','/payeeinfo','/financialtransactions','/failedattempts','/paid',
+			'','/payeeinfo','/captures','','/payeeinfo','/financialtransactions','/failedattempts','/paid');
+		foreach($paths as $index=>$path)
+			$this->assertSame(XSwedbankPay::ORIGIN.$this->id.$path,$client->calls[$index][1]);
 		foreach($client->calls as $index=>$call) $this->assertSame($index === 7 ? 'POST' : 'GET',$call[0]);
 		$this->assertSame(XSwedbankPay::ORIGIN.$this->id.'/captures',$client->calls[7][1]);
 		$transaction=json_decode($client->calls[7][3],true)['transaction'];
@@ -449,6 +540,31 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 		foreach($client->calls as $call) $this->assertSame('GET',$call[0]);
 	}
 
+	public function testVerifyCaptureUsesBoundEvidenceWithoutExtraRequests()
+	{
+		foreach(array('VAUTest1C1','DifferentCapture') as $captureReference)
+		{
+			$reader=$this->client(); $reader->responses=array_slice($this->captureResponses(),8);
+			$evidence=$reader->paymentEvidence($this->id,'VAUTest1',100,'EUR',$captureReference);
+			$verifier=$this->client(); $verifier->responses=array_slice($this->captureResponses(),8);
+			try
+			{
+				$result=$verifier->verifyCapture($this->id,'VAUTest1',100,$captureReference);
+				$this->assertTrue($evidence['captureVerified']);
+				$this->assertSame($evidence,$result);
+			}
+			catch(RuntimeException $e)
+			{
+				$this->assertFalse($evidence['captureVerified']);
+				$this->assertSame('Capture not yet verified; use read-only evidence. Do not repeat POST.',$e->getMessage());
+			}
+			$this->assertSame($reader->calls,$verifier->calls);
+		}
+		$client=$this->client();
+		try { $client->verifyCapture($this->id,'VAUTest1',100,'invalid/reference'); $this->fail('Invalid reference accepted.'); }
+		catch(InvalidArgumentException $e) { $this->assertCount(0,$client->calls); }
+	}
+
 	private function options()
 	{
 		return array('description'=>'Offline checkout', 'userAgent'=>'Actual payer browser',
@@ -522,14 +638,20 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 		}
 	}
 
-	private function action($responses)
+	private function action($result='captured')
 	{
 		$controller=new XSwedbankPayTestController('offline');
 		$controller->binding=array('orderId'=>$this->id,'reference'=>'VAUTest1','amount'=>100,
-			'currency'=>'EUR','captureReference'=>'VAUTest1C1');
+			'currency'=>'EUR','captureReference'=>'VAUTest1C1','payment'=>new stdClass);
 		$action=new XSwedbankPayTestAction($controller,'callback');
-		$action->bindingCallback='bindingForOrder'; $action->verifiedCallback='recordEvidence';
-		$action->component=$this->client(); $action->component->responses=$responses;
+		$action->bindingCallback='bindingForOrder';
+		$action->successCallback='recordEvidence'; $action->failureCallback='recordFailure';
+		$action->component=$this->getMockBuilder('XSwedbankPay')->setMethods(array('confirmPayment'))->getMock();
+		$action->component->method('confirmPayment')->willReturnCallback(function($binding) use($controller,$result) {
+			$controller->validatedBinding=$binding;
+			if($result instanceof Exception) throw $result;
+			return $result;
+		});
 		return $action;
 	}
 
@@ -539,65 +661,92 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 			'status'=>'Paid','amount'=>1,'payeeReference'=>'attacker','captureVerified'=>true));
 	}
 
-	public function testCallbackAuthorizationDoesNotBecomeCaptureOrMakeWrites()
+	public function testCallbackDispatchesOnlyAfterComponentValidation()
 	{
-		$action=$this->action($this->evidenceResponses());
+		$action=$this->action();
 		$this->assertSame(200,$action->processCallback('POST',$this->notification()));
 		$evidence=$action->controller->received[0];
 		$this->assertSame(100,$evidence['amount']);
 		$this->assertSame('VAUTest1',$evidence['reference']);
-		$this->assertFalse($evidence['captureVerified']);
-		$this->assertSame('Authorization',$evidence['paid']['transactionType']);
-		foreach($action->component->calls as $call) $this->assertSame('GET',$call[0]);
+		$this->assertSame($action->controller->validatedBinding,$evidence);
+		$this->assertSame($action->controller->binding['payment'],$action->component->payment);
+		$this->assertArrayNotHasKey('payment',$evidence);
+		$this->assertArrayNotHasKey('status',$evidence);
+		$this->assertCount(0,$action->controller->failures);
+		$this->assertStringStartsWith('wh_',$action->controller->uids[0]);
 	}
 
-	public function testDuplicateAndReorderedCallbacksFetchFreshState()
+	public function testCallbackPendingFailureAndUncertainResultsStayDistinct()
 	{
-		$captured=array_slice($this->captureResponses(),8);
-		$action=$this->action(array_merge($this->evidenceResponses(),$captured,$captured));
-		for($i=0;$i<3;$i++)
-			$this->assertSame(200,$action->processCallback('POST',$this->notification()));
-		$seen=$action->controller->received;
-		$this->assertFalse($seen[0]['captureVerified']);
-		$this->assertTrue($seen[1]['captureVerified']);
-		$this->assertTrue($seen[2]['captureVerified']);
-		foreach($action->component->calls as $call) $this->assertSame('GET',$call[0]);
+		foreach(array('pending'=>200,'failed'=>200,'error'=>500) as $result=>$status)
+		{
+			$action=$this->action($result);
+			$this->assertSame($status,$action->processCallback('POST',$this->notification()));
+			$this->assertCount(0,$action->controller->received);
+			$this->assertCount($result === 'failed' ? 1 : 0,$action->controller->failures);
+			if($result === 'failed')
+			{
+				$this->assertSame('Payment failed or was canceled.',$action->controller->failures[0]);
+				$this->assertStringStartsWith('wh_',$action->controller->uids[0]);
+			}
+		}
 	}
 
 	public function testCallbackDoesNotAcknowledgeReadOrHandlerFailures()
 	{
-		foreach(array('transport','wrongPayee','wrongAmount','handlerThrows','handlerFalse','resolverThrows','badBinding','disabled','missingHandler') as $scenario)
+		foreach(array('validationThrows','handlerThrows','handlerFalse','failureThrows','resolverThrows','badBinding','missingPayment','missingSuccess','missingFailure') as $scenario)
 		{
-			$action=$this->action($this->evidenceResponses());
-			if($scenario === 'transport') $action->component->responses=array(new RuntimeException('private transport'));
-			if($scenario === 'wrongPayee') $action->component->responses[1]=$this->ok(array('payeeInfo'=>array('payeeId'=>'wrong','payeeReference'=>'VAUTest1')));
-			if($scenario === 'wrongAmount') $action->controller->binding['amount']=99;
+			$action=$this->action($scenario === 'validationThrows' ? new RuntimeException('private transport') :
+				($scenario === 'failureThrows' ? 'failed' : 'captured'));
 			if($scenario === 'handlerThrows') $action->controller->handlerResult=new RuntimeException('private handler');
 			if($scenario === 'handlerFalse') $action->controller->handlerResult=false;
+			if($scenario === 'failureThrows') $action->controller->handlerResult=new RuntimeException('private failure');
 			if($scenario === 'resolverThrows') $action->controller->binding=new RuntimeException('private resolver');
 			if($scenario === 'badBinding') $action->controller->binding['orderId']='/psp/paymentorders/other';
-			if($scenario === 'disabled') $action->component->enabled=false;
-			if($scenario === 'missingHandler') $action->verifiedCallback=null;
+			if($scenario === 'missingPayment') unset($action->controller->binding['payment']);
+			if($scenario === 'missingSuccess') $action->successCallback=null;
+			if($scenario === 'missingFailure') $action->failureCallback=null;
 			$this->assertSame(500,$action->processCallback('POST',$this->notification()),$scenario);
 			if(!in_array($scenario,array('handlerThrows','handlerFalse'),true))
 				$this->assertCount(0,$action->controller->received);
-			foreach($action->component->calls as $call) $this->assertSame('GET',$call[0]);
+			if(in_array($scenario,array('resolverThrows','badBinding','missingPayment','missingSuccess','missingFailure'),true))
+				$this->assertNull($action->controller->validatedBinding);
 		}
+	}
+
+	public function testCallbackLoggingIsConfigurableAndSanitized()
+	{
+		$action=$this->action(new RuntimeException('private transport secret'));
+		$action->logCategory='swedbankWebhookTest';
+		$action->logLevel='warning';
+		$before=count(Yii::getLogger()->getLogs('warning','swedbankWebhookTest'));
+		$this->assertSame(500,$action->processCallback('POST',$this->notification()));
+		$this->assertCount($before,Yii::getLogger()->getLogs('warning','swedbankWebhookTest'));
+		$action->log=true;
+		$this->assertSame(500,$action->processCallback('POST',$this->notification()));
+		$logs=Yii::getLogger()->getLogs('warning','swedbankWebhookTest');
+		$this->assertCount($before+1,$logs);
+		$entry=end($logs);
+		$this->assertContains('UID=wh_',$entry[0]);
+		$this->assertContains('retry required',$entry[0]);
+		$this->assertNotContains('private transport secret',$entry[0]);
+		$this->assertNotContains('attacker',$entry[0]);
+		$this->assertNotContains($this->id,$entry[0]);
 	}
 
 	public function testMalformedAndUnknownCallbacksCannotReachProvider()
 	{
 		foreach(array('{}','bad json',json_encode(array('paymentOrder'=>array('id'=>'https://evil.example'))),str_repeat('x',16385)) as $body)
 		{
-			$action=$this->action(array());
+			$action=$this->action();
 			$this->assertSame(400,$action->processCallback('POST',$body));
-			$this->assertCount(0,$action->component->calls);
+			$this->assertNull($action->controller->validatedBinding);
 		}
-		$action=$this->action(array());
+		$action=$this->action();
 		$this->assertSame(405,$action->processCallback('GET',$this->notification()));
 		$action->controller->binding=null;
 		$this->assertSame(404,$action->processCallback('POST',$this->notification()));
-		$this->assertCount(0,$action->component->calls);
+		$this->assertNull($action->controller->validatedBinding);
 	}
 	public function testProductionOriginSelectionUsesOnlyFakeTransport()
 	{
@@ -617,21 +766,21 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 	{
 		foreach(array(null,'OtherCapture') as $reference)
 		{
-			$action=$this->action(array_slice($this->captureResponses(),8));
-			$action->controller->binding['captureReference']=$reference;
-			$this->assertSame(200,$action->processCallback('POST',$this->notification()));
-			$this->assertFalse($action->controller->received[0]['captureVerified']);
+			$client=$this->client();
+			$client->responses=array_slice($this->captureResponses(),8);
+			$evidence=$client->paymentEvidence($this->id,'VAUTest1',100,'EUR',$reference);
+			$this->assertFalse($evidence['captureVerified']);
 		}
 	}
 
-	public function testNonCardPaidEvidenceIsRejectedBeforeApplicationHandler()
+	public function testNonCardPaidEvidenceIsRejected()
 	{
 		$responses=$this->evidenceResponses();
 		$paid=json_decode($responses[4]['body'],true); $paid['paid']['instrument']='BankLink';
 		$responses[4]=$this->ok($paid);
-		$action=$this->action($responses);
-		$this->assertSame(500,$action->processCallback('POST',$this->notification()));
-		$this->assertCount(0,$action->controller->received);
+		$client=$this->client(); $client->responses=$responses;
+		$this->expectException('RuntimeException');
+		$client->paymentEvidence($this->id,'VAUTest1',100,'EUR','VAUTest1C1');
 	}
 
 	private function duplicateResponse($description=null)
@@ -712,16 +861,27 @@ class XSwedbankPayTestController extends CController
 {
 	public $binding;
 	public $received=array();
+	public $failures=array();
+	public $uids=array();
+	public $validatedBinding;
 	public $handlerResult=true;
 	public function bindingForOrder($id)
 	{
 		if($this->binding instanceof Exception) throw $this->binding;
 		return $this->binding;
 	}
-	public function recordEvidence($evidence)
+	public function recordEvidence($evidence, $webhookUid)
 	{
+		if($this->validatedBinding !== $evidence) throw new RuntimeException('Dispatch before validation.');
 		$this->received[]=$evidence;
+		$this->uids[]=$webhookUid;
 		if($this->handlerResult instanceof Exception) throw $this->handlerResult;
 		return $this->handlerResult;
+	}
+	public function recordFailure($message, $webhookUid)
+	{
+		$this->failures[]=$message;
+		$this->uids[]=$webhookUid;
+		if($this->handlerResult instanceof Exception) throw $this->handlerResult;
 	}
 }

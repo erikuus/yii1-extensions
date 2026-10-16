@@ -4,8 +4,9 @@
  * Amounts/VAT are integer minor units. Read methods require the saved binding.
  * submitPayment() redirects; the configured paymentModel stores the binding.
  * No automatic POST retries or application fulfilment.
- * Caller must serialize capture attempts and persist intent BEFORE any POST;
- * after an uncertain outcome reconcile with verifyCapture(), never blindly retry.
+ * confirmPayment() uses the configured model for durable capture intent/evidence.
+ * Low-level captureOrder() callers must serialize and persist intent themselves;
+ * after an uncertain outcome reconcile through GET, never blindly retry.
  * Checkout URLs and raw responses may contain tokens: do not log them.
  */
 class XSwedbankPay extends CApplicationComponent
@@ -16,17 +17,21 @@ class XSwedbankPay extends CApplicationComponent
 	public $payeeId;
 	public $accessToken;
 
-	/** Model alias implementing forPayment($payment, $client) and saveOrder($orderId). */
+	/** Model alias implementing binding and confirmation persistence; see README. */
 	public $paymentModel;
 	public $payment;
 	public $productName;
 	public $language;
 	public $returnUrl;
 	public $cancelUrl;
+	public $callbackUrl;
 	public $termsOfServiceUrl;
 	public $logoUrl;
 	public $autoRedirect=true;
 	public $paymentLink;
+	public $errorMessage;
+	/** Last validatePayment() result; error means confirmation could not be established. */
+	public $validationResult;
 
 	/** Configure payment values and URLs, then submit as with XEveryPay/XStripe. */
 	public function submitPayment()
@@ -49,6 +54,8 @@ class XSwedbankPay extends CApplicationComponent
 				'logoUrl'=>$this->logoUrl,
 			),
 		);
+		if($this->callbackUrl !== null)
+			$options['urls']['callbackUrl']=$this->callbackUrl;
 		$options['currency']=$detail->currency;
 		if(!$detail->order_id)
 		{
@@ -58,6 +65,79 @@ class XSwedbankPay extends CApplicationComponent
 		$this->paymentLink=$this->checkoutUrl($detail->order_id, $detail->reference, (int)$detail->amount, $detail->currency);
 		if($this->autoRedirect)
 			Yii::app()->request->redirect($this->paymentLink);
+	}
+
+	/**
+	 * Set payment before validation. True means verified capture, false verified
+	 * failure, and null pending/uncertain (never mark failed). No business completion
+	 * or parent payment-status writes. errorMessage contains only a safe message key.
+	 */
+	public function validatePayment($expectedBinding=null)
+	{
+		$this->validationResult='error';
+		$this->errorMessage='Payment confirmation could not be verified. Please try again later.';
+		try
+		{
+			$this->validationResult=$this->confirmPayment($expectedBinding);
+			if($this->validationResult === 'captured')
+			{
+				$this->errorMessage=null;
+				return true;
+			}
+			if($this->validationResult === 'failed')
+			{
+				$this->errorMessage='Payment failed or was canceled.';
+				return false;
+			}
+			if($this->validationResult === 'pending')
+				$this->errorMessage='Payment confirmation is pending.';
+			return null;
+		}
+		catch(Exception $e)
+		{
+			$this->validationResult='error';
+			$this->errorMessage='Payment confirmation could not be verified. Please try again later.';
+			return null;
+		}
+	}
+
+	/** Provider notifications use the separate webhook action, not browser validation. */
+	public function isAutoRequest()
+	{
+		return false;
+	}
+
+	/**
+	 * Shared browser/webhook confirmation. The model commits capture intent before
+	 * POST. Returns pending, failed or captured. No application business IO, parent
+	 * status changes or completion claims here; those belong to the legacy flow.
+	 */
+	public function confirmPayment($expectedBinding=null)
+	{
+		$this->checkAccess();
+		if(!$this->paymentModel)
+			throw new CException('A payment model is required.');
+		$class=Yii::import($this->paymentModel);
+		$detail=$class::forConfirmation($this->payment, $this);
+		// Bind webhook resolution to the same saved payment before any provider IO.
+		if($expectedBinding !== null && $expectedBinding != $detail->binding)
+			throw new RuntimeException('Notification binding differs from the saved payment.');
+		$evidence=$this->paymentEvidence($detail->order_id, $detail->reference,
+			(int)$detail->amount, $detail->currency, $detail->capture_reference);
+		if($evidence['status'] === 'Paid' && !$evidence['captureVerified'])
+		{
+			if(!$this->isUncapturedAuthorization($evidence, (int)$detail->amount))
+				throw new RuntimeException('Payment requires reconciliation; no full uncaptured authorization.');
+			if(!$detail->claimCapture())
+				throw new RuntimeException('Capture already requested; reconcile through GET only.');
+			$evidence=$this->captureOrder($detail->order_id, $detail->reference,
+				(int)$detail->amount, $detail->capture_reference, $detail->currency);
+		}
+		if(!in_array($evidence['status'], array('Initialized','Paid','Failed','Aborted','Cancelled'), true))
+			throw new RuntimeException('Unknown provider payment state.');
+		$result=$detail->saveConfirmation($evidence);
+		$this->payment->refresh();
+		return $result;
 	}
 
 	/** Yii consumes the reserved component option `enabled`; configure allowRequests instead. */
@@ -152,8 +232,7 @@ class XSwedbankPay extends CApplicationComponent
 		if($captureReference === $reference)
 			throw new InvalidArgumentException('Capture needs a distinct, persisted operation reference.');
 		$before=$this->paymentEvidence($id, $reference, $amount, $currency);
-		if($before['status'] !== 'Paid' || $before['paid']['transactionType'] !== 'Authorization' ||
-			$before['remainingCaptureAmount'] !== $amount || count($before['financialTransactions']) !== 0)
+		if(!$this->isUncapturedAuthorization($before, $amount))
 			throw new RuntimeException('Capture requires a wholly uncaptured card authorization.');
 		$response=$this->readOrder($id, $reference, $amount, $currency);
 		$order=$response['paymentOrder'];
@@ -184,11 +263,9 @@ class XSwedbankPay extends CApplicationComponent
 	public function verifyCapture($id, $reference, $amount, $captureReference, $currency='EUR')
 	{
 		$this->checkExpected($captureReference, $amount, $currency);
-		$after=$this->paymentEvidence($id, $reference, $amount, $currency);
-		if(!$this->isFullCapture($after, $amount, $captureReference))
+		$after=$this->paymentEvidence($id, $reference, $amount, $currency, $captureReference);
+		if(!$after['captureVerified'])
 			throw new RuntimeException('Capture not yet verified; use read-only evidence. Do not repeat POST.');
-		$after['captureReference']=$captureReference;
-		$after['captureVerified']=true;
 		return $after;
 	}
 
@@ -224,6 +301,10 @@ class XSwedbankPay extends CApplicationComponent
 			$evidence['paid']=array_intersect_key($paid, array_flip(array('id','number','instrument','transactionType','amount','payeeReference')));
 		}
 		$transactions=$evidence['financialTransactions'];
+		// Sandbox returns only the resource id for an initialized order with no
+		// financial activity. This permits pending delivery, never capture proof.
+		if($order['status'] === 'Initialized' && array_keys($transactions) === array('id'))
+			$transactions['financialTransactionsList']=array();
 		if(!isset($transactions['financialTransactionsList']) || !is_array($transactions['financialTransactionsList']))
 			throw new RuntimeException('Missing financial transaction list; capture is unverified.');
 		$evidence['financialTransactions']=array();
@@ -231,6 +312,9 @@ class XSwedbankPay extends CApplicationComponent
 		{
 			if(!is_array($transaction))
 				throw new RuntimeException('Malformed financial transaction.');
+			if((isset($transaction['id']) && (!is_string($transaction['id']) || strpos($transaction['id'],$id.'/financialtransactions/') !== 0)) ||
+				(isset($transaction['currency']) && $transaction['currency'] !== $currency))
+				throw new RuntimeException('Financial transaction binding mismatch.');
 			$evidence['financialTransactions'][]=array_intersect_key($transaction,
 				array_flip(array('id','created','type','number','amount','payeeReference')));
 		}
@@ -264,20 +348,50 @@ class XSwedbankPay extends CApplicationComponent
 		return $evidence;
 	}
 
+	/** Check before claiming capture, and again against fresh evidence before POST. */
+	private function isUncapturedAuthorization(array $evidence, $amount)
+	{
+		return $evidence['status'] === 'Paid' && $evidence['paid']['transactionType'] === 'Authorization' &&
+			$evidence['remainingCaptureAmount'] === $amount && $this->matchesTransactions($evidence, null);
+	}
+
 	private function isFullCapture(array $after, $amount, $captureReference)
 	{
-		$matched=false;
-		foreach($after['financialTransactions'] as $transaction)
-			if(isset($transaction['type'], $transaction['amount'], $transaction['payeeReference']) &&
-				$transaction['type'] === 'Capture' && $transaction['amount'] === $amount &&
-				$transaction['payeeReference'] === $captureReference)
-				$matched=true;
 		// Live v3.1 omits exhausted balances. Absence alone proves nothing: require
 		// the exact full capture AND the full reversible balance before accepting it.
-		return $matched && count($after['financialTransactions']) === 1 && $after['status'] === 'Paid' &&
+		return $after['status'] === 'Paid' && $after['paid']['transactionType'] === 'Authorization' &&
+			$this->matchesTransactions($after, $captureReference) &&
 			in_array($after['remainingCaptureAmount'], array(0,null), true) &&
 			in_array($after['remainingCancellationAmount'], array(0,null), true) &&
 			$after['remainingReversalAmount'] === $amount;
+	}
+
+	/** v3.1 lists may include the original authorization alongside captures. */
+	private function matchesTransactions(array $evidence, $captureReference)
+	{
+		$authorizations=0;
+		$captures=0;
+		foreach($evidence['financialTransactions'] as $transaction)
+		{
+			if(!isset($transaction['type'], $transaction['amount'], $transaction['payeeReference']) ||
+				$transaction['amount'] !== $evidence['amount'])
+				return false;
+			if($transaction['type'] === 'Authorization')
+			{
+				if(++$authorizations > 1 || !isset($transaction['number'], $evidence['paid']['number']) ||
+					$transaction['number'] !== $evidence['paid']['number'] ||
+					$transaction['payeeReference'] !== $evidence['reference'])
+					return false;
+			}
+			elseif($transaction['type'] === 'Capture' && $captureReference !== null)
+			{
+				if(++$captures > 1 || $transaction['payeeReference'] !== $captureReference)
+					return false;
+			}
+			else
+				return false; // Cancellation, reversal, sale, unknown or prior capture.
+		}
+		return $captures === ($captureReference === null ? 0 : 1);
 	}
 
 	private function checkAccess()

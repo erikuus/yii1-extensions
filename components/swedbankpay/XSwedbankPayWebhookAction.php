@@ -1,35 +1,33 @@
 <?php
 /**
- * Checkout v3.1 notification adapter. A notification is only a hint to GET state.
- *
- * Configure componentName, bindingCallback and verifiedCallback in actions().
- * bindingCallback($orderId) must resolve a SAVED application binding or return null:
- * array('orderId'=>..., 'reference'=>..., 'amount'=>100, 'currency'=>'EUR',
- *       'captureReference'=>...) -- captureReference may be null before capture intent.
- * Never construct this binding from callback-supplied amount/payee/reference/status.
- * verifiedCallback($evidence) must return true only after durable handling.
- * It receives sanitized, bound GET evidence, including captureVerified. Paid alone
- * does not mean captured. Handlers must tolerate duplicate/reordered notifications.
- *
- * This action neither captures nor knows application models/fulfilment. No action
- * is registered by this library. Application routing/CSRF policy belongs to its
- * integrator; register only after both handlers are implemented and tested.
+ * Checkout v3.1 notifications are hints; validate through the component first.
+ * bindingCallback($orderId) returns saved expectations plus the local payment,
+ * or null for an unknown order. Never derive expectations from notification data.
+ * successCallback($binding, $webhookUid) must return true after durable handling.
+ * failureCallback($message, $webhookUid) handles verified terminal failure only.
+ * Pending is acknowledged without dispatch; uncertain results request a retry.
+ * Capture safeguards belong to the component/model, fulfilment to the controller.
  */
 class XSwedbankPayWebhookAction extends CAction
 {
 	public $componentName='swedbankPay';
 	public $bindingCallback;
-	public $verifiedCallback;
+	public $successCallback;
+	public $failureCallback;
+	public $log=false;
+	public $logLevel='error';
+	public $logCategory='ext.components.swedbankpay.XSwedbankPayWebhookAction';
 
 	public function run()
 	{
 		http_response_code($this->processCallback(
-			Yii::app()->request->getRequestType(), file_get_contents('php://input')));
+			Yii::app()->request->getRequestType(), file_get_contents('php://input', false, null, 0, 16385)));
 	}
 
 	/** Returns an HTTP status; never acknowledges verification/handler failure. */
 	public function processCallback($method, $rawBody)
 	{
+		$webhookUid=uniqid('wh_', true);
 		if($method !== 'POST')
 			return 405;
 		if(!is_string($rawBody) || strlen($rawBody) > 16384)
@@ -42,27 +40,45 @@ class XSwedbankPayWebhookAction extends CAction
 		try
 		{
 			$component=$this->getPaymentComponent();
-			if(!($component instanceof XSwedbankPay) ||
-				!is_string($this->bindingCallback) || !is_callable(array($this->controller, $this->bindingCallback)) ||
-				!is_string($this->verifiedCallback) || !is_callable(array($this->controller, $this->verifiedCallback)))
-				return 500;
+			if(!($component instanceof XSwedbankPay))
+				throw new RuntimeException('Missing component.');
+			foreach(array($this->bindingCallback,$this->successCallback,$this->failureCallback) as $callback)
+				if(!is_string($callback) || !is_callable(array($this->controller,$callback)))
+					throw new RuntimeException('Missing callback.');
 			try { $component->checkOrderId($id); }
 			catch(RuntimeException $e) { return 400; }
 			$binding=$this->controller->{$this->bindingCallback}($id);
 			if($binding === null)
 				return 404;
-			if(!is_array($binding) || !isset($binding['orderId'], $binding['reference'], $binding['amount'], $binding['currency']) ||
-				$binding['orderId'] !== $id)
-				return 500;
-			$evidence=$component->paymentEvidence($id, $binding['reference'], $binding['amount'], $binding['currency'],
-				isset($binding['captureReference']) ? $binding['captureReference'] : null);
-			return $this->controller->{$this->verifiedCallback}($evidence) === true ? 200 : 500;
+			if(!is_array($binding) || !isset($binding['orderId'], $binding['reference'], $binding['amount'], $binding['currency'], $binding['payment']) ||
+				$binding['orderId'] !== $id || !is_object($binding['payment']))
+				throw new RuntimeException('Invalid saved binding.');
+			$component->payment=$binding['payment'];
+			unset($binding['payment']);
+			$result=$component->validatePayment($binding);
+			if($result === true)
+			{
+				if($this->controller->{$this->successCallback}($binding,$webhookUid) !== true)
+					throw new RuntimeException('Success handler did not finish.');
+			}
+			elseif($result === false)
+				$this->controller->{$this->failureCallback}($component->errorMessage,$webhookUid);
+			elseif($component->validationResult !== 'pending')
+				throw new RuntimeException('Uncertain payment state.');
+			return 200;
 		}
 		catch(Exception $e)
 		{
-			// Do not leak notification bodies, provider payloads, credentials or handler errors.
+			// Never log notification bodies, provider payloads, credentials or exception text.
+			$this->log('UID='.$webhookUid.' Payment verification or handling failed; retry required.');
 			return 500;
 		}
+	}
+
+	protected function log($message)
+	{
+		if($this->log === true)
+			Yii::log(__CLASS__.' '.$message,$this->logLevel,$this->logCategory);
 	}
 
 	protected function getPaymentComponent()
