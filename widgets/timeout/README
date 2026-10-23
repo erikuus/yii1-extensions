@@ -32,7 +32,13 @@ In your SiteController:
  */
 public function actionKeepAlive()
 {
-    if(Yii::app()->session->sessionID)
+    header('Cache-Control: no-store, private');
+    if(Yii::app()->user->isGuest)
+    {
+      header('HTTP/1.1 401 Unauthorized');
+      echo 'SESSION_EXPIRED';
+    }
+    else
       echo 'OK';
 
     Yii::app()->end();
@@ -56,3 +62,26 @@ _timeout-dialog.js_ was developed by rigoneri.
    * Fixes and updates to CSS.
  * 1.0 — 2012-07-05
    * Initial release.
+
+## Server-authoritative mode
+
+Set `statusUrl`, `expiredRedirectUrl` (a non-destructive login page), and
+`sessionKey` (an opaque identifier for the currently rendered login) to opt in.
+Without `statusUrl`, the original timeout-dialog.js behavior remains available.
+
+Both status and keep-alive endpoints receive GET parameters `format=json` and
+`sessionKey`. Return uncached JSON containing numeric Unix timestamps
+`serverTime` and `expiresAt`, and a string `sessionKey`. Status must enforce expiry
+without renewing it. Keep-alive must verify authentication and the supplied login
+identifier before renewing. Return HTTP 401 for expiry and HTTP 409 when a renewal
+belongs to another login. Do not redirect these endpoints to HTML login pages.
+
+The browser checks at warning/expiry boundaries and on focus/resume. localStorage
+notifications accelerate cross-tab synchronization; correctness does not depend on
+storage being available. Automatic expiry uses `expiredRedirectUrl` without
+calling logout. Explicit sign-out still uses `logoutUrl` / `logoutRedirectUrl`.
+Network failures leave a retryable dialog and do not claim renewal or log out.
+`networkErrorMessage` can be localized by the application. In this mode the server
+controls renewal, so legacy `timeout` and `restartOnYes` do not control expiry.
+
+Run `node widgets/timeout/tests/session-timeout.test.js` from the extension root.

@@ -72,6 +72,14 @@ class XTimeoutDialog extends CJuiWidget
 	 * Default: /keep-alive
 	 */
 	public $keepAliveUrl;
+	/** @var string optional JSON status endpoint; enables server-authoritative timers */
+	public $statusUrl;
+	/** @var string non-destructive redirect after expiry, normally the login page */
+	public $expiredRedirectUrl;
+	/** @var string opaque login identifier supplied by the server */
+	public $sessionKey;
+	/** @var string message shown when checking or renewing the session fails */
+	public $networkErrorMessage='Unable to check your session. Please try again.';
 	/**
 	 * @var string The url that will perform a POST request to display an error message.
 	 * that your session has timed out and has been logged out.
@@ -107,7 +115,9 @@ class XTimeoutDialog extends CJuiWidget
 		{
 			$cs = Yii::app()->getClientScript();
 			$assets = Yii::app()->getAssetManager()->publish(dirname(__FILE__) . '/assets');
-			$cs->registerScriptFile($assets . '/js/timeout-dialog.js');
+			// Publish the selected script separately so changing its contents invalidates old assets.
+			$script=$this->statusUrl===null ? 'timeout-dialog.js' : 'session-timeout.js';
+			$cs->registerScriptFile(Yii::app()->getAssetManager()->publish(dirname(__FILE__).'/assets/js/'.$script));
 
 			if($this->customCssFile===null)
 				$cs->registerCssFile($assets . '/css/timeout-dialog.css');
@@ -131,6 +141,10 @@ class XTimeoutDialog extends CJuiWidget
 			'keep_alive_button_text' => $this->keepAliveButtonText,
 			'sign_out_button_text' => $this->signOutButtonText,
 			'keep_alive_url' => $this->keepAliveUrl,
+			'status_url' => $this->statusUrl,
+			'expired_redirect_url' => $this->expiredRedirectUrl,
+			'session_key' => $this->sessionKey,
+			'network_error_message' => $this->networkErrorMessage,
 			'logout_url' => $this->logoutUrl,
 			'restart_on_yes' => $this->restartOnYes,
 			'logout_redirect_url' => $this->logoutRedirectUrl,
