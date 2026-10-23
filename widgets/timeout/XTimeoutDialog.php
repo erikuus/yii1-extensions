@@ -115,9 +115,11 @@ class XTimeoutDialog extends CJuiWidget
 		{
 			$cs = Yii::app()->getClientScript();
 			$assets = Yii::app()->getAssetManager()->publish(dirname(__FILE__) . '/assets');
-			// Publish the selected script separately so changing its contents invalidates old assets.
-			$script=$this->statusUrl===null ? 'timeout-dialog.js' : 'session-timeout.js';
-			$cs->registerScriptFile(Yii::app()->getAssetManager()->publish(dirname(__FILE__).'/assets/js/'.$script));
+			// Preserve the original asset URL for existing applications and script maps.
+			if($this->statusUrl===null)
+				$cs->registerScriptFile($assets . '/js/timeout-dialog.js');
+			else
+				$cs->registerScriptFile(Yii::app()->getAssetManager()->publish(dirname(__FILE__).'/assets/js/session-timeout.js'));
 
 			if($this->customCssFile===null)
 				$cs->registerCssFile($assets . '/css/timeout-dialog.css');
@@ -141,15 +143,19 @@ class XTimeoutDialog extends CJuiWidget
 			'keep_alive_button_text' => $this->keepAliveButtonText,
 			'sign_out_button_text' => $this->signOutButtonText,
 			'keep_alive_url' => $this->keepAliveUrl,
-			'status_url' => $this->statusUrl,
-			'expired_redirect_url' => $this->expiredRedirectUrl,
-			'session_key' => $this->sessionKey,
-			'network_error_message' => $this->networkErrorMessage,
 			'logout_url' => $this->logoutUrl,
 			'restart_on_yes' => $this->restartOnYes,
 			'logout_redirect_url' => $this->logoutRedirectUrl,
 			'dialog_width' => $this->dialogWidth,
 		);
+		// The JSON protocol is opt-in; keep legacy initialization options unchanged.
+		if($this->statusUrl!==null)
+		{
+			$options['status_url']=$this->statusUrl;
+			$options['expired_redirect_url']=$this->expiredRedirectUrl;
+			$options['session_key']=$this->sessionKey;
+			$options['network_error_message']=$this->networkErrorMessage;
+		}
 		foreach($options as $key => $value)
 		{
 			if($value === null)
