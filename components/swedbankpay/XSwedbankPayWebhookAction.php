@@ -28,14 +28,25 @@ class XSwedbankPayWebhookAction extends CAction
 	public function processCallback($method, $rawBody)
 	{
 		$webhookUid=uniqid('wh_', true);
+		$prefix='UID='.$webhookUid.' source=webhook ';
+		$this->log($prefix.'Callback received.');
 		if($method !== 'POST')
+		{
+			$this->log($prefix.'Callback rejected. HTTP=405');
 			return 405;
+		}
 		if(!is_string($rawBody) || strlen($rawBody) > 16384)
+		{
+			$this->log($prefix.'Callback rejected. HTTP=400');
 			return 400;
+		}
 		$notification=json_decode($rawBody, true);
 		if(!is_array($notification) || json_last_error() !== JSON_ERROR_NONE ||
 			!isset($notification['paymentOrder']['id']) || !is_string($notification['paymentOrder']['id']))
+		{
+			$this->log($prefix.'Callback rejected. HTTP=400');
 			return 400;
+		}
 		$id=$notification['paymentOrder']['id'];
 		try
 		{
@@ -45,17 +56,30 @@ class XSwedbankPayWebhookAction extends CAction
 			foreach(array($this->bindingCallback,$this->successCallback,$this->failureCallback) as $callback)
 				if(!is_string($callback) || !is_callable(array($this->controller,$callback)))
 					throw new RuntimeException('Missing callback.');
-			try { $component->checkOrderId($id); }
-			catch(RuntimeException $e) { return 400; }
+			try
+			{
+				$component->checkOrderId($id);
+			}
+			catch(RuntimeException $e)
+			{
+				$this->log($prefix.'Callback rejected. HTTP=400');
+				return 400;
+			}
+
 			$binding=$this->controller->{$this->bindingCallback}($id);
 			if($binding === null)
+			{
+				$this->log($prefix.'Unknown binding. HTTP=404');
 				return 404;
+			}
 			if(!is_array($binding) || !isset($binding['orderId'], $binding['reference'], $binding['amount'], $binding['currency'], $binding['payment']) ||
 				$binding['orderId'] !== $id || !is_object($binding['payment']))
 				throw new RuntimeException('Invalid saved binding.');
 			$component->payment=$binding['payment'];
 			unset($binding['payment']);
+			$prefix.='reference='.$binding['reference'].' order='.$binding['orderId'].' ';
 			$result=$component->validatePayment($binding);
+			$this->log($prefix.'Verification result='.$component->validationResult.' evidence='.json_encode($component->validationSummary));
 			if($result === true)
 			{
 				if($this->controller->{$this->successCallback}($binding,$webhookUid) !== true)
@@ -65,12 +89,13 @@ class XSwedbankPayWebhookAction extends CAction
 				$this->controller->{$this->failureCallback}($component->errorMessage,$webhookUid);
 			elseif($component->validationResult !== 'pending')
 				throw new RuntimeException('Uncertain payment state.');
+			$this->log($prefix.'Callback acknowledged. HTTP=200');
 			return 200;
 		}
 		catch(Exception $e)
 		{
 			// Never log notification bodies, provider payloads, credentials or exception text.
-			$this->log('UID='.$webhookUid.' Payment verification or handling failed; retry required.');
+			$this->log($prefix.'Payment verification or handling failed; retry required. HTTP=500');
 			return 500;
 		}
 	}

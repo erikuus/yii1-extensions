@@ -43,7 +43,7 @@ null result:
 
 | Return | `validationResult` | Application handling |
 | --- | --- | --- |
-| true | `captured` | Full capture is verified and saved; enter the application's existing completion flow. |
+| true | `captured` | Full card capture or BankLink Sale is verified and saved; enter the application's existing completion flow. |
 | false | `failed` | Verified terminal failure; use the application's normal failure handling. |
 | null | `pending` | Leave payment status unchanged and show the pending message. |
 | null | `error` | Confirmation is uncertain; leave payment status unchanged and retry verification later. |
@@ -73,7 +73,7 @@ After an uncertain response or a failed local save, subsequent confirmation is
 GET-only: verified capture can recover persistence, but an outstanding intent is
 never automatically reset. It uses the configured model, with no application subclass.
 
-`isUncapturedAuthorization()` supplies the same predicate to both confirmation
+`_isUncapturedAuthorization()` supplies the same predicate to both confirmation
 before the intent claim and `captureOrder()` on fresh evidence after the claim.
 Both checks remain. The final order/payee read for balances, VAT and the advertised
 operation still precedes POST, followed by independent GET verification.
@@ -98,7 +98,7 @@ Configure `class=ext.components.swedbankpay.XSwedbankPay`, `payeeId` and
   and `urls` with `hostUrls` and `completeUrl`. Optional: `currency` (EUR),
   `language` (et-EE), and `urls.cancelUrl` / `urls.callbackUrl` /
   `urls.termsOfServiceUrl` / `urls.logoUrl`. All URLs require absolute HTTPS.
-  Checkout does not restrict instruments; the merchant account determines available methods. Capture verification still covers cards only.
+  Checkout does not restrict instruments; the merchant account determines available methods. Confirmation supports CreditCard capture and BankLink Sale.
   Supply a callback URL only after the receiving endpoint works. Save the returned
   order ID against the local attempt. Raw responses and checkout URLs may contain
   tokens and must not be logged.
@@ -139,7 +139,7 @@ live-tested. Low-level capture callers must serialize capture, persist its disti
 reference and reconcile uncertain outcomes using GET before considering another
 write. The configured-model confirmation API above enforces those requirements
 without owning application completion.
-This version verifies card payments and one full capture. Bank payments, partial
+This version verifies card payments with one full capture and BankLink Sales. Partial
 captures, cancellations/refunds, subscriptions and application fulfilment are outside
 this implementation. Reversed or partially captured payments do not meet its
 full-capture predicate. Application state must not undo previously confirmed
@@ -157,15 +157,16 @@ is ready. Configure `componentName` (default `swedbankPay`) and three public met
    object; return null for an unknown order. Use the model's `binding` array and
    append the payment object. Do not derive any expectation from notification data.
 2. `successCallback($binding, $webhookUid)` receives the saved binding without the
-   payment object, only after the component verifies and persists full capture.
+   payment object, only after the component verifies and persists full card capture or BankLink Sale.
    Return exactly true after durable handling; other returns cause HTTP 500.
    Make handling idempotent and safe for delayed or duplicate notifications.
 3. `failureCallback($message, $webhookUid)` receives a safe message for verified
    terminal failure only. It may return void; an exception causes HTTP 500.
 
 Like EveryPay, configure `log` (default false), `logCategory` (default the action's
-class category), and optionally `logLevel` (default error). Action retry diagnostics
-contain a generated UID and a generic message, never notification bodies, raw
+class category), and optionally `logLevel` (default error). Callback traces
+contain a generated UID, source, validated saved binding identifiers, sanitized
+verification summary and HTTP result, never notification bodies, raw
 provider payloads, credentials or exception text. Application callback logging is
 separate, following the existing controller policy.
 
@@ -204,3 +205,32 @@ order. Pass a JSON line through private stdin: `payeeId`, `accessToken`,
 `orderId`, `reference`, integer `amount`, and `captureReference`.
 Never put credentials in command arguments or repository files. Its transport guard
 rejects every write and every non-sandbox request.
+
+## BankLink Sale and trace support (2026-11-06)
+
+`paymentEvidence()` now exposes `saleVerified` separately from `captureVerified`.
+A bound BankLink Paid/Sale requires full reversible balance, no outstanding capture
+or cancellation balance, and either an empty financial list or exactly its matching
+Sale (amount, reference and number). Contradictory, partial, duplicate, reversed or
+unrelated evidence cannot confirm payment. Bank confirmation performs GETs only.
+An Authorization remains card-only and uses the existing durable capture intent.
+Transaction numbers accept exact integral JSON numbers through 2^53-1, including
+the floats used for large integers by 32-bit PHP 5.6. Strings/booleans are rejected.
+
+The configured model must persist settlement on either verified flag. VAU retains
+its existing `captured` result and `capture_state=confirmed` names for compatibility,
+with the persisted instrument selecting CREDITCARD versus BANKLINK. No migration is
+needed. Unknown instruments remain unconfirmed. Individual-bank/simulator behavior
+has not yet been verified live.
+
+`validationSummary` resets on each validation and contains only bounded state/type,
+the supported instrument, verification booleans and failed-attempt count/codes.
+Callbacks log receipt, verification, rejection/retry and acknowledgment. VAU selects
+`logCategory=payment` and `logLevel=trace` to send these to payment_trace.log. Logging
+remains opt-in for other applications. This does not change callback verification
+or the application's business completion policy.
+
+Source contract and staging upload/acceptance evidence are recorded in VAU's
+`docs/features/swedbank_pay/staging.md` and the November 6 `progress.md` entry.
+The bank fixtures are contract tests, not captured live bank responses.
+Run all tests in this directory with PHPUnit, including `XSwedbankPayBankTest.php`.

@@ -5,6 +5,7 @@ require_once getenv('YII_FRAMEWORK') ?: dirname(__FILE__).'/../../../../yii-1.1.
 require_once dirname(__FILE__).'/../XSwedbankPay.php';
 require_once dirname(__FILE__).'/../XSwedbankPayWebhookAction.php';
 
+// phpcs:ignore Squiz.Classes.ClassFileName.NoMatch -- Test doubles stay beside their suite.
 class XSwedbankPayFakeClient extends XSwedbankPay
 {
 	public $calls=array();
@@ -27,27 +28,28 @@ class XSwedbankPayFakeClient extends XSwedbankPay
 	}
 }
 
+// phpcs:ignore Squiz.Classes.ClassFileName.NoMatch -- Test doubles stay beside their suite.
 class XSwedbankPayTestModule extends CModule { }
 
 class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 {
-	private $payee='00000000-0000-0000-0000-000000000001';
-	private $id='/psp/paymentorders/00000000-0000-0000-0000-000000000002';
+	private $_payee='00000000-0000-0000-0000-000000000001';
+	private $_id='/psp/paymentorders/00000000-0000-0000-0000-000000000002';
 
-	private function client($enabled=true)
+	private function _client($enabled=true)
 	{
-		return new XSwedbankPayFakeClient($this->payee, 'offline-test-token', $enabled);
+		return new XSwedbankPayFakeClient($this->_payee, 'offline-test-token', $enabled);
 	}
 
-	private function order()
+	private function _order()
 	{
 		return array('paymentOrder'=>array(
-			'id'=>$this->id, 'amount'=>100, 'currency'=>'EUR', 'status'=>'Initialized',
-			'payeeInfo'=>array('id'=>$this->id.'/payeeinfo'),
+			'id'=>$this->_id, 'amount'=>100, 'currency'=>'EUR', 'status'=>'Initialized',
+			'payeeInfo'=>array('id'=>$this->_id.'/payeeinfo'),
 		));
 	}
 
-	private function ok($value)
+	private function _ok($value)
 	{
 		return array('status'=>200, 'body'=>json_encode($value));
 	}
@@ -61,8 +63,10 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 			$this->assertSame($expected,$client->validatePayment());
 			$this->assertSame($result,$client->validationResult);
 			$this->assertFalse($client->isAutoRequest());
-			if($expected === true) $this->assertNull($client->errorMessage);
-			else $this->assertNotEmpty($client->errorMessage);
+			if($expected === true)
+				$this->assertNull($client->errorMessage);
+			else
+				$this->assertNotEmpty($client->errorMessage);
 		}
 	}
 
@@ -85,35 +89,56 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 	{
 		foreach(array(false, 1, 'true') as $enabled)
 		{
-			$client=$this->client($enabled);
-			try { $client->createOrder('VAUTest1', 100, $this->options()); $this->fail('Disabled client sent a request.'); }
-			catch(RuntimeException $e) { $this->assertContains('disabled', $e->getMessage()); }
+			$client=$this->_client($enabled);
+			try
+			{
+				$client->createOrder('VAUTest1', 100, $this->_options());
+				$this->fail('Disabled client sent a request.');
+			}
+			catch(RuntimeException $e)
+			{
+				$this->assertContains('disabled', $e->getMessage());
+			}
 			$this->assertCount(0, $client->calls);
 		}
-		$client=new XSwedbankPayFakeClient($this->payee, 'offline-test-token');
-		try { $client->readOrder($this->id, 'VAUTest1', 100); $this->fail('Default enabled.'); }
-		catch(RuntimeException $e) { $this->assertCount(0, $client->calls); }
+		$client=new XSwedbankPayFakeClient($this->_payee, 'offline-test-token');
+		try
+		{
+			$client->readOrder($this->_id, 'VAUTest1', 100);
+			$this->fail('Default enabled.');
+		}
+		catch(RuntimeException $e)
+		{
+			$this->assertCount(0, $client->calls);
+		}
 	}
 
 	public function testTermsAndLogoUrlsAreSentUnchangedAndValidated()
 	{
 		foreach(array('termsOfServiceUrl','logoUrl') as $field)
 		{
-			$options=$this->options();
+			$options=$this->_options();
 			$options['urls'][$field]='https://shop.example/public/resource?lang=et';
-			$client=$this->client();
+			$client=$this->_client();
 			$client->validateCreate('VAUTest1',100,$options);
 			$this->assertCount(0,$client->calls);
-			$client->responses=array($this->ok($this->order()));
+			$client->responses=array($this->_ok($this->_order()));
 			$client->createOrder('VAUTest1',100,$options);
 			$body=json_decode($client->calls[0][3],true);
 			$this->assertSame($options['urls'][$field],$body['paymentOrder']['urls'][$field]);
 			foreach(array('http://shop.example/a','//shop.example/a','https://user:secret@shop.example/a','https://shop.example/a#fragment',"https://shop.example/a\n",array('https://shop.example/a')) as $invalid)
 			{
 				$options['urls'][$field]=$invalid;
-				$client=$this->client();
-				try { $client->createOrder('VAUTest1',100,$options); $this->fail('Invalid URL accepted.'); }
-				catch(InvalidArgumentException $e) { $this->assertCount(0,$client->calls); }
+				$client=$this->_client();
+				try
+				{
+					$client->createOrder('VAUTest1',100,$options);
+					$this->fail('Invalid URL accepted.');
+				}
+				catch(InvalidArgumentException $e)
+				{
+					$this->assertCount(0,$client->calls);
+				}
 			}
 		}
 	}
@@ -127,15 +152,22 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 		)));
 		$this->assertFalse($module->getComponent('blocked')->enabled);
 		$this->assertTrue($module->getComponent('allowed')->enabled);
-		try { $module->getComponent('truthy')->validateCreate('Test',100,$this->options()); $this->fail('Truthy opt-in accepted.'); }
-		catch(RuntimeException $e) { $this->assertContains('disabled',$e->getMessage()); }
+		try
+		{
+			$module->getComponent('truthy')->validateCreate('Test',100,$this->_options());
+			$this->fail('Truthy opt-in accepted.');
+		}
+		catch(RuntimeException $e)
+		{
+			$this->assertContains('disabled',$e->getMessage());
+		}
 	}
 
 	public function testCreatesOrderWithVersionAndSuppliedPayerContext()
 	{
-		$client=$this->client();
-		$client->responses=array($this->ok($this->order()));
-		$result=$client->createOrder('VAUTest1', 100, $this->options());
+		$client=$this->_client();
+		$client->responses=array($this->_ok($this->_order()));
+		$result=$client->createOrder('VAUTest1', 100, $this->_options());
 		$this->assertSame('Initialized', $result['paymentOrder']['status']);
 		$this->assertCount(1, $client->calls);
 		$call=$client->calls[0];
@@ -159,9 +191,16 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 	/** @dataProvider invalidInputProvider */
 	public function testInvalidInputCannotSend($reference, $amount)
 	{
-		$client=$this->client();
-		try { $client->createOrder($reference, $amount, $this->options()); $this->fail('Input accepted.'); }
-		catch(InvalidArgumentException $e) { $this->assertCount(0, $client->calls); }
+		$client=$this->_client();
+		try
+		{
+			$client->createOrder($reference, $amount, $this->_options());
+			$this->fail('Input accepted.');
+		}
+		catch(InvalidArgumentException $e)
+		{
+			$this->assertCount(0, $client->calls);
+		}
 	}
 
 	public function unsafeResourceProvider()
@@ -173,17 +212,24 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 	/** @dataProvider unsafeResourceProvider */
 	public function testUnsafeResourceCannotReceiveCredentials($id)
 	{
-		$client=$this->client();
-		try { $client->readOrder($id, 'VAUTest1', 100); $this->fail('Resource accepted.'); }
-		catch(RuntimeException $e) { $this->assertCount(0, $client->calls); }
+		$client=$this->_client();
+		try
+		{
+			$client->readOrder($id, 'VAUTest1', 100);
+			$this->fail('Resource accepted.');
+		}
+		catch(RuntimeException $e)
+		{
+			$this->assertCount(0, $client->calls);
+		}
 	}
 
 	public function testReadBindsIdAmountCurrencyPayeeAndReference()
 	{
-		$client=$this->client();
-		$client->responses=array($this->ok($this->order()), $this->ok(array('payeeInfo'=>array(
-			'payeeId'=>$this->payee, 'payeeReference'=>'VAUTest1'))));
-		$result=$client->readOrder($this->id, 'VAUTest1', 100);
+		$client=$this->_client();
+		$client->responses=array($this->_ok($this->_order()), $this->_ok(array('payeeInfo'=>array(
+			'payeeId'=>$this->_payee, 'payeeReference'=>'VAUTest1'))));
+		$result=$client->readOrder($this->_id, 'VAUTest1', 100);
 		$this->assertSame('Initialized', $result['paymentOrder']['status']);
 		$this->assertCount(2, $client->calls);
 		$this->assertSame('GET', $client->calls[0][0]);
@@ -199,21 +245,35 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 	/** @dataProvider mismatchProvider */
 	public function testMismatchedOrderStopsBeforePayeeRequest($field, $value)
 	{
-		$client=$this->client(); $order=$this->order(); $order['paymentOrder'][$field]=$value;
-		$client->responses=array($this->ok($order));
-		try { $client->readOrder($this->id, 'VAUTest1', 100); $this->fail('Mismatch accepted.'); }
-		catch(RuntimeException $e) { $this->assertCount(1, $client->calls); }
+		$client=$this->_client(); $order=$this->_order(); $order['paymentOrder'][$field]=$value;
+		$client->responses=array($this->_ok($order));
+		try
+		{
+			$client->readOrder($this->_id, 'VAUTest1', 100);
+			$this->fail('Mismatch accepted.');
+		}
+		catch(RuntimeException $e)
+		{
+			$this->assertCount(1, $client->calls);
+		}
 	}
 
 	public function testPayeeAndReferenceMismatchesAreRejected()
 	{
 		foreach(array(array('payeeId'=>'other','payeeReference'=>'VAUTest1'),
-			array('payeeId'=>$this->payee,'payeeReference'=>'other')) as $payee)
+			array('payeeId'=>$this->_payee,'payeeReference'=>'other')) as $payee)
 		{
-			$client=$this->client();
-			$client->responses=array($this->ok($this->order()), $this->ok(array('payeeInfo'=>$payee)));
-			try { $client->readOrder($this->id, 'VAUTest1', 100); $this->fail('Mismatch accepted.'); }
-			catch(RuntimeException $e) { $this->assertSame('Payee or reference mismatch.', $e->getMessage()); }
+			$client=$this->_client();
+			$client->responses=array($this->_ok($this->_order()), $this->_ok(array('payeeInfo'=>$payee)));
+			try
+			{
+				$client->readOrder($this->_id, 'VAUTest1', 100);
+				$this->fail('Mismatch accepted.');
+			}
+			catch(RuntimeException $e)
+			{
+				$this->assertSame('Payee or reference mismatch.', $e->getMessage());
+			}
 		}
 	}
 
@@ -221,25 +281,46 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 	{
 		foreach(array(302,401,429,500,200) as $status)
 		{
-			$client=$this->client();
+			$client=$this->_client();
 			$client->responses=array(array('status'=>$status,'body'=>'private-body-secret'));
-			try { $client->createOrder('VAUTest1',100, $this->options()); $this->fail('Bad response accepted.'); }
-			catch(RuntimeException $e) { $this->assertNotContains('private-body-secret',$e->getMessage()); }
+			try
+			{
+				$client->createOrder('VAUTest1',100, $this->_options());
+				$this->fail('Bad response accepted.');
+			}
+			catch(RuntimeException $e)
+			{
+				$this->assertNotContains('private-body-secret',$e->getMessage());
+			}
 			$this->assertCount(1,$client->calls);
 		}
-		$client=$this->client();
+		$client=$this->_client();
 		$client->responses=array(new RuntimeException('Simulated timeout'));
-		try { $client->createOrder('VAUTest1',100, $this->options()); $this->fail('Timeout accepted.'); }
-		catch(RuntimeException $e) { $this->assertCount(1,$client->calls); }
+		try
+		{
+			$client->createOrder('VAUTest1',100, $this->_options());
+			$this->fail('Timeout accepted.');
+		}
+		catch(RuntimeException $e)
+		{
+			$this->assertCount(1,$client->calls);
+		}
 	}
 
 	public function testMissingCredentialsAndHeaderInjectionCannotSend()
 	{
 		foreach(array('', "token\r\nInjected: value") as $token)
 		{
-			$client=new XSwedbankPayFakeClient($this->payee, $token, true);
-			try { $client->createOrder('VAUTest1',100, $this->options()); $this->fail('Bad credentials accepted.'); }
-			catch(RuntimeException $e) { $this->assertCount(0,$client->calls); }
+			$client=new XSwedbankPayFakeClient($this->_payee, $token, true);
+			try
+			{
+				$client->createOrder('VAUTest1',100, $this->_options());
+				$this->fail('Bad credentials accepted.');
+			}
+			catch(RuntimeException $e)
+			{
+				$this->assertCount(0,$client->calls);
+			}
 		}
 	}
 
@@ -247,15 +328,22 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 	{
 		foreach(array(array(), array('paymentOrder'=>array('id'=>'https://evil.test/order'))) as $response)
 		{
-			$client=$this->client(); $client->responses=array($this->ok($response));
-			try { $client->createOrder('VAUTest1',100, $this->options()); $this->fail('Malformed response accepted.'); }
-			catch(RuntimeException $e) { $this->assertCount(1,$client->calls); }
+			$client=$this->_client(); $client->responses=array($this->_ok($response));
+			try
+			{
+				$client->createOrder('VAUTest1',100, $this->_options());
+				$this->fail('Malformed response accepted.');
+			}
+			catch(RuntimeException $e)
+			{
+				$this->assertCount(1,$client->calls);
+			}
 		}
 	}
 
-	private function payeeResponse()
+	private function _payeeResponse()
 	{
-		return $this->ok(array('payeeInfo'=>array('payeeId'=>$this->payee, 'payeeReference'=>'VAUTest1')));
+		return $this->_ok(array('payeeInfo'=>array('payeeId'=>$this->_payee, 'payeeReference'=>'VAUTest1')));
 	}
 
 	public function checkoutUrlProvider()
@@ -272,53 +360,55 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 	/** @dataProvider checkoutUrlProvider */
 	public function testCheckoutUsesOnlyVerifiedSandboxOrigin($url,$allowed)
 	{
-		$client=$this->client(); $order=$this->order();
+		$client=$this->_client(); $order=$this->_order();
 		$order['operations']=array(array('rel'=>'redirect-checkout','method'=>'GET','href'=>$url));
-		$client->responses=array($this->ok($order),$this->payeeResponse());
-		if(!$allowed) $this->expectException(RuntimeException::class);
-		$this->assertSame($url,$client->checkoutUrl($this->id,'VAUTest1',100));
+		$client->responses=array($this->_ok($order),$this->_payeeResponse());
+		if(!$allowed)
+			$this->expectException(RuntimeException::class);
+		$this->assertSame($url,$client->checkoutUrl($this->_id,'VAUTest1',100));
 	}
 
 	public function testPaidOrderCannotBeOpenedForAnotherCheckout()
 	{
-		$client=$this->client(); $order=$this->order(); $order['paymentOrder']['status']='Paid';
-		$client->responses=array($this->ok($order),$this->payeeResponse());
+		$client=$this->_client(); $order=$this->_order(); $order['paymentOrder']['status']='Paid';
+		$client->responses=array($this->_ok($order),$this->_payeeResponse());
 		$this->expectException(RuntimeException::class);
-		$client->checkoutUrl($this->id,'VAUTest1',100);
+		$client->checkoutUrl($this->_id,'VAUTest1',100);
 	}
 
-	private function evidenceResponses($status='Paid')
+	private function _evidenceResponses($status='Paid')
 	{
-		$order=$this->order(); $order['paymentOrder']['status']=$status;
+		$order=$this->_order(); $order['paymentOrder']['status']=$status;
 		foreach(array('paid','financialTransactions','failedAttempts') as $resource)
-			$order['paymentOrder'][$resource]=array('id'=>$this->id.'/'.strtolower($resource));
+			$order['paymentOrder'][$resource]=array('id'=>$this->_id.'/'.strtolower($resource));
 		$order['paymentOrder']['remainingCaptureAmount']=100;
-		return array($this->ok($order),$this->payeeResponse(),
-			$this->ok(array('financialTransactions'=>array('id'=>$this->id.'/financialtransactions','financialTransactionsList'=>array()))),
-			$this->ok(array('failedAttempts'=>array('id'=>$this->id.'/failedattempts','failedAttemptList'=>array(
+		return array($this->_ok($order),$this->_payeeResponse(),
+			$this->_ok(array('financialTransactions'=>array('id'=>$this->_id.'/financialtransactions','financialTransactionsList'=>array()))),
+			$this->_ok(array('failedAttempts'=>array('id'=>$this->_id.'/failedattempts','failedAttemptList'=>array(
 				array('status'=>'Failed','problem'=>array('type'=>'carddeclined','status'=>403,'detail'=>'private detail',
 					'problems'=>array(array('name'=>'INELIGIBLE_CARD_RANGE','description'=>'private card data'),
 						array('name'=>'private detail with spaces')))))))),
-			$this->ok(array('paid'=>array('id'=>$this->id.'/paid','amount'=>100,'payeeReference'=>'VAUTest1',
+			$this->_ok(array('paid'=>array('id'=>$this->_id.'/paid','amount'=>100,'payeeReference'=>'VAUTest1',
 				'instrument'=>'CreditCard','transactionType'=>'Authorization','details'=>array('private'=>'card detail'),
 				'paymentToken'=>'private token'))));
 	}
 
 	public function testPaidAuthorizationIsNotReportedAsCaptureAndSecretsAreExcluded()
 	{
-		$client=$this->client(); $client->responses=$this->evidenceResponses();
-		$evidence=$client->paymentEvidence($this->id,'VAUTest1',100);
+		$client=$this->_client(); $client->responses=$this->_evidenceResponses();
+		$evidence=$client->paymentEvidence($this->_id,'VAUTest1',100);
 		$this->assertSame('Authorization',$evidence['paid']['transactionType']);
 		$this->assertSame(100,$evidence['remainingCaptureAmount']);
 		$this->assertSame(array(),$evidence['financialTransactions']);
 		$this->assertNotContains('private',json_encode($evidence));
-		foreach($client->calls as $call) $this->assertSame('GET',$call[0]);
+		foreach($client->calls as $call)
+			$this->assertSame('GET',$call[0]);
 	}
 
 	public function testFailedAttemptCanLeaveOrderInitializedWithNoFinancialTransactions()
 	{
-		$client=$this->client(); $client->responses=$this->evidenceResponses('Initialized');
-		$evidence=$client->paymentEvidence($this->id,'VAUTest1',100);
+		$client=$this->_client(); $client->responses=$this->_evidenceResponses('Initialized');
+		$evidence=$client->paymentEvidence($this->_id,'VAUTest1',100);
 		$this->assertSame('Initialized',$evidence['status']);
 		$this->assertSame(array(),$evidence['financialTransactions']);
 		$this->assertSame('Failed',$evidence['failedAttempts'][0]['status']);
@@ -330,42 +420,45 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 
 	public function testEvidenceResourceMismatchIsRejected()
 	{
-		$client=$this->client(); $client->responses=$this->evidenceResponses();
-		$client->responses[2]=$this->ok(array('financialTransactions'=>array('id'=>'/psp/paymentorders/other/financialtransactions')));
+		$client=$this->_client(); $client->responses=$this->_evidenceResponses();
+		$client->responses[2]=$this->_ok(array('financialTransactions'=>array('id'=>'/psp/paymentorders/other/financialtransactions')));
 		$this->expectException(RuntimeException::class);
-		$client->paymentEvidence($this->id,'VAUTest1',100);
+		$client->paymentEvidence($this->_id,'VAUTest1',100);
 	}
 
 	public function testPaidReferenceMismatchIsRejected()
 	{
-		$client=$this->client(); $client->responses=$this->evidenceResponses();
+		$client=$this->_client(); $client->responses=$this->_evidenceResponses();
 		$data=json_decode($client->responses[4]['body'],true); $data['paid']['payeeReference']='another';
-		$client->responses[4]=$this->ok($data);
+		$client->responses[4]=$this->_ok($data);
 		$this->expectException(RuntimeException::class);
-		$client->paymentEvidence($this->id,'VAUTest1',100);
+		$client->paymentEvidence($this->_id,'VAUTest1',100);
 	}
 
 	public function testMissingFinancialListIsNotInterpretedAsZeroCaptures()
 	{
-		$client=$this->client(); $client->responses=$this->evidenceResponses();
-		$client->responses[2]=$this->ok(array('financialTransactions'=>array('id'=>$this->id.'/financialtransactions')));
+		$client=$this->_client(); $client->responses=$this->_evidenceResponses();
+		$client->responses[2]=$this->_ok(array('financialTransactions'=>array('id'=>$this->_id.'/financialtransactions')));
 		$this->expectException(RuntimeException::class);
-		$client->paymentEvidence($this->id,'VAUTest1',100);
+		$client->paymentEvidence($this->_id,'VAUTest1',100);
 	}
 
 	public function testInitializedOrderMayOmitTheEmptyFinancialListButPaidCannot()
 	{
 		foreach(array('Initialized','Paid') as $status)
 		{
-			$client=$this->client(); $client->responses=$this->evidenceResponses($status);
-			$client->responses[2]=$this->ok(array('financialTransactions'=>array('id'=>$this->id.'/financialtransactions')));
+			$client=$this->_client(); $client->responses=$this->_evidenceResponses($status);
+			$client->responses[2]=$this->_ok(array('financialTransactions'=>array('id'=>$this->_id.'/financialtransactions')));
 			try
 			{
-				$result=$client->paymentEvidence($this->id,'VAUTest1',100,'EUR','VAUTest1C1');
+				$result=$client->paymentEvidence($this->_id,'VAUTest1',100,'EUR','VAUTest1C1');
 				$this->assertSame('Initialized',$status);
 				$this->assertFalse($result['captureVerified']);
 			}
-			catch(RuntimeException $e) { $this->assertSame('Paid',$status); }
+			catch(RuntimeException $e)
+			{
+				$this->assertSame('Paid',$status);
+			}
 		}
 	}
 
@@ -373,32 +466,37 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 	{
 		foreach(array('valid','number','amount','reference','duplicate','reversal','duplicateCapture') as $case)
 		{
-			$client=$this->client();
-			$responses=$this->captureResponses();
+			$client=$this->_client();
+			$responses=$this->_captureResponses();
 			$authorization=array('type'=>'Authorization','number'=>123,'amount'=>100,'payeeReference'=>'VAUTest1');
-			if($case === 'number') $authorization['number']=124;
-			if($case === 'amount') $authorization['amount']=99;
-			if($case === 'reference') $authorization['payeeReference']='Other';
-			if($case === 'reversal') $authorization['type']='Reversal';
+			if($case === 'number')
+				$authorization['number']=124;
+			if($case === 'amount')
+				$authorization['amount']=99;
+			if($case === 'reference')
+				$authorization['payeeReference']='Other';
+			if($case === 'reversal')
+				$authorization['type']='Reversal';
 			foreach(array(4,12) as $index)
 			{
 				$data=json_decode($responses[$index]['body'],true);
 				$data['paid']['number']=123;
-				$responses[$index]=$this->ok($data);
+				$responses[$index]=$this->_ok($data);
 			}
 			foreach(array(2,10) as $index)
 			{
 				$data=json_decode($responses[$index]['body'],true);
 				$data['financialTransactions']['financialTransactionsList'][]=$authorization;
-				if($case === 'duplicate') $data['financialTransactions']['financialTransactionsList'][]=$authorization;
+				if($case === 'duplicate')
+					$data['financialTransactions']['financialTransactionsList'][]=$authorization;
 				if($case === 'duplicateCapture' && $index === 10)
 					$data['financialTransactions']['financialTransactionsList'][]=$data['financialTransactions']['financialTransactionsList'][0];
-				$responses[$index]=$this->ok($data);
+				$responses[$index]=$this->_ok($data);
 			}
 			$client->responses=$responses;
 			try
 			{
-				$result=$client->captureOrder($this->id,'VAUTest1',100,'VAUTest1C1');
+				$result=$client->captureOrder($this->_id,'VAUTest1',100,'VAUTest1C1');
 				$this->assertSame('valid',$case);
 				$this->assertTrue($result['captureVerified']);
 			}
@@ -406,44 +504,46 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 			{
 				$this->assertNotSame('valid',$case);
 				if($case !== 'duplicateCapture')
-					foreach($client->calls as $call) $this->assertSame('GET',$call[0]);
+					foreach($client->calls as $call)
+						$this->assertSame('GET',$call[0]);
 			}
 		}
 	}
 
-	private function captureResponses()
+	private function _captureResponses()
 	{
-		$before=$this->evidenceResponses();
+		$before=$this->_evidenceResponses();
 		$order=json_decode($before[0]['body'],true);
 		$order['paymentOrder']['vatAmount']=0;
 		$order['operations']=array(array('rel'=>'capture','method'=>'POST',
-			'href'=>XSwedbankPay::ORIGIN.$this->id.'/captures'));
-		$after=$this->evidenceResponses();
+			'href'=>XSwedbankPay::ORIGIN.$this->_id.'/captures'));
+		$after=$this->_evidenceResponses();
 		$captured=$order;
 		$captured['paymentOrder']['remainingCaptureAmount']=0;
 		$captured['paymentOrder']['remainingCancellationAmount']=0;
 		$captured['paymentOrder']['remainingReversalAmount']=100;
 		$captured['operations']=array();
-		$after[0]=$this->ok($captured);
-		$after[2]=$this->ok(array('financialTransactions'=>array('id'=>$this->id.'/financialtransactions',
+		$after[0]=$this->_ok($captured);
+		$after[2]=$this->_ok(array('financialTransactions'=>array('id'=>$this->_id.'/financialtransactions',
 			'financialTransactionsList'=>array(array('type'=>'Capture','amount'=>100,
 				'number'=>123,'payeeReference'=>'VAUTest1C1')))));
-		return array_merge($before,array($this->ok($order),$this->payeeResponse(),$this->ok($captured)),$after);
+		return array_merge($before,array($this->_ok($order),$this->_payeeResponse(),$this->_ok($captured)),$after);
 	}
 
 	public function testCapturePostsOnceAndVerifiesSeparateReadBack()
 	{
-		$client=$this->client(); $client->responses=$this->captureResponses();
-		$result=$client->captureOrder($this->id,'VAUTest1',100, 'VAUTest1C1');
+		$client=$this->_client(); $client->responses=$this->_captureResponses();
+		$result=$client->captureOrder($this->_id,'VAUTest1',100, 'VAUTest1C1');
 		$this->assertTrue($result['captureVerified']);
 		$this->assertSame('VAUTest1C1',$result['captureReference']);
 		$this->assertCount(13,$client->calls);
 		$paths=array('','/payeeinfo','/financialtransactions','/failedattempts','/paid',
 			'','/payeeinfo','/captures','','/payeeinfo','/financialtransactions','/failedattempts','/paid');
 		foreach($paths as $index=>$path)
-			$this->assertSame(XSwedbankPay::ORIGIN.$this->id.$path,$client->calls[$index][1]);
-		foreach($client->calls as $index=>$call) $this->assertSame($index === 7 ? 'POST' : 'GET',$call[0]);
-		$this->assertSame(XSwedbankPay::ORIGIN.$this->id.'/captures',$client->calls[7][1]);
+			$this->assertSame(XSwedbankPay::ORIGIN.$this->_id.$path,$client->calls[$index][1]);
+		foreach($client->calls as $index=>$call)
+			$this->assertSame($index === 7 ? 'POST' : 'GET',$call[0]);
+		$this->assertSame(XSwedbankPay::ORIGIN.$this->_id.'/captures',$client->calls[7][1]);
 		$transaction=json_decode($client->calls[7][3],true)['transaction'];
 		$this->assertSame(100,$transaction['amount']);
 		$this->assertSame(0,$transaction['vatAmount']);
@@ -460,27 +560,40 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 	/** @dataProvider capturePreconditionProvider */
 	public function testUnsafeCaptureDoesNotPost($scenario)
 	{
-		$client=$this->client($scenario !== 'disabled'); $responses=$this->captureResponses();
-		if($scenario === 'alreadyCaptured') $responses[0]=$responses[8];
+		$client=$this->_client($scenario !== 'disabled'); $responses=$this->_captureResponses();
+		if($scenario === 'alreadyCaptured')
+			$responses[0]=$responses[8];
 		if($scenario === 'wrongPayee' || $scenario === 'wrongReference')
 		{
 			$data=json_decode($responses[1]['body'],true);
 			$data['payeeInfo'][$scenario === 'wrongPayee' ? 'payeeId' : 'payeeReference']='other';
-			$responses[1]=$this->ok($data);
+			$responses[1]=$this->_ok($data);
 		}
 		if($scenario === 'notAuthorization')
 		{
 			$data=json_decode($responses[4]['body'],true); $data['paid']['transactionType']='Sale';
-			$responses[4]=$this->ok($data);
+			$responses[4]=$this->_ok($data);
 		}
 		$order=json_decode($responses[5]['body'],true);
-		if($scenario === 'balanceChanged') $order['paymentOrder']['remainingCaptureAmount']=0;
-		if($scenario === 'foreignOperation') $order['operations'][0]['href']='https://api.swedbankpay.com'.$this->id.'/captures';
-		if($scenario === 'noOperation') $order['operations']=array();
-		if($scenario === 'vat') $order['paymentOrder']['vatAmount']=20;
-		$responses[5]=$this->ok($order); $client->responses=$responses;
-		try { $client->captureOrder($this->id,'VAUTest1',100, 'VAUTest1C1'); $this->fail('Unsafe capture accepted.'); }
-		catch(RuntimeException $e) { foreach($client->calls as $call) $this->assertSame('GET',$call[0]); }
+		if($scenario === 'balanceChanged')
+			$order['paymentOrder']['remainingCaptureAmount']=0;
+		if($scenario === 'foreignOperation')
+			$order['operations'][0]['href']='https://api.swedbankpay.com'.$this->_id.'/captures';
+		if($scenario === 'noOperation')
+			$order['operations']=array();
+		if($scenario === 'vat')
+			$order['paymentOrder']['vatAmount']=20;
+		$responses[5]=$this->_ok($order); $client->responses=$responses;
+		try
+		{
+			$client->captureOrder($this->_id,'VAUTest1',100, 'VAUTest1C1');
+			$this->fail('Unsafe capture accepted.');
+		}
+		catch(RuntimeException $e)
+		{
+			foreach($client->calls as $call)
+				$this->assertSame('GET',$call[0]);
+		}
 	}
 
 	public function testCaptureUncertainPostIsNeverRetried()
@@ -488,9 +601,16 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 		foreach(array(new RuntimeException('Simulated timeout'),array('status'=>502,'body'=>'private response'),
 			array('status'=>200,'body'=>'malformed')) as $failure)
 		{
-			$client=$this->client(); $client->responses=$this->captureResponses(); $client->responses[7]=$failure;
-			try { $client->captureOrder($this->id,'VAUTest1',100, 'VAUTest1C1'); $this->fail('Uncertain capture accepted.'); }
-			catch(RuntimeException $e) { $this->assertNotContains('private',$e->getMessage()); }
+			$client=$this->_client(); $client->responses=$this->_captureResponses(); $client->responses[7]=$failure;
+			try
+			{
+				$client->captureOrder($this->_id,'VAUTest1',100, 'VAUTest1C1');
+				$this->fail('Uncertain capture accepted.');
+			}
+			catch(RuntimeException $e)
+			{
+				$this->assertNotContains('private',$e->getMessage());
+			}
 			$this->assertCount(8,$client->calls);
 		}
 	}
@@ -504,52 +624,67 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 	/** @dataProvider captureMismatchProvider */
 	public function testAcceptedCaptureStillRequiresMatchingTransactionAndBalances($scenario)
 	{
-		$client=$this->client(); $responses=$this->captureResponses();
+		$client=$this->_client(); $responses=$this->_captureResponses();
 		$data=json_decode($responses[10]['body'],true);
-		if($scenario === 'missingTransaction') $data['financialTransactions']['financialTransactionsList']=array();
-		if($scenario === 'wrongReference') $data['financialTransactions']['financialTransactionsList'][0]['payeeReference']='other';
-		if($scenario === 'wrongAmount') $data['financialTransactions']['financialTransactionsList'][0]['amount']=99;
-		if($scenario === 'wrongType') $data['financialTransactions']['financialTransactionsList'][0]['type']='Authorization';
-		$responses[10]=$this->ok($data);
-		if($scenario === 'balance') $responses[8]=$responses[0];
+		if($scenario === 'missingTransaction')
+			$data['financialTransactions']['financialTransactionsList']=array();
+		if($scenario === 'wrongReference')
+			$data['financialTransactions']['financialTransactionsList'][0]['payeeReference']='other';
+		if($scenario === 'wrongAmount')
+			$data['financialTransactions']['financialTransactionsList'][0]['amount']=99;
+		if($scenario === 'wrongType')
+			$data['financialTransactions']['financialTransactionsList'][0]['type']='Authorization';
+		$responses[10]=$this->_ok($data);
+		if($scenario === 'balance')
+			$responses[8]=$responses[0];
 		if($scenario === 'missingReversal' || $scenario === 'absentBalancesWithoutTransaction')
 		{
 			$order=json_decode($responses[8]['body'],true);
 			unset($order['paymentOrder']['remainingCaptureAmount'], $order['paymentOrder']['remainingCancellationAmount']);
-			if($scenario === 'missingReversal') unset($order['paymentOrder']['remainingReversalAmount']);
-			else $responses[10]=$responses[2];
-			$responses[8]=$this->ok($order);
+			if($scenario === 'missingReversal')
+				unset($order['paymentOrder']['remainingReversalAmount']);
+			else
+				$responses[10]=$responses[2];
+			$responses[8]=$this->_ok($order);
 		}
 		$client->responses=$responses;
-		try { $client->captureOrder($this->id,'VAUTest1',100, 'VAUTest1C1'); $this->fail('Capture falsely verified.'); }
-		catch(RuntimeException $e) { $this->assertContains('Do not repeat POST',$e->getMessage()); }
+		try
+		{
+			$client->captureOrder($this->_id,'VAUTest1',100, 'VAUTest1C1');
+			$this->fail('Capture falsely verified.');
+		}
+		catch(RuntimeException $e)
+		{
+			$this->assertContains('Do not repeat POST',$e->getMessage());
+		}
 		$this->assertCount(13,$client->calls);
 	}
 
 	public function testReadOnlyCaptureVerificationAcceptsOmittedExhaustedBalancesWithPositiveEvidence()
 	{
-		$client=$this->client(); $responses=array_slice($this->captureResponses(),8);
+		$client=$this->_client(); $responses=array_slice($this->_captureResponses(),8);
 		$order=json_decode($responses[0]['body'],true);
 		unset($order['paymentOrder']['remainingCaptureAmount'], $order['paymentOrder']['remainingCancellationAmount']);
-		$responses[0]=$this->ok($order); $client->responses=$responses;
-		$result=$client->verifyCapture($this->id,'VAUTest1',100, 'VAUTest1C1');
+		$responses[0]=$this->_ok($order); $client->responses=$responses;
+		$result=$client->verifyCapture($this->_id,'VAUTest1',100, 'VAUTest1C1');
 		$this->assertTrue($result['captureVerified']);
 		$this->assertNull($result['remainingCaptureAmount']);
 		$this->assertSame(100,$result['remainingReversalAmount']);
 		$this->assertCount(5,$client->calls);
-		foreach($client->calls as $call) $this->assertSame('GET',$call[0]);
+		foreach($client->calls as $call)
+			$this->assertSame('GET',$call[0]);
 	}
 
 	public function testVerifyCaptureUsesBoundEvidenceWithoutExtraRequests()
 	{
 		foreach(array('VAUTest1C1','DifferentCapture') as $captureReference)
 		{
-			$reader=$this->client(); $reader->responses=array_slice($this->captureResponses(),8);
-			$evidence=$reader->paymentEvidence($this->id,'VAUTest1',100,'EUR',$captureReference);
-			$verifier=$this->client(); $verifier->responses=array_slice($this->captureResponses(),8);
+			$reader=$this->_client(); $reader->responses=array_slice($this->_captureResponses(),8);
+			$evidence=$reader->paymentEvidence($this->_id,'VAUTest1',100,'EUR',$captureReference);
+			$verifier=$this->_client(); $verifier->responses=array_slice($this->_captureResponses(),8);
 			try
 			{
-				$result=$verifier->verifyCapture($this->id,'VAUTest1',100,$captureReference);
+				$result=$verifier->verifyCapture($this->_id,'VAUTest1',100,$captureReference);
 				$this->assertTrue($evidence['captureVerified']);
 				$this->assertSame($evidence,$result);
 			}
@@ -560,12 +695,19 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 			}
 			$this->assertSame($reader->calls,$verifier->calls);
 		}
-		$client=$this->client();
-		try { $client->verifyCapture($this->id,'VAUTest1',100,'invalid/reference'); $this->fail('Invalid reference accepted.'); }
-		catch(InvalidArgumentException $e) { $this->assertCount(0,$client->calls); }
+		$client=$this->_client();
+		try
+		{
+			$client->verifyCapture($this->_id,'VAUTest1',100,'invalid/reference');
+			$this->fail('Invalid reference accepted.');
+		}
+		catch(InvalidArgumentException $e)
+		{
+			$this->assertCount(0,$client->calls);
+		}
 	}
 
-	private function options()
+	private function _options()
 	{
 		return array('description'=>'Offline checkout', 'userAgent'=>'Actual payer browser',
 			'vatAmount'=>0, 'urls'=>array('hostUrls'=>array('https://shop.example'),
@@ -579,10 +721,10 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 		$this->assertTrue($component->isInitialized);
 		$this->assertFalse($component->enabled);
 		$this->assertTrue($component->testMode);
-		$client=$this->client();
-		$order=$this->order(); $order['paymentOrder']['amount']=12500; $order['paymentOrder']['currency']='SEK';
-		$client->responses=array($this->ok($order),$this->ok($order),$this->payeeResponse());
-		$options=$this->options(); $options['currency']='SEK'; $options['vatAmount']=2500;
+		$client=$this->_client();
+		$order=$this->_order(); $order['paymentOrder']['amount']=12500; $order['paymentOrder']['currency']='SEK';
+		$client->responses=array($this->_ok($order),$this->_ok($order),$this->_payeeResponse());
+		$options=$this->_options(); $options['currency']='SEK'; $options['vatAmount']=2500;
 		$options['urls']['callbackUrl']='https://shop.example/callback';
 		$client->createOrder('VAUTest1',12500,$options);
 		$sent=json_decode($client->calls[0][3],true)['paymentOrder'];
@@ -590,7 +732,7 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 		$this->assertSame(2500,$sent['vatAmount']);
 		$this->assertSame('Actual payer browser',$sent['userAgent']);
 		$this->assertSame($options['urls'],$sent['urls']);
-		$client->readOrder($this->id,'VAUTest1',12500,'SEK');
+		$client->readOrder($this->_id,'VAUTest1',12500,'SEK');
 		$this->assertCount(3,$client->calls);
 	}
 
@@ -598,30 +740,49 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 	{
 		$invalid=array();
 		foreach(array('description','userAgent','vatAmount','urls') as $field)
-		{ $options=$this->options(); unset($options[$field]); $invalid[]=$options; }
+		{
+			$options=$this->_options();
+			unset($options[$field]);
+			$invalid[]=$options;
+		}
 		foreach(array(-1,101,'0') as $vat)
-		{ $options=$this->options(); $options['vatAmount']=$vat; $invalid[]=$options; }
+		{
+			$options=$this->_options();
+			$options['vatAmount']=$vat;
+			$invalid[]=$options;
+		}
 		foreach(array('http://shop.example','https://user:pass@shop.example','https://shop.example/#fragment',"https://shop.example/\n") as $url)
-		{ $options=$this->options(); $options['urls']['callbackUrl']=$url; $invalid[]=$options; }
-		$options=$this->options(); $options['currency']='eur'; $invalid[]=$options;
-		$options=$this->options(); $options['language']=array(); $invalid[]=$options;
+		{
+			$options=$this->_options();
+			$options['urls']['callbackUrl']=$url;
+			$invalid[]=$options;
+		}
+		$options=$this->_options(); $options['currency']='eur'; $invalid[]=$options;
+		$options=$this->_options(); $options['language']=array(); $invalid[]=$options;
 		foreach($invalid as $options)
 		{
-			$client=$this->client();
-			try { $client->createOrder('VAUTest1',100,$options); $this->fail('Bad options accepted.'); }
-			catch(InvalidArgumentException $e) { $this->assertCount(0,$client->calls); }
+			$client=$this->_client();
+			try
+			{
+				$client->createOrder('VAUTest1',100,$options);
+				$this->fail('Bad options accepted.');
+			}
+			catch(InvalidArgumentException $e)
+			{
+				$this->assertCount(0,$client->calls);
+			}
 		}
 	}
 
 	public function testExplicitCaptureReferenceAndVatAreUsed()
 	{
-		$client=$this->client(); $responses=$this->captureResponses();
+		$client=$this->_client(); $responses=$this->_captureResponses();
 		foreach($responses as &$response)
 			$response['body']=str_replace('VAUTest1C1','SavedCapture42',$response['body']);
 		unset($response);
 		$order=json_decode($responses[5]['body'],true); $order['paymentOrder']['vatAmount']=20;
-		$responses[5]=$this->ok($order); $client->responses=$responses;
-		$evidence=$client->captureOrder($this->id,'VAUTest1',100,'SavedCapture42','EUR',20);
+		$responses[5]=$this->_ok($order); $client->responses=$responses;
+		$evidence=$client->captureOrder($this->_id,'VAUTest1',100,'SavedCapture42','EUR',20);
 		$sent=json_decode($client->calls[7][3],true)['transaction'];
 		$this->assertSame(20,$sent['vatAmount']);
 		$this->assertSame('SavedCapture42',$sent['payeeReference']);
@@ -632,16 +793,23 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 	{
 		foreach(array('VAUTest1','bad/ref') as $reference)
 		{
-			$client=$this->client();
-			try { $client->captureOrder($this->id,'VAUTest1',100,$reference); $this->fail('Bad capture reference.'); }
-			catch(InvalidArgumentException $e) { $this->assertCount(0,$client->calls); }
+			$client=$this->_client();
+			try
+			{
+				$client->captureOrder($this->_id,'VAUTest1',100,$reference);
+				$this->fail('Bad capture reference.');
+			}
+			catch(InvalidArgumentException $e)
+			{
+				$this->assertCount(0,$client->calls);
+			}
 		}
 	}
 
-	private function action($result='captured')
+	private function _action($result='captured')
 	{
 		$controller=new XSwedbankPayTestController('offline');
-		$controller->binding=array('orderId'=>$this->id,'reference'=>'VAUTest1','amount'=>100,
+		$controller->binding=array('orderId'=>$this->_id,'reference'=>'VAUTest1','amount'=>100,
 			'currency'=>'EUR','captureReference'=>'VAUTest1C1','payment'=>new stdClass);
 		$action=new XSwedbankPayTestAction($controller,'callback');
 		$action->bindingCallback='bindingForOrder';
@@ -649,22 +817,23 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 		$action->component=$this->getMockBuilder('XSwedbankPay')->setMethods(array('confirmPayment'))->getMock();
 		$action->component->method('confirmPayment')->willReturnCallback(function($binding) use($controller,$result) {
 			$controller->validatedBinding=$binding;
-			if($result instanceof Exception) throw $result;
+			if($result instanceof Exception)
+				throw $result;
 			return $result;
 		});
 		return $action;
 	}
 
-	private function notification()
+	private function _notification()
 	{
-		return json_encode(array('paymentOrder'=>array('id'=>$this->id),
+		return json_encode(array('paymentOrder'=>array('id'=>$this->_id),
 			'status'=>'Paid','amount'=>1,'payeeReference'=>'attacker','captureVerified'=>true));
 	}
 
 	public function testCallbackDispatchesOnlyAfterComponentValidation()
 	{
-		$action=$this->action();
-		$this->assertSame(200,$action->processCallback('POST',$this->notification()));
+		$action=$this->_action();
+		$this->assertSame(200,$action->processCallback('POST',$this->_notification()));
 		$evidence=$action->controller->received[0];
 		$this->assertSame(100,$evidence['amount']);
 		$this->assertSame('VAUTest1',$evidence['reference']);
@@ -680,8 +849,8 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 	{
 		foreach(array('pending'=>200,'failed'=>200,'error'=>500) as $result=>$status)
 		{
-			$action=$this->action($result);
-			$this->assertSame($status,$action->processCallback('POST',$this->notification()));
+			$action=$this->_action($result);
+			$this->assertSame($status,$action->processCallback('POST',$this->_notification()));
 			$this->assertCount(0,$action->controller->received);
 			$this->assertCount($result === 'failed' ? 1 : 0,$action->controller->failures);
 			if($result === 'failed')
@@ -696,17 +865,25 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 	{
 		foreach(array('validationThrows','handlerThrows','handlerFalse','failureThrows','resolverThrows','badBinding','missingPayment','missingSuccess','missingFailure') as $scenario)
 		{
-			$action=$this->action($scenario === 'validationThrows' ? new RuntimeException('private transport') :
+			$action=$this->_action($scenario === 'validationThrows' ? new RuntimeException('private transport') :
 				($scenario === 'failureThrows' ? 'failed' : 'captured'));
-			if($scenario === 'handlerThrows') $action->controller->handlerResult=new RuntimeException('private handler');
-			if($scenario === 'handlerFalse') $action->controller->handlerResult=false;
-			if($scenario === 'failureThrows') $action->controller->handlerResult=new RuntimeException('private failure');
-			if($scenario === 'resolverThrows') $action->controller->binding=new RuntimeException('private resolver');
-			if($scenario === 'badBinding') $action->controller->binding['orderId']='/psp/paymentorders/other';
-			if($scenario === 'missingPayment') unset($action->controller->binding['payment']);
-			if($scenario === 'missingSuccess') $action->successCallback=null;
-			if($scenario === 'missingFailure') $action->failureCallback=null;
-			$this->assertSame(500,$action->processCallback('POST',$this->notification()),$scenario);
+			if($scenario === 'handlerThrows')
+				$action->controller->handlerResult=new RuntimeException('private handler');
+			if($scenario === 'handlerFalse')
+				$action->controller->handlerResult=false;
+			if($scenario === 'failureThrows')
+				$action->controller->handlerResult=new RuntimeException('private failure');
+			if($scenario === 'resolverThrows')
+				$action->controller->binding=new RuntimeException('private resolver');
+			if($scenario === 'badBinding')
+				$action->controller->binding['orderId']='/psp/paymentorders/other';
+			if($scenario === 'missingPayment')
+				unset($action->controller->binding['payment']);
+			if($scenario === 'missingSuccess')
+				$action->successCallback=null;
+			if($scenario === 'missingFailure')
+				$action->failureCallback=null;
+			$this->assertSame(500,$action->processCallback('POST',$this->_notification()),$scenario);
 			if(!in_array($scenario,array('handlerThrows','handlerFalse'),true))
 				$this->assertCount(0,$action->controller->received);
 			if(in_array($scenario,array('resolverThrows','badBinding','missingPayment','missingSuccess','missingFailure'),true))
@@ -716,87 +893,94 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 
 	public function testCallbackLoggingIsConfigurableAndSanitized()
 	{
-		$action=$this->action(new RuntimeException('private transport secret'));
+		$action=$this->_action(new RuntimeException('private transport secret'));
 		$action->logCategory='swedbankWebhookTest';
 		$action->logLevel='warning';
 		$before=count(Yii::getLogger()->getLogs('warning','swedbankWebhookTest'));
-		$this->assertSame(500,$action->processCallback('POST',$this->notification()));
+		$this->assertSame(500,$action->processCallback('POST',$this->_notification()));
 		$this->assertCount($before,Yii::getLogger()->getLogs('warning','swedbankWebhookTest'));
 		$action->log=true;
-		$this->assertSame(500,$action->processCallback('POST',$this->notification()));
+		$this->assertSame(500,$action->processCallback('POST',$this->_notification()));
 		$logs=Yii::getLogger()->getLogs('warning','swedbankWebhookTest');
-		$this->assertCount($before+1,$logs);
+		$this->assertCount($before+3,$logs);
 		$entry=end($logs);
 		$this->assertContains('UID=wh_',$entry[0]);
 		$this->assertContains('retry required',$entry[0]);
 		$this->assertNotContains('private transport secret',$entry[0]);
 		$this->assertNotContains('attacker',$entry[0]);
-		$this->assertNotContains($this->id,$entry[0]);
+		$this->assertContains('reference=VAUTest1',$entry[0]);
 	}
 
 	public function testMalformedAndUnknownCallbacksCannotReachProvider()
 	{
 		foreach(array('{}','bad json',json_encode(array('paymentOrder'=>array('id'=>'https://evil.example'))),str_repeat('x',16385)) as $body)
 		{
-			$action=$this->action();
+			$action=$this->_action();
 			$this->assertSame(400,$action->processCallback('POST',$body));
 			$this->assertNull($action->controller->validatedBinding);
 		}
-		$action=$this->action();
-		$this->assertSame(405,$action->processCallback('GET',$this->notification()));
+		$action=$this->_action();
+		$this->assertSame(405,$action->processCallback('GET',$this->_notification()));
 		$action->controller->binding=null;
-		$this->assertSame(404,$action->processCallback('POST',$this->notification()));
+		$this->assertSame(404,$action->processCallback('POST',$this->_notification()));
 		$this->assertNull($action->controller->validatedBinding);
 	}
 	public function testProductionOriginSelectionUsesOnlyFakeTransport()
 	{
-		$client=$this->client(); $client->testMode=false;
-		$order=$this->order();
+		$client=$this->_client(); $client->testMode=false;
+		$order=$this->_order();
 		$order['operations']=array(array('rel'=>'redirect-checkout','method'=>'GET',
 			'href'=>'https://swedbank-checkout.swedbankpay.com/menu/offline'));
-		$client->responses=array($this->ok($order),$this->payeeResponse());
-		$this->assertSame('https://swedbank-checkout.swedbankpay.com/menu/offline',$client->checkoutUrl($this->id,'VAUTest1',100));
-		$this->assertSame('https://api.swedbankpay.com'.$this->id,$client->calls[0][1]);
-		$client=$this->client(); $client->testMode='false';
-		try { $client->readOrder($this->id,'VAUTest1',100); $this->fail('Ambiguous environment accepted.'); }
-		catch(RuntimeException $e) { $this->assertCount(0,$client->calls); }
+		$client->responses=array($this->_ok($order),$this->_payeeResponse());
+		$this->assertSame('https://swedbank-checkout.swedbankpay.com/menu/offline',$client->checkoutUrl($this->_id,'VAUTest1',100));
+		$this->assertSame('https://api.swedbankpay.com'.$this->_id,$client->calls[0][1]);
+		$client=$this->_client(); $client->testMode='false';
+		try
+		{
+			$client->readOrder($this->_id,'VAUTest1',100);
+			$this->fail('Ambiguous environment accepted.');
+		}
+		catch(RuntimeException $e)
+		{
+			$this->assertCount(0,$client->calls);
+		}
 	}
 
 	public function testMissingOrWrongCaptureIntentCannotVerifyCallbackCapture()
 	{
 		foreach(array(null,'OtherCapture') as $reference)
 		{
-			$client=$this->client();
-			$client->responses=array_slice($this->captureResponses(),8);
-			$evidence=$client->paymentEvidence($this->id,'VAUTest1',100,'EUR',$reference);
+			$client=$this->_client();
+			$client->responses=array_slice($this->_captureResponses(),8);
+			$evidence=$client->paymentEvidence($this->_id,'VAUTest1',100,'EUR',$reference);
 			$this->assertFalse($evidence['captureVerified']);
 		}
 	}
 
 	public function testNonCardPaidEvidenceIsRejected()
 	{
-		$responses=$this->evidenceResponses();
-		$paid=json_decode($responses[4]['body'],true); $paid['paid']['instrument']='BankLink';
-		$responses[4]=$this->ok($paid);
-		$client=$this->client(); $client->responses=$responses;
+		$responses=$this->_evidenceResponses();
+		$paid=json_decode($responses[4]['body'],true); $paid['paid']['instrument']='Unknown';
+		$responses[4]=$this->_ok($paid);
+		$client=$this->_client(); $client->responses=$responses;
 		$this->expectException('RuntimeException');
-		$client->paymentEvidence($this->id,'VAUTest1',100,'EUR','VAUTest1C1');
+		$client->paymentEvidence($this->_id,'VAUTest1',100,'EUR','VAUTest1C1');
 	}
 
-	private function duplicateResponse($description=null)
+	private function _duplicateResponse($description=null)
 	{
 		return array('status'=>409,'body'=>json_encode(array(
 			'type'=>'https://api.swedbankpay.com/psp/errordetail/paymentorders/conflict',
 			'problems'=>array(array('name'=>'ConflictingPaymentOrderId',
-				'description'=>$description === null ? basename($this->id) : $description)))));
+				'description'=>$description === null ? basename($this->_id) : $description)))));
 	}
 
 	public function testDuplicateReferenceRecoversOnlyAfterVerifiedGet()
 	{
-		$client=$this->client();
-		$client->responses=array($this->duplicateResponse(),$this->ok($this->order()),$this->payeeResponse());
-		$result=$client->createOrder('VAUTest1',100,$this->options());
-		$this->assertSame($this->id,$result['paymentOrder']['id']);
+		$client=$this->_client();
+		$client->responses=array($this->_duplicateResponse(),$this->_ok($this->_order()),$this->_payeeResponse());
+		$result=$client->createOrder('VAUTest1',100,$this->_options());
+		$this->assertSame($this->_id,$result['paymentOrder']['id']);
 		$this->assertSame(array('POST','GET','GET'),array_column($client->calls,0));
 	}
 
@@ -804,59 +988,90 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 	{
 		foreach(array('amount','currency','id','payeeId','payeeReference') as $field)
 		{
-			$order=$this->order();
-			$payee=array('payeeInfo'=>array('payeeId'=>$this->payee,'payeeReference'=>'VAUTest1'));
-			if($field === 'payeeId' || $field === 'payeeReference') $payee['payeeInfo'][$field]='different';
-			else $order['paymentOrder'][$field]=$field === 'amount' ? 101 : 'different';
-			$client=$this->client();
-			$client->responses=array($this->duplicateResponse(),$this->ok($order),$this->ok($payee));
-			try { $client->createOrder('VAUTest1',100,$this->options()); $this->fail('Mismatched conflict accepted.'); }
-			catch(RuntimeException $e) { $this->assertContains('mismatch',$e->getMessage()); }
+			$order=$this->_order();
+			$payee=array('payeeInfo'=>array('payeeId'=>$this->_payee,'payeeReference'=>'VAUTest1'));
+			if($field === 'payeeId' || $field === 'payeeReference')
+				$payee['payeeInfo'][$field]='different';
+			else
+				$order['paymentOrder'][$field]=$field === 'amount' ? 101 : 'different';
+			$client=$this->_client();
+			$client->responses=array($this->_duplicateResponse(),$this->_ok($order),$this->_ok($payee));
+			try
+			{
+				$client->createOrder('VAUTest1',100,$this->_options());
+				$this->fail('Mismatched conflict accepted.');
+			}
+			catch(RuntimeException $e)
+			{
+				$this->assertContains('mismatch',$e->getMessage());
+			}
 			$this->assertSame(1,count(array_keys(array_column($client->calls,0),'POST')));
 		}
 	}
 
 	public function testUnrecognizedOrAmbiguousConflictDoesNotTriggerRecovery()
 	{
-		$responses=array($this->duplicateResponse('https://evil.test/order'),$this->duplicateResponse('../payeeinfo'),
+		$responses=array($this->_duplicateResponse('https://evil.test/order'),$this->_duplicateResponse('../payeeinfo'),
 			array('status'=>409,'body'=>'not-json'));
 		foreach(array('type','missing','multiple') as $case)
 		{
-			$response=$this->duplicateResponse();
+			$response=$this->_duplicateResponse();
 			$data=json_decode($response['body'],true);
-			if($case === 'type') $data['type']='unrelated-conflict';
-			elseif($case === 'missing') $data['problems']=array();
-			else $data['problems'][]=$data['problems'][0];
+			if($case === 'type')
+				$data['type']='unrelated-conflict';
+			elseif($case === 'missing')
+				$data['problems']=array();
+			else
+				$data['problems'][]=$data['problems'][0];
 			$response['body']=json_encode($data);
 			$responses[]=$response;
 		}
 		foreach($responses as $response)
 		{
-			$client=$this->client();
+			$client=$this->_client();
 			$client->responses=array($response);
-			try { $client->createOrder('VAUTest1',100,$this->options()); $this->fail('Unrecognized conflict accepted.'); }
-			catch(RuntimeException $e) { $this->assertContains('HTTP 409',$e->getMessage()); }
+			try
+			{
+				$client->createOrder('VAUTest1',100,$this->_options());
+				$this->fail('Unrecognized conflict accepted.');
+			}
+			catch(RuntimeException $e)
+			{
+				$this->assertContains('HTTP 409',$e->getMessage());
+			}
 			$this->assertCount(1,$client->calls);
 		}
 	}
 
 	public function testCreationRecoveryDoesNotApplyToCaptureConflict()
 	{
-		$client=$this->client();
-		$client->responses=$this->captureResponses();
-		$client->responses[7]=$this->duplicateResponse();
-		try { $client->captureOrder($this->id,'VAUTest1',100,'VAUTest1C1'); $this->fail('Capture conflict accepted.'); }
-		catch(RuntimeException $e) { $this->assertContains('HTTP 409',$e->getMessage()); }
+		$client=$this->_client();
+		$client->responses=$this->_captureResponses();
+		$client->responses[7]=$this->_duplicateResponse();
+		try
+		{
+			$client->captureOrder($this->_id,'VAUTest1',100,'VAUTest1C1');
+			$this->fail('Capture conflict accepted.');
+		}
+		catch(RuntimeException $e)
+		{
+			$this->assertContains('HTTP 409',$e->getMessage());
+		}
 		$this->assertCount(8,$client->calls);
 	}
 
 }
 
+// phpcs:ignore Squiz.Classes.ClassFileName.NoMatch -- Test doubles stay beside their suite.
 class XSwedbankPayTestAction extends XSwedbankPayWebhookAction
 {
 	public $component;
-	protected function getPaymentComponent() { return $this->component; }
+	protected function getPaymentComponent()
+	{
+		return $this->component;
+	}
 }
+// phpcs:ignore Squiz.Classes.ClassFileName.NoMatch -- Test doubles stay beside their suite.
 class XSwedbankPayTestController extends CController
 {
 	public $binding;
@@ -867,21 +1082,25 @@ class XSwedbankPayTestController extends CController
 	public $handlerResult=true;
 	public function bindingForOrder($id)
 	{
-		if($this->binding instanceof Exception) throw $this->binding;
+		if($this->binding instanceof Exception)
+			throw $this->binding;
 		return $this->binding;
 	}
 	public function recordEvidence($evidence, $webhookUid)
 	{
-		if($this->validatedBinding !== $evidence) throw new RuntimeException('Dispatch before validation.');
+		if($this->validatedBinding !== $evidence)
+			throw new RuntimeException('Dispatch before validation.');
 		$this->received[]=$evidence;
 		$this->uids[]=$webhookUid;
-		if($this->handlerResult instanceof Exception) throw $this->handlerResult;
+		if($this->handlerResult instanceof Exception)
+			throw $this->handlerResult;
 		return $this->handlerResult;
 	}
 	public function recordFailure($message, $webhookUid)
 	{
 		$this->failures[]=$message;
 		$this->uids[]=$webhookUid;
-		if($this->handlerResult instanceof Exception) throw $this->handlerResult;
+		if($this->handlerResult instanceof Exception)
+			throw $this->handlerResult;
 	}
 }
