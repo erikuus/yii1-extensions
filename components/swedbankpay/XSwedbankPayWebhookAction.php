@@ -76,6 +76,7 @@ class XSwedbankPayWebhookAction extends CAction
 				$binding['orderId'] !== $id || !is_object($binding['payment']))
 				throw new RuntimeException('Invalid saved binding.');
 			$component->payment=$binding['payment'];
+			$component->traceContext=$this->log === true ? $prefix.'reference='.$binding['reference'] : '';
 			unset($binding['payment']);
 			$prefix.='reference='.$binding['reference'].' order='.$binding['orderId'].' ';
 			$result=$component->validatePayment($binding);

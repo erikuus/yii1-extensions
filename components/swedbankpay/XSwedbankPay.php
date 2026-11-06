@@ -34,6 +34,12 @@ class XSwedbankPay extends CApplicationComponent
 	public $validationResult;
 	/** Sanitized GET evidence for request-correlated application traces. No payloads. */
 	public $validationSummary=array();
+	/** Set by the caller from its generated UID and saved binding, never request data. */
+	public $traceContext='';
+	private $_confirmationStage='binding';
+	private $_failureReason;
+	private $_confirmationStarted;
+
 
 	/** Configure payment values and URLs, then submit as with XEveryPay/XStripe. */
 	public function submitPayment()
@@ -78,10 +84,16 @@ class XSwedbankPay extends CApplicationComponent
 	{
 		$this->validationResult='error';
 		$this->validationSummary=array();
+		$this->_confirmationStage='binding';
+		$this->_failureReason=null;
+		$this->_confirmationStarted=microtime(true);
+		$this->_trace('confirmation_started');
 		$this->errorMessage='Payment confirmation could not be verified. Please try again later.';
 		try
 		{
 			$this->validationResult=$this->confirmPayment($expectedBinding);
+			$this->_trace('confirmation_finished',array('result'=>$this->validationResult,
+				'elapsedMs'=>$this->_elapsed($this->_confirmationStarted)));
 			if($this->validationResult === 'captured')
 			{
 				$this->errorMessage=null;
@@ -99,6 +111,10 @@ class XSwedbankPay extends CApplicationComponent
 		catch(Exception $e)
 		{
 			$this->validationResult='error';
+			$this->validationSummary['reason']=$this->_failureReason ?: 'confirmation_error';
+			$this->validationSummary['stage']=$this->_confirmationStage;
+			$this->_trace('confirmation_failed',array('reason'=>$this->validationSummary['reason'],
+				'elapsedMs'=>$this->_elapsed($this->_confirmationStarted)));
 			$this->errorMessage='Payment confirmation could not be verified. Please try again later.';
 			return null;
 		}
@@ -125,21 +141,32 @@ class XSwedbankPay extends CApplicationComponent
 		// Bind webhook resolution to the same saved payment before any provider IO.
 		if($expectedBinding !== null && $expectedBinding != $detail->binding)
 			throw new RuntimeException('Notification binding differs from the saved payment.');
+		$this->_confirmationStage='evidence';
 		$evidence=$this->paymentEvidence($detail->order_id, $detail->reference,
 			(int)$detail->amount, $detail->currency, $detail->capture_reference);
 		$this->_summarizeEvidence($evidence);
 		if($evidence['status'] === 'Paid' && !$evidence['captureVerified'] && !$evidence['saleVerified'])
 		{
 			if(!$this->_isUncapturedAuthorization($evidence, (int)$detail->amount))
+			{
+				$this->_failureReason='authorization_precondition';
 				throw new RuntimeException('Payment requires reconciliation; no full uncaptured authorization.');
+			}
+			$this->_confirmationStage='capture_claim';
 			if(!$detail->claimCapture())
+			{
+				$this->_failureReason='capture_already_requested';
+				$this->_trace('capture_claim_unavailable');
 				throw new RuntimeException('Capture already requested; reconcile through GET only.');
+			}
+			$this->_trace('capture_claim_acquired');
 			$evidence=$this->captureOrder($detail->order_id, $detail->reference,
 				(int)$detail->amount, $detail->capture_reference, $detail->currency);
 		}
 		if(!in_array($evidence['status'], array('Initialized','Paid','Failed','Aborted','Cancelled'), true))
 			throw new RuntimeException('Unknown provider payment state.');
 		$this->_summarizeEvidence($evidence);
+		$this->_confirmationStage='save_confirmation';
 		$result=$detail->saveConfirmation($evidence);
 		$this->payment->refresh();
 		return $result;
@@ -236,6 +263,7 @@ class XSwedbankPay extends CApplicationComponent
 		$this->_checkVat($vatAmount, $amount);
 		if($captureReference === $reference)
 			throw new InvalidArgumentException('Capture needs a distinct, persisted operation reference.');
+		$this->_confirmationStage='capture_preflight';
 		$before=$this->paymentEvidence($id, $reference, $amount, $currency);
 		if(!$this->_isUncapturedAuthorization($before, $amount))
 			throw new RuntimeException('Capture requires a wholly uncaptured card authorization.');
@@ -253,10 +281,13 @@ class XSwedbankPay extends CApplicationComponent
 				$available=true;
 		if(!$available)
 			throw new RuntimeException('Expected capture operation unavailable.');
+		$this->_confirmationStage='capture_post';
+		$this->_trace('capture_post_started');
 		$response=$this->_request('POST', $path, array('transaction'=>array(
 			'description'=>'Full card capture', 'amount'=>$amount, 'vatAmount'=>$vatAmount,
 			'payeeReference'=>$captureReference,
 		)));
+		$this->_trace('capture_post_accepted');
 		// An accepted POST is not enough. Reconcile independently through GET resources.
 		$this->_checkOrder($response, $amount, $currency);
 		if($response['paymentOrder']['id'] !== $id)
@@ -268,9 +299,15 @@ class XSwedbankPay extends CApplicationComponent
 	public function verifyCapture($id, $reference, $amount, $captureReference, $currency='EUR')
 	{
 		$this->_checkExpected($captureReference, $amount, $currency);
+		$this->_confirmationStage='capture_reconciliation';
+		$this->_trace('capture_reconciliation_started');
 		$after=$this->paymentEvidence($id, $reference, $amount, $currency, $captureReference);
 		if(!$after['captureVerified'])
+		{
+			$this->_failureReason='capture_not_verified';
 			throw new RuntimeException('Capture not yet verified; use read-only evidence. Do not repeat POST.');
+		}
+		$this->_trace('capture_verified');
 		return $after;
 	}
 
@@ -493,11 +530,27 @@ class XSwedbankPay extends CApplicationComponent
 		$body=$payload === null ? null : json_encode($payload);
 		if($body === false)
 			throw new RuntimeException('Request encoding failed.');
-		$result=$this->send($method, $this->_apiOrigin().$path, array(
-			'Authorization: Bearer '.$this->accessToken,
-			'Content-Type: application/json;version=3.1',
-			'Accept: application/json;version=3.1',
-		), $body);
+		$started=microtime(true);
+		// Log resource kind only, never URLs, bodies, headers or arbitrary exception text.
+		$resource=preg_match('~/([a-z]+)$~',$path,$match) ? $match[1] : 'order';
+		$this->_trace('provider_request_started',array('method'=>$method,'resource'=>$resource));
+		try
+		{
+			$result=$this->send($method, $this->_apiOrigin().$path, array(
+				'Authorization: Bearer '.$this->accessToken,
+				'Content-Type: application/json;version=3.1',
+				'Accept: application/json;version=3.1',
+			), $body);
+		}
+		catch(Exception $e)
+		{
+			$this->_failureReason='transport_error';
+			$this->_trace('provider_request_failed',array('method'=>$method,'resource'=>$resource,
+				'reason'=>$this->_failureReason,'elapsedMs'=>$this->_elapsed($started)));
+			throw $e;
+		}
+		$this->_trace('provider_request_finished',array('method'=>$method,'resource'=>$resource,
+			'httpStatus'=>(int)$result['status'],'elapsedMs'=>$this->_elapsed($started)));
 		// This recovery applies only to order creation, never to capture POSTs.
 		if($method === 'POST' && $path === '/psp/paymentorders' && $result['status'] === 409)
 		{
@@ -516,10 +569,16 @@ class XSwedbankPay extends CApplicationComponent
 		}
 		// Never include response bodies, headers or transport diagnostics in errors.
 		if($result['status'] < 200 || $result['status'] >= 300)
+		{
+			$this->_failureReason='provider_http_error';
 			throw new RuntimeException('Swedbank Pay HTTP '.$result['status'].'. No automatic retry; reconcile before repeating POST.');
+		}
 		$decoded=json_decode($result['body'], true);
 		if(!is_array($decoded) || json_last_error() !== JSON_ERROR_NONE)
+		{
+			$this->_failureReason='invalid_json';
 			throw new RuntimeException('Invalid JSON response. No automatic retry.');
+		}
 		return $decoded;
 	}
 
@@ -550,6 +609,19 @@ class XSwedbankPay extends CApplicationComponent
 		if($response === false || $error)
 			throw new RuntimeException('Swedbank Pay transport failed (cURL '.$error.'). Outcome uncertain; creation retries require the same reference; reconcile capture before retrying.');
 		return array('status'=>$status, 'body'=>$response);
+	}
+
+	/** Only call with fixed event names and explicitly selected scalar diagnostics. */
+	private function _trace($event, array $data=array())
+	{
+		if($this->traceContext !== '')
+			Yii::log('[Swedbank Pay '.$this->traceContext.'] event='.$event.' stage='.$this->_confirmationStage.
+				' data='.json_encode($data),'trace','payment');
+	}
+
+	private function _elapsed($started)
+	{
+		return (int)round((microtime(true)-$started)*1000);
 	}
 
 	private function _apiOrigin()
