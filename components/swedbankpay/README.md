@@ -234,3 +234,24 @@ Source contract and staging upload/acceptance evidence are recorded in VAU's
 `docs/features/swedbank_pay/staging.md` and the November 6 `progress.md` entry.
 The bank fixtures are contract tests, not captured live bank responses.
 Run all tests in this directory with PHPUnit, including `XSwedbankPayBankTest.php`.
+
+## Attempt reason diagnostics (2026-11-18)
+
+The existing confirmation summary now adds `failedAttempts` (at most the first
+ten entries in provider list order) and `failedAttemptsTruncated`. The existing
+count and `failureCodes` are preserved. Each entry has allowlisted instrument,
+attempt status and problem type, plus a numeric attempt number when valid.
+Unknown/missing/contradictory values become `Unknown`; invalid numbers are omitted.
+These fields are diagnostic only and never determine settlement or model evidence.
+
+BankLink permits `paymentattempt-aborted` with Aborted and
+`paymentattempt-declined` with Failed. CreditCard permits the two
+3dsecureusercancelled/3dsecureusercanceled spellings, 3dsecuredeclined, carddeclined,
+acquirerinsufficientfunds and 3dsecureacquirergatewayerror. Known card reason URIs
+from api.payex.com or api.swedbankpay.com are normalized to the code.
+No error text, operation URL or additional provider GET is introduced.
+
+Existing webhook/browser log callers receive the added fields automatically.
+Deploy only XSwedbankPay.php for this incremental runtime change.
+The offline summary fixtures exercise the real confirmation and webhook path,
+sanitization, bounds and unchanged GET-only non-success processing.

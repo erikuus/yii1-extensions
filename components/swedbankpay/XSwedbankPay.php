@@ -488,6 +488,33 @@ class XSwedbankPay extends CApplicationComponent
 				$codes=array_merge($codes,$attempt['problem']['codes']);
 		}
 		$this->validationSummary['failureCodes']=array_values(array_unique($codes));
+		// Diagnostics only: never use attempt outcomes to decide settlement.
+		$problemTypes=array(
+			'BankLink'=>array('paymentattempt-aborted'=>'Aborted','paymentattempt-declined'=>'Failed'),
+			'CreditCard'=>array('3dsecureusercancelled'=>'Aborted','3dsecureusercanceled'=>'Aborted',
+				'3dsecuredeclined'=>'Failed','carddeclined'=>'Failed','acquirerinsufficientfunds'=>'Failed',
+				'3dsecureacquirergatewayerror'=>'Failed'),
+		);
+		$this->validationSummary['failedAttempts']=array();
+		$this->validationSummary['failedAttemptsTruncated']=count($evidence['failedAttempts']) > 10;
+		foreach(array_slice($evidence['failedAttempts'],0,10) as $attempt)
+		{
+			$instrument=isset($attempt['instrument']) && in_array($attempt['instrument'],array('CreditCard','BankLink'),true) ?
+				$attempt['instrument'] : 'Unknown';
+			$status=isset($attempt['status']) && in_array($attempt['status'],array('Failed','Aborted'),true) ?
+				$attempt['status'] : 'Unknown';
+			$type=isset($attempt['problem']['type']) && is_string($attempt['problem']['type']) ? $attempt['problem']['type'] : '';
+			if($instrument === 'CreditCard' &&
+				preg_match('~\Ahttps://api\.(?:payex|swedbankpay)\.com/psp/errordetail/(?:creditcard/)?([a-z0-9]+)\z~', $type, $matches))
+				$type=$matches[1];
+			$summary=array('instrument'=>$instrument,'status'=>$status,
+				'problemType'=>isset($problemTypes[$instrument][$type]) && $problemTypes[$instrument][$type] === $status ? $type : 'Unknown');
+			// Large JSON integers become floats on 32-bit PHP; reject lossy values.
+			if(isset($attempt['number']) && (is_int($attempt['number']) || is_float($attempt['number'])) &&
+				$attempt['number'] > 0 && $attempt['number'] <= 9007199254740991 && floor($attempt['number']) == $attempt['number'])
+				$summary['number']=$attempt['number'];
+			$this->validationSummary['failedAttempts'][]=$summary;
+		}
 	}
 
 	private function _checkAccess()
