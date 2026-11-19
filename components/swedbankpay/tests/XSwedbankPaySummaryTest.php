@@ -41,15 +41,19 @@ class XSwedbankPaySummaryTest extends PHPUnit_Framework_TestCase
 			array('Initialized','Failed','paymentattempt-declined'),
 			array('Aborted','Aborted','paymentattempt-aborted'),
 			array('Aborted','Failed','paymentattempt-declined'),
+			array('Aborted','Aborted','paymentattempt-aborted',true),
 		);
 	}
 
 	/** @dataProvider bankOutcomes */
-	public function testBrowserAndWebhookLogAttemptReasonWithoutChangingConfirmation($orderStatus, $status, $type)
+	public function testBrowserAndWebhookLogAttemptReasonWithoutChangingConfirmation($orderStatus, $status, $type, $idOnly=false)
 	{
 		foreach(array(false,true) as $webhook)
 		{
 			$client=$this->_client(array($this->_attempt($status,$type)),$orderStatus);
+			if($idOnly)
+				$client->responses[2]=array('status'=>200,'body'=>json_encode(array(
+					'financialTransactions'=>array('id'=>(new XSwedbankPaySummaryModel)->order_id.'/financialtransactions'))));
 			if($webhook)
 			{
 				$controller=new XSwedbankPayTestController('offline');

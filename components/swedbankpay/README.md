@@ -255,3 +255,23 @@ Existing webhook/browser log callers receive the added fields automatically.
 Deploy only XSwedbankPay.php for this incremental runtime change.
 The offline summary fixtures exercise the real confirmation and webhook path,
 sanitization, bounds and unchanged GET-only non-success processing.
+
+## Aborted order with empty financial resource (2026-11-19)
+
+The VAU staging old-attempt test observed a bound Aborted order whose
+financialTransactions GET returned only its id. paymentEvidence now normalizes
+that exact id-only shape to an empty list for Aborted, as already done for
+Initialized and supported Paid/Sale evidence. Resource/order/payee/reference/
+amount checks still run first. Paid/Authorization still requires its list;
+malformed, null, extra-field and wrong-resource shapes remain rejected. No new
+provider requests, settlement rule, callback policy or logging payload is added.
+Failed/Cancelled handling is unchanged by this incremental fix.
+
+Regression tests cover the observed resource, browser/webhook terminal results,
+attempt-reason logging and invalid-shape boundaries. VAU's separate local suite
+checks both arrival orders alongside a saved successful Visa, receipt and enquiry
+history. Local checks passed; the owner uploaded XSwedbankPay.php and the
+same-case staging retest passed: terminal customer message, callback HTTP 200,
+unchanged paid Visa/receipt/history. No further upload/config/migration is required.
+See VAU docs/features/swedbank_pay/aborted-empty-financial-fix-2026-11-19.md for
+the upload path, hash and same-case acceptance checks.

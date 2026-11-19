@@ -443,16 +443,19 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 		$client->paymentEvidence($this->_id,'VAUTest1',100);
 	}
 
-	public function testInitializedOrderMayOmitTheEmptyFinancialListButPaidCannot()
+	public function testInitializedAndAbortedOrdersMayOmitTheEmptyFinancialListButPaidCannot()
 	{
-		foreach(array('Initialized','Paid') as $status)
+		foreach(array('Initialized','Aborted','Paid') as $status)
 		{
 			$client=$this->_client(); $client->responses=$this->_evidenceResponses($status);
 			$client->responses[2]=$this->_ok(array('financialTransactions'=>array('id'=>$this->_id.'/financialtransactions')));
 			try
 			{
 				$result=$client->paymentEvidence($this->_id,'VAUTest1',100,'EUR','VAUTest1C1');
-				$this->assertSame('Initialized',$status);
+				$this->assertContains($status,array('Initialized','Aborted'));
+				$this->assertSame($status,$result['status']);
+				$this->assertSame(array(),$result['financialTransactions']);
+				$this->assertFalse($result['saleVerified']);
 				$this->assertFalse($result['captureVerified']);
 			}
 			catch(RuntimeException $e)
@@ -460,6 +463,32 @@ class XSwedbankPayTest extends PHPUnit_Framework_TestCase
 				$this->assertSame('Paid',$status);
 			}
 		}
+	}
+
+	public function abortedMalformedFinancialResources()
+	{
+		return array(array('wrong_id'),array('missing_id'),array('null_list'),array('scalar_list'),
+			array('extra_field'),array('malformed_entry'));
+	}
+
+	/** @dataProvider abortedMalformedFinancialResources */
+	public function testAbortedFinancialResourceStillRequiresBindingAndValidStructure($case)
+	{
+		$client=$this->_client();
+		$client->responses=$this->_evidenceResponses('Aborted');
+		$resource=array('id'=>$this->_id.'/financialtransactions');
+		switch($case)
+		{
+			case 'wrong_id': $resource['id'].='other'; break;
+			case 'missing_id': unset($resource['id']); break;
+			case 'null_list': $resource['financialTransactionsList']=null; break;
+			case 'scalar_list': $resource['financialTransactionsList']='private'; break;
+			case 'extra_field': $resource['unexpected']='private'; break;
+			case 'malformed_entry': $resource['financialTransactionsList']=array('private'); break;
+		}
+		$client->responses[2]=$this->_ok(array('financialTransactions'=>$resource));
+		$this->expectException(RuntimeException::class);
+		$client->paymentEvidence($this->_id,'VAUTest1',100,'EUR','VAUTest1C1');
 	}
 
 	public function testOptionalAuthorizationMustMatchPaidTransactionBeforeAndAfterCapture()

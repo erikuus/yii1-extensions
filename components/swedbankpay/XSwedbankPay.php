@@ -343,9 +343,9 @@ class XSwedbankPay extends CApplicationComponent
 			$evidence['paid']=array_intersect_key($paid, array_flip(array('id','number','instrument','transactionType','amount','payeeReference')));
 		}
 		$transactions=$evidence['financialTransactions'];
-		// An empty resource may omit its list for Initialized orders and Sales.
+		// An empty resource may omit its list for Initialized/Aborted orders and Sales.
 		// It is not settlement proof on its own; the predicates below verify evidence.
-		if(($order['status'] === 'Initialized' || ($order['status'] === 'Paid' && $evidence['paid']['transactionType'] === 'Sale')) &&
+		if((in_array($order['status'],array('Initialized','Aborted'),true) || ($order['status'] === 'Paid' && $evidence['paid']['transactionType'] === 'Sale')) &&
 			array_keys($transactions) === array('id'))
 			$transactions['financialTransactionsList']=array();
 		if(!isset($transactions['financialTransactionsList']) || !is_array($transactions['financialTransactionsList']))
